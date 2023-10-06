@@ -1,4 +1,5 @@
 #include <iostream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "basic/Mesh.h"
@@ -8,6 +9,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
 
+#define STRINGIFY(x) #x
+#define EXPAND(x) STRINGIFY(x)
 
 
 using namespace std;
@@ -25,10 +28,14 @@ float vertices[] = {
 };
 
 int main(int argc , char** argv) {
-	std::cout << "hello";
+	std::cout << "hello"<<endl;
 	glfwInit();
 
-	
+	string src_path = EXPAND(_PRJ_SRC_PATH);
+	src_path.erase(0, 1); // erase the first quote
+	src_path.erase(src_path.size() - 1); // erase the last quote and the dot	
+	printf(src_path.c_str());
+
 	// open gl version 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //版本3.x
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //版本x.3
@@ -51,11 +58,15 @@ int main(int argc , char** argv) {
 
 	gladLoadGL();
 
-	//SetProgram(state , "./assets/shaders/vert.glsl" , "./assets/shaders/frag.glsl");
+	
+	SetProgram(state , 
+		src_path + string("\\assets\\shaders\\vert.glsl"),
+		src_path + string("\\assets\\shaders\\frag.glsl"));
+	/*
 	SetProgram(state, 
 			"E:/Projects/OpenGL/TinyEngine/src/vert.glsl",
 			"E:/Projects/OpenGL/TinyEngine/src/frag.glsl");
-
+	*/
 
 	//初始化glad
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -73,7 +84,8 @@ int main(int argc , char** argv) {
 	// 
 	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/Room1.obj");
 	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/Room2.fbx");
-	Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/TrollApose_low.fbx");
+	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/TrollApose_low.fbx");
+	Mesh mesh = Mesh(src_path + "\\assets\\TrollApose_low.fbx");
 
 	while (!glfwWindowShouldClose(window)) { // 等到console 送出kill flag
 		processInput(window , 0.1f);

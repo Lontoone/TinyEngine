@@ -19,7 +19,7 @@ struct MechainState
 
 };
 
-void SetProgram(MechainState& mechainState, const char* vs_file, const char* fs_file);
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file);
 
 
 #endif // FASET_SETUP
