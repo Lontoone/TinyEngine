@@ -33,6 +33,9 @@
     <ClCompile Include="src\basic\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic\TransformObject.h">
@@ -47,9 +50,37 @@
     <ClInclude Include="src\basic\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Linking\include\GL\eglew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\freeglut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\freeglut_ext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\freeglut_std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\glew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\glut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\glxew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Linking\include\GL\wglew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
+    <None Include="src\freeglut.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\freeglut.lib" />
   </ItemGroup>
 </Project>

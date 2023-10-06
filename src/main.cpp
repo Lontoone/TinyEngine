@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
 
+
+
 using namespace std;
 void processInput(GLFWwindow* window, double dt);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -22,11 +24,11 @@ float vertices[] = {
 		0.5f , 0.0f , 0.0f,
 };
 
-int main() {
+int main(int argc , char** argv) {
 	std::cout << "hello";
-
 	glfwInit();
 
+	
 	// open gl version 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //ª©¥»3.x
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //ª©¥»x.3
