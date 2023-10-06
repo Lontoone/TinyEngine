@@ -106,14 +106,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)\src";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\Linking\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;%(AdditionalDependencies);$(solutionDir)lib\freeglut.lib;$(solutionDir)lib\glew32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -164,7 +164,7 @@
     <None Include="src\freeglut.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\freeglut.lib" />
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

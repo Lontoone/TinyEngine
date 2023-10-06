@@ -1,7 +1,7 @@
-E:\Projects\OpenGL\TinyEngine\lib\glad.c;E:\Projects\OpenGL\TinyEngine\x64\Debug\glad.obj
-E:\Projects\OpenGL\TinyEngine\src\basic\camera.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\camera.obj
-E:\Projects\OpenGL\TinyEngine\src\basic\Fastsetup.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\Fastsetup.obj
-E:\Projects\OpenGL\TinyEngine\src\basic\Mesh.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\Mesh.obj
-E:\Projects\OpenGL\TinyEngine\src\basic\TransformObject.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\TransformObject.obj
-E:\Projects\OpenGL\TinyEngine\src\main.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\main.obj
-E:\Projects\OpenGL\TinyEngine\src\test.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\test.obj
+D:\Projects\OpenGL_TinyEngine\lib\glad.c;D:\Projects\OpenGL_TinyEngine\x64\Debug\glad.obj
+D:\Projects\OpenGL_TinyEngine\src\basic\camera.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\camera.obj
+D:\Projects\OpenGL_TinyEngine\src\basic\Fastsetup.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\Fastsetup.obj
+D:\Projects\OpenGL_TinyEngine\src\basic\Mesh.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\Mesh.obj
+D:\Projects\OpenGL_TinyEngine\src\basic\TransformObject.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\TransformObject.obj
+D:\Projects\OpenGL_TinyEngine\src\main.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\main.obj
+D:\Projects\OpenGL_TinyEngine\src\test.cpp;D:\Projects\OpenGL_TinyEngine\x64\Debug\test.obj

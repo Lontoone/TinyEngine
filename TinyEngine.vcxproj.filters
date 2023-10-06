@@ -81,6 +81,6 @@
     <None Include="src\freeglut.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\freeglut.lib" />
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
 </Project>
