@@ -1,2 +1,9 @@
-﻿  main.cpp
-  TinyEngine.vcxproj -> E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe
+﻿  test.cpp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+test.obj : error LNK2019: unresolved external symbol __imp_glutInitWindowPosition referenced in function "int __cdecl learn_gl(int,char * *)" (?learn_gl@@YAHHPEAPEAD@Z)
+test.obj : error LNK2019: unresolved external symbol __imp_glutInitWindowSize referenced in function "int __cdecl learn_gl(int,char * *)" (?learn_gl@@YAHHPEAPEAD@Z)
+test.obj : error LNK2019: unresolved external symbol __imp_glutInitDisplayMode referenced in function "int __cdecl learn_gl(int,char * *)" (?learn_gl@@YAHHPEAPEAD@Z)
+test.obj : error LNK2019: unresolved external symbol __imp___glutInitWithExit referenced in function glutInit_ATEXIT_HACK
+test.obj : error LNK2019: unresolved external symbol __imp___glutCreateWindowWithExit referenced in function glutCreateWindow_ATEXIT_HACK
+E:\Projects\OpenGL\TinyEngine\lib\freeglut.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe : fatal error LNK1120: 5 unresolved externals
