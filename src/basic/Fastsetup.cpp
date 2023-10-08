@@ -105,3 +105,25 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 	mechainState.programId		= p;
 	
 }
+
+Shader::Shader()
+{
+}
+
+Shader::Shader(const string src_path,const string _shaderName)
+{
+	this->m_state = MechainState();
+	SetProgram(this->m_state,
+		src_path +"\\"+ _shaderName + string("_vert.glsl"),
+		src_path +"\\"+ _shaderName + string("_frag.glsl"));
+}
+
+Shader::~Shader()
+{
+	//delete &this->m_state;
+}
+
+void Shader::activate()
+{
+	glUseProgram(this->m_state.programId);
+}

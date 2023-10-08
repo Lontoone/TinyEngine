@@ -8,15 +8,24 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
+#include "basic/Hierarchy.h"
+//#include "basic/GameObject.h"
+//#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
 #define EXPAND(x) STRINGIFY(x)
 
+void init();
+void update();
+void render();
+void input();
 
 using namespace std;
 void processInput(GLFWwindow* window, double dt);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 MechainState state;
+
+
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float SCR_WIDTH		= 800;
 float SCR_HEIGHT	= 600;
@@ -27,24 +36,16 @@ float vertices[] = {
 		0.5f , 0.0f , 0.0f,
 };
 
+
+static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
+
+
 int main(int argc , char** argv) {
-	std::cout << "hello"<<endl;
-	glfwInit();
+	std::cout << "hello"<<endl<<endl;
 
-	string src_path = EXPAND(_PRJ_SRC_PATH);
-	src_path.erase(0, 1); // erase the first quote
-	src_path.erase(src_path.size() - 1); // erase the last quote and the dot	
-	printf(src_path.c_str());
+	init();  // TODO: init
 
-	// open gl version 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //版本3.x
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //版本x.3
-
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-# ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+#pragma region LoadWindow
 
 	// 檢查
 	GLFWwindow* window = glfwCreateWindow(800, 600, "title", NULL, NULL); //monitor先設為NULL
@@ -56,17 +57,18 @@ int main(int argc , char** argv) {
 	//把window放到thread上
 	glfwMakeContextCurrent(window);
 
-	gladLoadGL();
-
-	
+	gladLoadGL();	
 	SetProgram(state , 
 		src_path + string("\\assets\\shaders\\vert.glsl"),
 		src_path + string("\\assets\\shaders\\frag.glsl"));
 	/*
-	SetProgram(state, 
-			"E:/Projects/OpenGL/TinyEngine/src/vert.glsl",
-			"E:/Projects/OpenGL/TinyEngine/src/frag.glsl");
-	*/
+	*/	
+	Shader s_default_shader(
+		src_path + string("\\assets\\shaders"),
+		"default"
+	);
+	s_default_shader.activate();
+	cout << "activate pg " << s_default_shader.m_state.programId << endl;
 
 	//初始化glad
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -74,23 +76,44 @@ int main(int argc , char** argv) {
 		glfwTerminate();
 		return-1;
 	}
-	
 	//定義視窗
 	glViewport(0, 0, 800, 600); //(x, y , width , height)
 
 	//指定視窗resize的處理方法
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glEnable(GL_DEPTH_TEST);
-	// 
-	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/Room1.obj");
-	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/Room2.fbx");
-	//Mesh mesh = Mesh("E:/Projects/OpenGL/TinyEngine/src/assets/TrollApose_low.fbx");
-	Mesh mesh = Mesh(src_path + "\\assets\\TrollApose_low.fbx");
+#pragma endregion
+	
+#pragma region Test_Hirerarchy
+
+	//GameObject* obj = new GameObject();
+	GameObject obj = GameObject();
+	//Mesh mesh = Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);
+	Mesh mesh = Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
+	//Mesh mesh = Mesh(src_path + "\\assets\\sponza.obj");
+	//Mesh mesh = Mesh(src_path + "\\assets\\Room1.obj");
+	//Mesh mmesh = Mesh();
+	//Component* model_comp = dynamic_cast<Component*>(&mmesh);
+	//Component* test_comp = new Component();
+	Component test_comp = Component();
+	obj.set_name("New Obj ");
+	obj.add_component(&test_comp);
+	obj.add_component(&mesh);
+	//obj.execute();
+	Hierarchy hierarchy = Hierarchy();
+	//hierarchy.add_main_camera();
+	hierarchy.add_object(&obj);
+	hierarchy.execute();
+
+#pragma endregion
+
 
 	while (!glfwWindowShouldClose(window)) { // 等到console 送出kill flag
 		processInput(window , 0.1f);
-		glUseProgram(state.programId);
+		//glUseProgram(state.programId);
+		s_default_shader.activate();
 
+		//update();
 		//-------------- [ TEMP 暫時的MVP ] ------------------
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);
@@ -100,17 +123,21 @@ int main(int argc , char** argv) {
 		//view = glm::translate(view, glm::vec3( -0 , -0 , -3 ));  // view已轉換坐標系統
 		view = camera.getViewMatrix();// view已轉換坐標系統
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 1000.0f);
+		/*
 		glUniformMatrix4fv(glGetUniformLocation(state.programId, "model"), 1, GL_FALSE, value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(state.programId, "view"), 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
+		*/
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 
-		//---------------- Load 3D ------------------
 		//清除顏色
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-		mesh.Render();
+		hierarchy.execute();
+		//mesh.Render();
 		//glBindVertexArray(VAO);
 		//glUseProgram(state.programId);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -125,7 +152,26 @@ int main(int argc , char** argv) {
 
 	return 0;
 }
+void init() {
+	glfwInit();
 
+	src_path.erase(0, 1); // erase the first quote
+	src_path.erase(src_path.size() - 1); // erase the last quote and the dot	
+	printf(src_path.c_str());
+
+	// open gl version 3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //版本3.x
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //版本x.3
+
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+# ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+}
+void update() {}
+void render() {}
+void input() {}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
