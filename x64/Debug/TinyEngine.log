@@ -1,3 +1,2 @@
-﻿  main.cpp
-D:\IDE\VC\Tools\MSVC\14.37.32822\include\filesystem(13): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
-  TinyEngine.vcxproj -> D:\Projects\OpenGL_TinyEngine\x64\Debug\TinyEngine.exe
+﻿  Texture.cpp
+  TinyEngine.vcxproj -> D:\MyGit\TinyEngine\x64\Debug\TinyEngine.exe

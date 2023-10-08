@@ -1,6 +1,7 @@
 #include "TransformObject.h"
 
-void TransformObject::UpdateTransform()
+
+void TransformObject::Do()
 {
-	//TODO: update mvp
+	cout << "Do Trans" << endl;
 }

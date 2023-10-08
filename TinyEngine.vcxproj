@@ -42,13 +42,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -106,7 +106,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)\src";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\Linking\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -136,15 +136,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\basic\Hierarchy.cpp" />
+    <ClCompile Include="src\basic\Component.cpp" />
+    <ClCompile Include="src\basic\GameObject.cpp" />
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="src\basic\camera.cpp" />
     <ClCompile Include="src\basic\Fastsetup.cpp" />
+    <ClCompile Include="src\basic\Material.cpp" />
     <ClCompile Include="src\basic\Mesh.cpp" />
     <ClCompile Include="src\basic\TransformObject.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\test.cpp" />
+    <ClCompile Include="src\basic\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\basic\Hierarchy.h" />
+    <ClInclude Include="src\basic\Component.h" />
+    <ClInclude Include="src\basic\GameObject.h" />
     <ClInclude Include="Linking\include\GL\eglew.h" />
     <ClInclude Include="Linking\include\GL\freeglut.h" />
     <ClInclude Include="Linking\include\GL\freeglut_ext.h" />
@@ -155,16 +163,26 @@
     <ClInclude Include="Linking\include\GL\wglew.h" />
     <ClInclude Include="src\basic\camera.h" />
     <ClInclude Include="src\basic\Fastsetup.h" />
+    <ClInclude Include="src\basic\Material.h" />
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
+    <ClInclude Include="src\basic\Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\assets\shaders\default_frag.glsl" />
+    <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
+    <None Include="src\default_frag.glsl" />
+    <None Include="src\default_vert.glsl" />
     <None Include="src\freeglut.dll" />
+    <None Include="src\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\assets\models\sponza\00_skap.JPG" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
