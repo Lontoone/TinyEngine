@@ -1,1 +1,2 @@
 E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe
+D:\Projects\OpenGL_TinyEngine\x64\Debug\TinyEngine.exe

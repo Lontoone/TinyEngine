@@ -32,7 +32,8 @@ char* textFileRead(const char* fn) {
 }
 
 
-void SetProgram(MechainState& mechainState , const char* vs_file , const char* fs_file)
+//void SetProgram(MechainState& mechainState , const char* vs_file , const char* fs_file)
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)
 {
 	GLuint v, f, p;
 	char* vs = NULL;
@@ -41,8 +42,8 @@ void SetProgram(MechainState& mechainState , const char* vs_file , const char* f
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 
-	vs = textFileRead(vs_file);
-	fs = textFileRead(fs_file);
+	vs = textFileRead(vs_file.c_str());
+	fs = textFileRead(fs_file.c_str());
 
 	glShaderSource(v, 1, (const GLchar**)&vs, NULL);
 	glShaderSource(f, 1, (const GLchar**)&fs, NULL);
@@ -103,4 +104,26 @@ void SetProgram(MechainState& mechainState , const char* vs_file , const char* f
 	mechainState.vertShaderId	= v;
 	mechainState.programId		= p;
 	
+}
+
+Shader::Shader()
+{
+}
+
+Shader::Shader(const string src_path,const string _shaderName)
+{
+	this->m_state = MechainState();
+	SetProgram(this->m_state,
+		src_path +"\\"+ _shaderName + string("_vert.glsl"),
+		src_path +"\\"+ _shaderName + string("_frag.glsl"));
+}
+
+Shader::~Shader()
+{
+	//delete &this->m_state;
+}
+
+void Shader::activate()
+{
+	glUseProgram(this->m_state.programId);
 }

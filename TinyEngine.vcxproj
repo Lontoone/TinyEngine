@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -106,14 +106,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Linking\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Linking\include;imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;%(AdditionalDependencies);$(solutionDir)lib\freeglut.lib;$(solutionDir)lib\glew32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -136,15 +137,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\basic\Hierarchy.cpp" />
+    <ClCompile Include="src\basic\Component.cpp" />
+    <ClCompile Include="src\basic\GameObject.cpp" />
     <ClCompile Include="lib\glad.c" />
     <ClCompile Include="src\basic\camera.cpp" />
     <ClCompile Include="src\basic\Fastsetup.cpp" />
+    <ClCompile Include="src\basic\Material.cpp" />
     <ClCompile Include="src\basic\Mesh.cpp" />
     <ClCompile Include="src\basic\TransformObject.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\test.cpp" />
+    <ClCompile Include="src\basic\Texture.cpp" />
+    <ClCompile Include="src\ui\UiManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="src\basic\Hierarchy.h" />
+    <ClInclude Include="src\basic\Component.h" />
+    <ClInclude Include="src\basic\GameObject.h" />
     <ClInclude Include="Linking\include\GL\eglew.h" />
     <ClInclude Include="Linking\include\GL\freeglut.h" />
     <ClInclude Include="Linking\include\GL\freeglut_ext.h" />
@@ -155,16 +180,27 @@
     <ClInclude Include="Linking\include\GL\wglew.h" />
     <ClInclude Include="src\basic\camera.h" />
     <ClInclude Include="src\basic\Fastsetup.h" />
+    <ClInclude Include="src\basic\Material.h" />
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
+    <ClInclude Include="src\basic\Texture.h" />
+    <ClInclude Include="src\ui\UiManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\assets\shaders\default_frag.glsl" />
+    <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
+    <None Include="src\default_frag.glsl" />
+    <None Include="src\default_vert.glsl" />
     <None Include="src\freeglut.dll" />
+    <None Include="src\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="lib\freeglut.lib" />
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\assets\models\sponza\00_skap.JPG" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
