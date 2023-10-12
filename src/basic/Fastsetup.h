@@ -19,7 +19,21 @@ struct MechainState
 
 };
 
-void SetProgram(MechainState& mechainState, const char* vs_file, const char* fs_file);
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file);
 
+class Shader {
+public:
+	Shader();
+	Shader(const string src_path, const string _shaderName);
+	~Shader();
+
+	MechainState m_state;
+	void init_program();
+	void activate();
+private:
+	
+
+
+};
 
 #endif // FASET_SETUP
