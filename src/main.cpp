@@ -83,6 +83,8 @@ int main(int argc , char** argv) {
 	//指定視窗resize的處理方法
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW); // counter clock wise
 #pragma endregion
 	
 #pragma region Test_Hirerarchy
@@ -212,5 +214,11 @@ void processInput(GLFWwindow* window, double dt) {
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 		camera.updateCameraPos(CameraDirection::DOWN, dt);
+	}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		camera.updateCameraDirection(5.0f*dt, 0);
+	}
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+		camera.updateCameraDirection(-5.0f*dt, 0);
 	}
 }

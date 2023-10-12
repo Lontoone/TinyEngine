@@ -8,11 +8,12 @@
 #include <iostream>
 #include <vector>
 #include "TransformObject.h"
+#include "UiPanel.h"
 
 using namespace std;
 
 
-class Hierarchy
+class Hierarchy : public UiPanel
 {
 public :
 	
