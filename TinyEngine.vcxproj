@@ -108,8 +108,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Linking\include;imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,6 +157,7 @@
     <ClCompile Include="src\test.cpp" />
     <ClCompile Include="src\basic\Texture.cpp" />
     <ClCompile Include="src\ui\UiManager.cpp" />
+    <ClCompile Include="src\ui\UiPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -184,7 +185,9 @@
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
     <ClInclude Include="src\basic\Texture.h" />
+    <ClInclude Include="src\ui\UiItem.h" />
     <ClInclude Include="src\ui\UiManager.h" />
+    <ClInclude Include="src\ui\UiPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\default_frag.glsl" />
