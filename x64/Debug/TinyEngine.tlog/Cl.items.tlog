@@ -1,10 +1,10 @@
 E:\Projects\OpenGL\TinyEngine\imgui\imgui.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui.obj
-E:\Projects\OpenGL\TinyEngine\imgui\imgui_demo.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_demo.obj
 E:\Projects\OpenGL\TinyEngine\imgui\imgui_draw.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_draw.obj
 E:\Projects\OpenGL\TinyEngine\imgui\imgui_impl_glfw.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_impl_glfw.obj
 E:\Projects\OpenGL\TinyEngine\imgui\imgui_impl_opengl3.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_impl_opengl3.obj
 E:\Projects\OpenGL\TinyEngine\imgui\imgui_tables.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_tables.obj
 E:\Projects\OpenGL\TinyEngine\imgui\imgui_widgets.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\imgui_widgets.obj
+E:\Projects\OpenGL\TinyEngine\src\basic\FileDialog.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\FileDialog.obj
 E:\Projects\OpenGL\TinyEngine\src\basic\Hierarchy.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\Hierarchy.obj
 E:\Projects\OpenGL\TinyEngine\src\basic\Component.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\Component.obj
 E:\Projects\OpenGL\TinyEngine\src\basic\GameObject.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\GameObject.obj
@@ -17,5 +17,6 @@ E:\Projects\OpenGL\TinyEngine\src\basic\TransformObject.cpp;E:\Projects\OpenGL\T
 E:\Projects\OpenGL\TinyEngine\src\main.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\main.obj
 E:\Projects\OpenGL\TinyEngine\src\test.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\test.obj
 E:\Projects\OpenGL\TinyEngine\src\basic\Texture.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\Texture.obj
+E:\Projects\OpenGL\TinyEngine\src\ui\UiItem.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\UiItem.obj
 E:\Projects\OpenGL\TinyEngine\src\ui\UiManager.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\UiManager.obj
 E:\Projects\OpenGL\TinyEngine\src\ui\UiPanel.cpp;E:\Projects\OpenGL\TinyEngine\x64\Debug\UiPanel.obj

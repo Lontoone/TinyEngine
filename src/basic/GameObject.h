@@ -2,10 +2,18 @@
 #ifndef GAMEOBJECT
 #define GAMEOBJECT
 
+#include <BasicFlags.h>
 #include <iostream>
 #include <vector>
-#include "TransformObject.h"
-#include "Mesh.h"
+//#include "TransformObject.h"
+#include <TransformObject.h>
+class TransformObject;
+#include <string>
+#include <random>
+#include <UiPanel.h>
+#include <UIableComponent.h>
+
+//#include "../utlis/uuid_helper.h"
 //#include "Hierarchy.h"
 
 #ifndef COMPONENT
@@ -13,7 +21,6 @@
 #endif // !COMPONENT
 
 /*
-
 struct ExecuteList
 {
 	vector<Component*> m_comps;
@@ -23,19 +30,31 @@ struct ExecuteList
 
 using namespace std;
 
-class GameObject : public Component
+class GameObject : public Component , public UiPanel
 {
 public:
 	GameObject();
+	GameObject(const char* _obj_name);
 	~GameObject();
+		
+	//const char* name ="";
+	string name="";
+	const char* m_instance_id="";
+	//int32 m_instance_id =0;
 
-	const char* name;
-	TransformObject					*m_transform;	
 	std::vector<Component*>			m_comps;
-	void execute();
+	std::vector<GameObject*>		m_childs;
+	TransformObject*				m_transform;	
 
-	void set_name(const char* new_name);
+	void execute(EXECUTE_TIMING timimg);
+	void update_ui_tree();
+
+	void set_name(const char* new_name);	
 	void add_component(Component* _new_comp );
+	void add_component(UiableComponent* _new_comp);
+	
+	void DO_Before_Frame() override;
+	void Do_End_Frame() override;
 
 	template<class T>
 	T* get_component() {
@@ -46,6 +65,7 @@ public:
 	}
 private:
 	//std::vector<ExecuteList*> m_execute_layers;
+	std::vector<UiPanel*>			m_components_panels;
 
 };
 

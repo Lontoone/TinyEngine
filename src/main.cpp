@@ -10,7 +10,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
 #include "basic/Hierarchy.h"
-//#include "basic/GameObject.h"
+#include "basic/GameObject.h"
+#include "FileDialog.h"
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -40,10 +41,10 @@ float vertices[] = {
 
 static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
+Hierarchy Hierarchy::sInstance;
 
 int main(int argc , char** argv) {
-	std::cout << "hello"<<endl<<endl;
-
+	std::cout << "hello"<<endl;	
 	init();  // TODO: init
 
 #pragma region LoadWindow
@@ -88,34 +89,54 @@ int main(int argc , char** argv) {
 #pragma endregion
 	
 #pragma region Test_Hirerarchy
-
-	//GameObject* obj = new GameObject();
-	GameObject obj = GameObject();
-	GameObject obj2 = GameObject();
+	
+	//Hierarchy Hierarchy::sInstance;
+	//Hierarchy hierarchy = Hierarchy::instance();
+	GameObject obj = GameObject("obj1");
+	GameObject obj2 = GameObject("obj2");
 	//Mesh mesh = Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);
 	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	Mesh* mesh2 = new Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);
-	
-	//Component* model_comp = dynamic_cast<Component*>(&mmesh);
+	Mesh* mesh2 = new Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);	
 
 	//Component* test_comp = new Component();
-	obj.set_name("New Obj ");
+	obj.set_name("Building");
 	//obj.add_component(test_comp);
-	obj.add_component(mesh);
+	obj.add_component(mesh);		
 
 	//Component* test_comp2 = new Component();
-	//obj2.set_name("New Obj 2");
-	//obj2.add_component(test_comp2);
-	//obj2.add_component(mesh2);	
-
-	Hierarchy hierarchy = Hierarchy();
+	obj2.set_name("New Obj 2");	
+	obj2.add_component(mesh2);	
 
 	//hierarchy.add_main_camera();
-	hierarchy.add_object(&obj);
-	//hierarchy.add_object(&obj2);
-	hierarchy.execute();
+	//hierarchy.add_object(&obj);
+	//hierarchy.add_object(&obj2);	
+	Hierarchy::instance().add_object(&obj);
+	Hierarchy::instance().add_object(&obj2);
+	/*
+	*/
 
-	glm::mat4 model = glm::mat4(1.0f);
+
+	// Add Load model opts:
+	auto pos_inp = [&]() { if (Button("Open Model")) {
+		char output_path[260];
+		bool has_selected = FileDialog::Open(*output_path);
+
+		if (!has_selected)
+			return false;
+		
+		string _tmp_name = string( (string("New object") + to_string(Hierarchy::instance().m_game_objects.size())));
+		const char* _n = _tmp_name.c_str();		
+		Mesh* mesh3 = new Mesh(output_path, s_default_shader);
+		
+		GameObject* obj3= new GameObject(_n);
+		obj3->add_component(mesh3);
+		Hierarchy::instance().add_object(obj3);
+		return true;
+	} };
+	ui_manager.m_menu_cmds.push_back(pos_inp);
+	
+
+	//glm::mat4 model = glm::mat4(1.0f);
 #pragma endregion
 
 
@@ -125,25 +146,16 @@ int main(int argc , char** argv) {
 		//glUseProgram(state.programId);
 
 		//清除顏色
+		ui_manager.new_frame();
+		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ui_manager.new_frame();
-
 		s_default_shader.activate();
 		//update();
 		// 
 		//-------------- [ TEMP 暫時的MVP ] ------------------
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(-30.0f), glm::vec3(0.5f));
-		//model = glm::scale(model, vec3(1.0f));
-		
-		//obj.m_transform.m_position += vec3((float)glfwGetTime() * 0.01f , 0 ,0);
-		//obj.m_transform->move(vec3((float)glfwGetTime() * 0.01f , (float)glfwGetTime() * 0.01f, (float)glfwGetTime() * 0.01f));
-		//cout<< obj.m_transform.m_position.x <<endl;
-		//model = obj.m_transform->m_model_matrix;
-		
-		//view = glm::translate(view, glm::vec3( -0 , -0 , -3 ));  // view已轉換坐標系統
 		view = camera.getViewMatrix();// view已轉換坐標系統
 		projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 1000.0f);
 		
@@ -151,13 +163,18 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 
-		hierarchy.execute();
+		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+		//hierarchy.draw_ui_loop();
+		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
+		ui_manager.create_menubar();
+
 		ui_manager._test();  // Draw UI ontop
 
 		//--------------------------------------------
 
 		glfwSwapBuffers(window); //GPU在渲染當前的frame時，會準備下一個frame，當此frame結束時直接swap過去。
 		glfwPollEvents(); // processes all pending events。 (處理如input....等事件)
+		Hierarchy::instance().execute(EXECUTE_TIMING::AFTER_FRAME);
 	}
 	ui_manager.destory();
 	glfwTerminate(); //Close

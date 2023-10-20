@@ -6,14 +6,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#ifndef COMPONENT
-#include "Component.h"
-#endif // !COMPONENT
+#include <Hierarchy.h>
+#include <functional>
+#include <UIableComponent.h>
+//#include "Component.h"
+//#include "UiPanel.h"
+
 
 
 using namespace glm;
 using namespace std;
-class TransformObject : virtual public Component {
+//class TransformObject : virtual public Component ,virtual public UiPanel{
+class TransformObject :public UiableComponent {
 public:
 	~TransformObject() =default;
 	TransformObject();
