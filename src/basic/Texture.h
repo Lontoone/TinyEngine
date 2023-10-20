@@ -5,16 +5,20 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <string>
+#include <map>
+#include <BasicFlags.h>
+#include <BasicFlags.h>
 
 using namespace std;
-enum Bind_Type
-{
-	DIFFUSE,
-	NORMAL
-};
+
+/*
 static const char* s_bind_types[] =
 { "DIFFUSE", "NORMAL" };
-
+*/
+static map<Bind_Type, const char*> s_bind_types = {
+	{ Bind_Type::DIFFUSE , "DIFFUSE" },
+	{ Bind_Type::NORMAL, "NORMAL"} 
+};
 
 class Texture {	
 public :

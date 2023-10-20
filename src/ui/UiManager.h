@@ -5,6 +5,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <vector>
+#include <functional>
+#include <GameObject.h>
 
 using namespace std;
 using namespace ImGui;
@@ -14,12 +17,21 @@ public:
 	UiManager();
 	//~UiManager();
 
+	//******** TEMP **********	
+	typedef function<bool()> t_draw_cmd;
+	vector<t_draw_cmd> m_menu_cmds;
+	//**********************
+
 	void init_imgui(GLFWwindow* window);
 	void new_frame();
 	void destory();
 
+	void create_menubar();
 	void _test();
 
+	void create_window(const char* _window_name);
+	void create_hierarchy_window(vector<GameObject*>&  objs);
+	void end_create();
 
 private:
 

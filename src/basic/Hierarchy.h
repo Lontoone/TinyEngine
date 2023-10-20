@@ -2,12 +2,16 @@
 #ifndef HIERARCHY
 #define HIERARCHY
 
-#include "camera.h"
-#include "GameObject.h"
-#include "Component.h"
 #include <iostream>
+#include <BasicFlags.h>
 #include <vector>
-#include "TransformObject.h"
+#include <string>
+#include <map>
+//#include "camera.h"
+//#include "Component.h"
+#include "GameObject.h"
+class GameObject;
+//#include "TransformObject.h"
 #include "UiPanel.h"
 
 using namespace std;
@@ -15,17 +19,29 @@ using namespace std;
 
 class Hierarchy : public UiPanel
 {
-public :
-	
-	void execute();	
+public:
+	static Hierarchy& instance() {
+		return sInstance;
+	}
+
+	void execute(EXECUTE_TIMING timimg);
+	void draw_ui_loop();	
+
 	void add_object(GameObject* new_obj);
-	GameObject* add_new_object();
 	void add_main_camera();
-
-private:
 	vector<GameObject*> m_game_objects;
-	//vector<ExecuteList*> m_execute_layers;
 
+	vector<string>* get_gameobjs_list();
+	GameObject* get_gameobjs_by_name(string name);
+
+private:	
+	//vector<ExecuteList*> m_execute_layers;
+	map<string, GameObject*> m_gameobj_maps;
+	vector<string> m_gameobject_names;
+
+	Hierarchy() {};
+	static Hierarchy sInstance ;
+	
 };
 
 #endif 

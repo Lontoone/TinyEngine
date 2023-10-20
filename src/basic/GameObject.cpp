@@ -1,12 +1,52 @@
 #include "GameObject.h"
+string get_uuid() {
+	// this is not safe
+	static random_device dev;
+	static mt19937 rng(dev());
+
+	uniform_int_distribution<int> dist(0, 15);
+
+	const char* v = "0123456789abcdef";
+	const bool dash[] = { 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 };
+
+	string res;
+	for (int i = 0; i < 16; i++) {
+		if (dash[i]) res += "-";
+		res += v[dist(rng)];
+		res += v[dist(rng)];
+	}
+	return res;
+}
 
 GameObject::GameObject()
 {
 	TransformObject* trans = new TransformObject();	
+	//this->m_instance_id = reinterpret_cast<int32>(this);
 	this->add_component(trans);
-	this->m_transform = trans;
+	this->m_transform = trans;	
+
+}
+GameObject::GameObject(const char* _obj_name):GameObject()
+{
 	/*
+	string _uuid = get_uuid();
+	this->m_instance_id = _uuid.c_str();
+	string _tmp = string("GameObject##") + _uuid[0] + _uuid[2] + _uuid[5];
+	cout << "game id " << _tmp << endl;
 	*/
+	this->set_name(_obj_name);
+	this->m_panel_names = _obj_name;
+	cout << "obj name" << m_panel_names<<endl;
+	this->create_panel(this->m_panel_names);
+
+}
+void GameObject::DO_Before_Frame() {
+	panel_begin();
+}
+
+void GameObject::Do_End_Frame()
+{
+	panel_end();
 }
 
 GameObject::~GameObject()
@@ -26,21 +66,77 @@ GameObject::~GameObject()
 	cout << this->m_comps.size()<<endl;
 }
 
-void GameObject::execute()
+
+void GameObject::execute(EXECUTE_TIMING timimg )
 {	
-	for (int i = 0; i < this->m_comps.size(); i++) {		
-		this->m_comps[i]->Do();
+		/*
+	switch (timimg)
+	{	
+	case EXECUTE_TIMING::BEFORE_FRAME:		
+		this->DO_Before_Frame();
+		break;
+	case EXECUTE_TIMING::AFTER_FRAME:
+		this->Do_End_Frame();
+		break;
+	default:
+		break;
 	}
+		*/
+	
+	for (int i = 0; i < this->m_comps.size(); i++) {		
+
+		switch (timimg)
+		{
+		case EXECUTE_TIMING::MAIN_LOGIC:			
+			this->m_comps[i]->Do();
+			break;
+		case EXECUTE_TIMING::BEFORE_FRAME:			
+			this->m_comps[i]->DO_Before_Frame();
+			break;
+		case EXECUTE_TIMING::AFTER_FRAME:			
+			this->m_comps[i]->Do_End_Frame();
+			break;
+		default:
+			break;
+		}
+	}
+	/*
+	if (timimg == EXECUTE_TIMING::MAIN_LOGIC) {
+		panel_end();
+	}
+	*/
+
+}
+
+void GameObject::update_ui_tree()
+{
+	//panel_begin();	
+	for (int i = 0; i < this->m_components_panels.size(); i++) {		
+		this->m_components_panels[i]->draw_ui_panel();		
+	}
+	//panel_end();
 }
 
 void GameObject::set_name(const char* new_name)
 {
-	this->name = new_name;
+	this->name = (char*)new_name;	
 }
+/*
+void GameObject::set_name(size_t  _idx)
+{
+	string _tmp_name = (string("New object") + to_string(_idx));
+	this->name = _tmp_name.c_str();
+}
+*/
 
 void GameObject::add_component(Component* _new_comp)
 {
 	this->m_comps.push_back(_new_comp);
-	_new_comp->set_parent(this);
+	_new_comp->set_parent(this);	
+}
 
+void GameObject::add_component(UiableComponent* _new_comp)
+{
+	this->m_components_panels.push_back((UiPanel*)_new_comp);
+	this->add_component((Component*)_new_comp);
 }
