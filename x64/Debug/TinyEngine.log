@@ -1,2 +1,3 @@
-﻿  GameObject.cpp
+﻿  UiManager.cpp
+E:\Projects\OpenGL\TinyEngine\src\ui\UiManager.cpp(22): warning C4715: '`UiManager::init_imgui'::`2'::<lambda_1>::operator()': not all control paths return a value
   TinyEngine.vcxproj -> E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe

@@ -64,6 +64,8 @@ public:
 	
     void Render();
 	void Do() ; 
+    
+    Component* copy() override;
 	 
 
 private:

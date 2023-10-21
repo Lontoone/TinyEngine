@@ -27,7 +27,7 @@ public:
 	void destory();
 
 	void create_menubar();
-	void _test();
+	void render_ui();
 
 	void create_window(const char* _window_name);
 	void create_hierarchy_window(vector<GameObject*>&  objs);

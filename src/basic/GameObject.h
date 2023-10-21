@@ -60,6 +60,8 @@ public:
 	bool add_child(GameObject* _child);
 	void remove_child(GameObject* _child);
 	bool check_is_child(GameObject* _child);
+	//Component* copy()override;
+	vector<GameObject*> clone();
 
 	template<class T>
 	T* get_component() {

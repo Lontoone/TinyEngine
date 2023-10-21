@@ -70,6 +70,21 @@ void Mesh::Do()
 	this->Render();
 }
 
+Component* Mesh::copy()
+{
+    Mesh* _clone = new Mesh();
+    _clone->m_name = this->m_name;
+    _clone->m_Entries = this->m_Entries;
+    _clone->m_default_shader = this->m_default_shader;
+    _clone->materials = this->materials;
+
+    _clone->m_srcPath = this->m_srcPath;
+    _clone->m_srcDirecotory = this->m_srcDirecotory;
+
+    return _clone;
+
+}
+
 bool Mesh::LoadModel(const string& path)
 {
 	// parse directory from path
