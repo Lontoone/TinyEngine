@@ -20,7 +20,7 @@ string get_uuid() {
 
 GameObject::GameObject()
 {
-	TransformObject* trans = new TransformObject();	
+	TransformObject* trans = new TransformObject(this);	
 	//this->m_instance_id = reinterpret_cast<int32>(this);
 	this->add_component(trans);
 	this->m_transform = trans;	
@@ -47,6 +47,31 @@ void GameObject::DO_Before_Frame() {
 void GameObject::Do_End_Frame()
 {
 	panel_end();
+}
+
+bool GameObject::add_child(GameObject* _child)
+{
+	if (_child != this && !this->check_is_child(_child)) {
+		if(_child->m_transform->m_parent != nullptr)
+			_child->m_transform->m_parent->m_gameobject->remove_child(_child);
+		this->m_childs.push_back(_child);
+		return true;
+	}
+	else
+	{
+		cout << "[invalid operation] Set Parent" << endl;
+		return false;
+	}
+}
+
+void GameObject::remove_child(GameObject* _child)
+{
+	this->m_childs.erase(std::remove(this->m_childs.begin(), this->m_childs.end(), _child), this->m_childs.end());
+}
+
+bool GameObject::check_is_child(GameObject* _child)
+{	
+	return this->m_childs.size()>0 && std::find(this->m_childs.begin(), this->m_childs.end(), _child) != this->m_childs.end();
 }
 
 GameObject::~GameObject()

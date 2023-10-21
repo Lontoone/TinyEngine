@@ -9,6 +9,8 @@
 #include <Hierarchy.h>
 #include <functional>
 #include <UIableComponent.h>
+#include <GameObject.h>
+class GameObject;
 //#include "Component.h"
 //#include "UiPanel.h"
 
@@ -21,6 +23,7 @@ class TransformObject :public UiableComponent {
 public:
 	~TransformObject() =default;
 	TransformObject();
+	TransformObject(GameObject* _obj);
 	vec3 m_position = vec3(0.0f);
 	vec3 m_scale = vec3(1.0f);
 	vec3 m_rotation = vec3(0.0f);
@@ -33,8 +36,12 @@ public:
 	mat4 m_translate_matrix;
 	mat4 m_model_matrix = glm::mat4(1.0f);
 
+	TransformObject* m_parent=nullptr; 
+	GameObject* m_gameobject;
+
 	void move(vec3 _m);
 	void Do() override;
+	void set_transform_parent(TransformObject* _new_parent);
 
 private:
 	//void UpdateTransform();

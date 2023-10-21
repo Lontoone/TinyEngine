@@ -7,30 +7,35 @@ void UiPanel::add_draw_item(function<bool()> _draw_cmd)
 	this->m_draw_cmds.push_back(_draw_cmd);
 }
 
-void UiPanel::add_drop_down_menu(vector<string>& _ops, function < bool (string) > _callback)
+void UiPanel::add_drop_down_menu(vector<string>& _ops, void(*func)(string))
 {
-	string current_item = "";
-	
-	if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
-	{
-		//for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-		//for (int n = 0; n < _ops->size(); n++)
-		for (auto opt : _ops)
+	static const char* current_item = "Set Parent";
+	auto pos_inp = [&]() {
+		if (ImGui::BeginCombo("##combo1", current_item)) // The second parameter is the label previewed before opening the combo.
 		{
-			bool is_selected = (current_item == opt ); // You can store your selection however you want, outside or inside your objects
-			if (ImGui::Selectable(opt.c_str(), is_selected)) {
-				current_item = opt;
-				std::cout << "selected " << current_item << std::endl;
-			}
-			if (is_selected) {
-				ImGui::SetItemDefaultFocus();
-			}   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-		}
-		ImGui::EndCombo();
+			for (auto opt : _ops)
+			{
+				bool is_selected = (current_item == opt ); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(opt.c_str(), is_selected)) {
+					current_item =  opt.c_str();			
 
-	}
+					std::cout << "selected " << current_item << std::endl;
+					func("aa");
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			}
+			ImGui::EndCombo();
+		}
+		return true;
+	};
+	this->m_draw_cmds.push_back(pos_inp);
 }
 
+void _default_callback(string msg) {
+	cout << "msg" << msg << endl;
+}
 void UiPanel::draw_ui_panel()
 {
 

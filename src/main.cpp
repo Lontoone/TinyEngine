@@ -93,10 +93,10 @@ int main(int argc , char** argv) {
 	//Hierarchy Hierarchy::sInstance;
 	//Hierarchy hierarchy = Hierarchy::instance();
 	GameObject obj = GameObject("obj1");
-	GameObject obj2 = GameObject("obj2");
+	//GameObject obj2 = GameObject("obj2");
 	//Mesh mesh = Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);
 	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	Mesh* mesh2 = new Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);	
+	//Mesh* mesh2 = new Mesh(src_path + "\\assets\\TrollApose_low.fbx", s_default_shader);	
 
 	//Component* test_comp = new Component();
 	obj.set_name("Building");
@@ -104,14 +104,14 @@ int main(int argc , char** argv) {
 	obj.add_component(mesh);		
 
 	//Component* test_comp2 = new Component();
-	obj2.set_name("New Obj 2");	
-	obj2.add_component(mesh2);	
+	//obj2.set_name("New Obj 2");	
+	//obj2.add_component(mesh2);	
 
 	//hierarchy.add_main_camera();
 	//hierarchy.add_object(&obj);
 	//hierarchy.add_object(&obj2);	
 	Hierarchy::instance().add_object(&obj);
-	Hierarchy::instance().add_object(&obj2);
+	//Hierarchy::instance().add_object(&obj2);
 	/*
 	*/
 
@@ -164,6 +164,7 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+		auto obj_list = Hierarchy::instance().get_gameobjs_list();
 		//hierarchy.draw_ui_loop();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();

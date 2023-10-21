@@ -1,0 +1,7 @@
+﻿  Generating code
+  Previous IPDB not found, fall back to full compilation.
+E:\Projects\OpenGL\TinyEngine\src\ui\UiManager.cpp(22): warning C4715: '`UiManager::init_imgui'::`2'::<lambda_1>::operator()': not all control paths return a value
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(135): warning C4715: '`main'::`2'::<lambda_1>::operator()': not all control paths return a value
+  All 2792 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  TinyEngine.vcxproj -> E:\Projects\OpenGL\TinyEngine\x64\Release\TinyEngine.exe
