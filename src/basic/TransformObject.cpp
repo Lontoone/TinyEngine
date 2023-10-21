@@ -1,7 +1,6 @@
 #include "TransformObject.h"
 
-
-
+void test_print(string msg);
 void TransformObject::Do()
 {
 	// TODO: Check parent....
@@ -9,18 +8,28 @@ void TransformObject::Do()
 	this->update_rotation_matrix_eular();  // TODO: qutanion
 	this->update_scale_matrix();
 
-	this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
-	//this->draw_ui_panel();
+	if(this->m_parent!=nullptr)
+		this->m_model_matrix = this->m_parent->m_model_matrix * this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+	else
+		this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
 
-	//this->m_model_matrix =  this->m_scale_matrix;
-	//this->m_model_matrix = mat4(1.0f);
-	/*
-	for (int i = 0; i < 4; i++) {
-		cout << this->m_model_matrix[i][0] << " " << this->m_model_matrix[i][1] << " " << this->m_model_matrix[i][2] << " " << this->m_model_matrix[i][3]<< endl;
+}
+
+void TransformObject::set_transform_parent(TransformObject* _new_parent)
+{
+	if (_new_parent == this) {
+		//TODO: this is TEMP : remove parent workaround.
+		if (this->m_parent != nullptr) {
+			this->m_parent->m_gameobject->remove_child(this->m_gameobject);
+			_new_parent->m_gameobject->remove_child(this->m_gameobject);
+			this->m_parent = nullptr;
+		}
 	}
-	cout << endl;
-	*/
-	//this->m_model_matrix
+	else if (_new_parent->m_gameobject->add_child(this->m_gameobject)) {
+		this->m_parent = _new_parent;
+		cout << "Set Parent " << _new_parent->m_name;
+	};
+	//TODO: Transform....
 }
 
 
@@ -52,6 +61,11 @@ void TransformObject::update_scale_matrix()
 	*/
 }
 
+TransformObject::TransformObject(GameObject* _obj):TransformObject()
+{
+	this->m_gameobject = _obj;
+}
+
 TransformObject::TransformObject() :Component("Transform")
 {
 	this->m_position = vec3(0.0f);
@@ -70,14 +84,37 @@ TransformObject::TransformObject() :Component("Transform")
 	this->add_draw_item(scale_inp);
 	
 	//======== Define select parent dropdown =================
-	/*
-	auto set_parent_inp = [&](string selected) {
-		this->set_parent(Hierarchy::instance->get_gameobjs_by_name(selected));
-		return true; 
+
+	auto obj_list = Hierarchy::instance().get_gameobjs_list();	
+	static const char* current_item = "Set Parent";
+	auto dp_inp = [&]() {
+		if (ImGui::BeginCombo("##combo1", current_item)) // The second parameter is the label previewed before opening the combo.
+		{
+			for (auto opt : *Hierarchy::instance().get_gameobjs_list())
+			{
+				bool is_selected = (current_item == opt); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(opt.c_str(), is_selected)) {
+					current_item = opt.c_str();
+
+					std::cout << "selected " << current_item << std::endl;
+					GameObject* _new_parent_obj = Hierarchy::instance().get_gameobjs_by_name(current_item);
+					this->set_transform_parent(_new_parent_obj->m_transform);
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			}
+			ImGui::EndCombo();
+		}
+		return true;
 	};
-	auto obj_list = Hierarchy::instance->get_gameobjs_list();
-	add_drop_down_menu(*obj_list , set_parent_inp);
-	*/
+	this->add_draw_item(dp_inp);
+}
+
+
+
+void test_print(string msg) {
+	cout << msg << endl;
 }
 
 void TransformObject::move(vec3 _m)

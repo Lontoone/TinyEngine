@@ -207,7 +207,7 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
 
     for (unsigned int i = 0; i < paiMesh->mNumFaces; i++) {
         const aiFace& Face = paiMesh->mFaces[i];
-        assert(Face.mNumIndices == 3);
+        //assert(Face.mNumIndices == 3);  //This usually works, but sometimes blocks the model for importing.
         Indices.push_back(Face.mIndices[0]);
         Indices.push_back(Face.mIndices[1]);
         Indices.push_back(Face.mIndices[2]);

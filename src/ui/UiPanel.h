@@ -28,7 +28,7 @@ public:
 	//void add_draw_item(t_draw_cmd& _draw_cmd);
 
 	void add_draw_item(function<bool()> _draw_cmd);
-	void add_drop_down_menu(vector<string>& _ops, function<bool(string)> _callback);
+	void add_drop_down_menu(vector<string>& _ops, void(*func)(string));
 	void draw_ui_panel();
 	void create_panel(const char* window_name);
 	void panel_begin();

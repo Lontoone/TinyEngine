@@ -12,7 +12,7 @@ class TransformObject;
 #include <random>
 #include <UiPanel.h>
 #include <UIableComponent.h>
-
+#include <algorithm>
 //#include "../utlis/uuid_helper.h"
 //#include "Hierarchy.h"
 
@@ -44,6 +44,7 @@ public:
 
 	std::vector<Component*>			m_comps;
 	std::vector<GameObject*>		m_childs;
+	
 	TransformObject*				m_transform;	
 
 	void execute(EXECUTE_TIMING timimg);
@@ -55,6 +56,10 @@ public:
 	
 	void DO_Before_Frame() override;
 	void Do_End_Frame() override;
+
+	bool add_child(GameObject* _child);
+	void remove_child(GameObject* _child);
+	bool check_is_child(GameObject* _child);
 
 	template<class T>
 	T* get_component() {
