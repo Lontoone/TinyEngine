@@ -15,8 +15,8 @@ Component::~Component()
 	std::cout << "deconstruct comp" << this << std::endl;
 }
 
-void Component::set_parent(Component* ptr) {
-	this->m_gameobject = ptr;
+void Component::attatch_to(Component* ptr) {
+	this->m_gameobject = ptr;	
 }
 
 /*

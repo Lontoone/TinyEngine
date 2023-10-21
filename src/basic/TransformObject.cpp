@@ -32,6 +32,11 @@ void TransformObject::set_transform_parent(TransformObject* _new_parent)
 	//TODO: Transform....
 }
 
+Component* TransformObject::copy()
+{	
+	return nullptr;
+}
+
 
 void TransformObject::update_rotation_matrix_eular()
 {

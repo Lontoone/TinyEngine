@@ -74,6 +74,33 @@ bool GameObject::check_is_child(GameObject* _child)
 	return this->m_childs.size()>0 && std::find(this->m_childs.begin(), this->m_childs.end(), _child) != this->m_childs.end();
 }
 
+vector<GameObject*> GameObject::clone()
+{
+	vector<GameObject*> result;
+
+	string _clone_name = this->name + "_Clone";
+	GameObject* _clone = new GameObject(_clone_name.c_str());
+	result.push_back(_clone);
+
+	for (auto comp : this->m_comps) {
+		auto _comp_clone = comp->copy();
+		if (_comp_clone != nullptr)
+			_comp_clone->attatch_to(_clone);
+	}
+	for (int i = 0; i < this->m_childs.size(); i++) {
+		auto child_clone = (GameObject*)(this->m_childs[i]->copy());
+		result.push_back(child_clone);
+		if (i == 0) {
+			child_clone->m_transform->set_transform_parent(this->m_transform->m_parent);
+		}
+		else
+		{
+			child_clone->m_transform->set_transform_parent(this->m_childs[i - 1]->m_transform);
+		}
+	}
+	return result;
+}
+
 GameObject::~GameObject()
 {
 	for (auto ptr : this->m_comps) {
@@ -157,7 +184,7 @@ void GameObject::set_name(size_t  _idx)
 void GameObject::add_component(Component* _new_comp)
 {
 	this->m_comps.push_back(_new_comp);
-	_new_comp->set_parent(this);	
+	_new_comp->attatch_to(this);	
 }
 
 void GameObject::add_component(UiableComponent* _new_comp)
