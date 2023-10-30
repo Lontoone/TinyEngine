@@ -23,8 +23,10 @@ public:
 	virtual void Do(){};
 	virtual void DO_Before_Frame() {};
 	virtual void Do_End_Frame() {};
+		
+	virtual Component* copy() { return nullptr; };
 
-	void set_parent(Component* ptr);
+	void attatch_to(Component* ptr);
 
 	template<class T>
 	T* cast_component() {

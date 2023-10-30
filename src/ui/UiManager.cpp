@@ -15,12 +15,14 @@ void UiManager::init_imgui(GLFWwindow* window)
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 
-	// test:
+	// test: BUTTON
+	/*
 	auto pos_inp = [&]() { if (Button("h")) {
 		printf("click" );
 		return true;
 	} };
 	this->m_menu_cmds.push_back(pos_inp);
+	*/
 }
 
 void UiManager::new_frame()
@@ -44,7 +46,6 @@ void UiManager::create_menubar()
 {
 	ImGui::BeginMainMenuBar();
 	Text("Tiny Engine___Lontoone");
-	Button("Add Gameobject");
 	for (auto _cmd : this-> m_menu_cmds) {
 		//_item->run_all_draw_cmd();
 		_cmd();
@@ -55,7 +56,7 @@ void UiManager::create_menubar()
 	//End();
 }
 
-void UiManager::_test()
+void UiManager::render_ui()
 {
 	/*
 	Begin("Test");

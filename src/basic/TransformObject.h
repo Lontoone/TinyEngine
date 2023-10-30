@@ -42,6 +42,7 @@ public:
 	void move(vec3 _m);
 	void Do() override;
 	void set_transform_parent(TransformObject* _new_parent);
+	Component* copy() override;
 
 private:
 	//void UpdateTransform();
