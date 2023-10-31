@@ -91,7 +91,7 @@ void recursive_add_node(const char* _name, GameObject* current,vector<GameObject
 			recursive_add_node(_nextPanel->name.c_str(), _nextPanel, _nextPanel->m_childs, n + 1);
 			
 		}
-
+		/*  [Demo Dragging]
 		//ImGui::Selectable(current->name);
 		if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
 		{
@@ -101,7 +101,7 @@ void recursive_add_node(const char* _name, GameObject* current,vector<GameObject
 				ImGui::ResetMouseDragDelta();
 			}
 		}
-
+		*/
 		TreePop();
 	}
 	PopID();

@@ -171,6 +171,7 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="src\basic\BasicFlags.h" />
+    <ClInclude Include="src\basic\Debugger.hpp" />
     <ClInclude Include="src\basic\FileDialog.h" />
     <ClInclude Include="src\basic\Hierarchy.h" />
     <ClInclude Include="src\basic\Component.h" />

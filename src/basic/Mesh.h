@@ -37,7 +37,7 @@ struct Vertex
     }
 };
 
-class Mesh : public Component{
+class Mesh : public UiableComponent {
 public:
 	Mesh();
 	Mesh(const string& path);
@@ -65,7 +65,9 @@ public:
     void Render();
 	void Do() ; 
     
+    // Override for UI
     Component* copy() override;
+    void init_ui_content() override;
 	 
 
 private:

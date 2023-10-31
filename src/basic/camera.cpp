@@ -1,4 +1,13 @@
 #include "camera.h"
+Camera::Camera() :GameObject("Camera")
+{
+}
+
+Camera::Camera(glm::vec3 position):GameObject("Camera") {
+	this->m_transform->m_position = position;
+	//this->m_transform->m_auto_update_matrix = false;
+}
+/*
 Camera::Camera(glm::vec3 position) 
 	:	cameraPos(position), 
 		worldUp(glm::vec3(0.0f , 1.0f , 0.0f)),
@@ -6,10 +15,11 @@ Camera::Camera(glm::vec3 position)
 		pitch(0.0f),
 		speed(2.5f),
 		zoom(45.0f),
-		cameraFront(glm::vec3 (0.0f,0.0f,-1.0f))  // Look at origin
+		cameraFront(glm::vec3 (0.0f,0.0f,-1.0f)) // Look at origin
 {
 	updateCameraVectors();
 }
+
 void Camera::updateCameraDirection(double dx, double dy) {
 	yaw += dx;
 	pitch += dy;
@@ -50,6 +60,7 @@ void Camera::updateCameraPos(CameraDirection dir, double dt) {
 	}
 
 }
+*/
 void Camera::updateCameraZoom(double dy) {
 	if (zoom >= 1.0f && zoom <= 45.0f) {
 		zoom -= dy;
@@ -62,13 +73,35 @@ void Camera::updateCameraZoom(double dy) {
 	}
 }
 
-glm::mat4 Camera::getViewMatrix() {
-	this->updateCameraVectors();
-
-	return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);		
-
+vec3 Camera::get_view_center_position()
+{
+	vec3 center = this->m_transform->m_position + this->m_transform->m_forward * zoom;
+	return center;
 }
 
+vec3 Camera::get_view_dir()
+{
+	//vec3 dir =this->m_transform->m_position 
+	//return -this->m_transform->m_forward;
+	//return normalize(this->m_transform->m_position - this->get_view_center_position());
+	return  normalize(this->view_target) -normalize(this->m_transform->m_position);
+}
+
+glm::mat4 Camera::getViewMatrix() {
+	//this->updateCameraVectors();	
+	//return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);		
+	//vec3 _tmp = this->get_view_center_position();
+	//vec3 _tmp = this->m_transform->m_forward;
+	//cout << _tmp.x << " , " << _tmp.y << "," << _tmp.z << endl;
+	// 
+	//return glm::lookAt( this->m_transform->m_position , this->get_view_dir() , this->m_transform->m_up);
+	
+	//mat4 look = glm::lookAt(this->m_transform->m_position , this->get_view_dir(), this->m_transform->m_up);
+	//this->m_transform->m_model_matrix *= look;
+	return inverse( this->m_transform->m_model_matrix);
+}
+
+/*
 void Camera::updateCameraVectors() {
 	glm::vec3 direction;
 	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -80,3 +113,4 @@ void Camera::updateCameraVectors() {
 	cameraUp	= glm::normalize(glm::cross(cameraRight, cameraFront));
 
 }
+*/

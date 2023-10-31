@@ -1,21 +1,24 @@
 #include "Mesh.h"
 
-Mesh::Mesh()
+Mesh::Mesh() :Component("Mesh Render")
 {
 	this->m_name = "Mesh_Comp";
 }
 
-Mesh::Mesh(const string& path)
+Mesh::Mesh(const string& path) :Mesh()
 {
     bool success = LoadModel(path);
     cout << "Load success " << success << " in path:"<<path << endl;
 
 }
 
-Mesh::Mesh(const string& path, Shader& _default_shader)//:Mesh(path)
+Mesh::Mesh(const string& path, Shader& _default_shader) :Mesh(path)
 {	
 	this->m_default_shader = _default_shader;
 	bool success = LoadModel(path);
+
+    // TODO: Add UI in LoadModel
+    this->init_ui_content();
 }
 
 Mesh::~Mesh()
@@ -85,6 +88,25 @@ Component* Mesh::copy()
 
 }
 
+void Mesh::init_ui_content()
+{
+    //this->create_panel(this->m_name);
+
+    auto title_text = [&]() {Text("========= [ Mesh Render] ============");return true;};
+    this->add_draw_item(title_text);
+
+    for (auto _mat : this->materials) {
+        //auto m_path_text = [&]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->get_file_path_char()); return true; };
+        if (_mat->m_textures.size() > 0) {
+            cout << _mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str() << endl;
+            auto m_path_text = [=]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str()); return true; };
+            this->add_draw_item(m_path_text);
+        }
+    }
+
+    
+}
+
 bool Mesh::LoadModel(const string& path)
 {
 	// parse directory from path
@@ -119,7 +141,7 @@ bool Mesh::LoadModel(const string& path)
         printf("Error parsing '%s': '%s'\n", path.c_str(), Importer.GetErrorString());
     }
 
-	
+
 
     return Ret;
 }
@@ -162,7 +184,7 @@ bool Mesh::InitMaterials(const aiScene* pScene)
 			//Diffuse maps
 			int numTextures = material->GetTextureCount(aiTextureType_DIFFUSE);//Amount of diffuse textures
 			aiString textureName;//Filename of the texture using the aiString assimp structure
-
+            
 			if (numTextures > 0)
 			{
 				//Get the file name of the texture by passing the variable by reference again
@@ -175,7 +197,27 @@ bool Mesh::InitMaterials(const aiScene* pScene)
 				cout << "init mat diff map " << textureFileName << endl;
 
 				mat->add_texture(Bind_Type::DIFFUSE , this->m_srcDirecotory +'\\'+textureFileName);
-			}
+			}            
+            //Bump maps
+            int numTextures_bump = material->GetTextureCount(aiTextureType_HEIGHT);//Amount of diffuse textures
+            aiString textureName_bump;//Filename of the texture using the aiString assimp structure
+
+            if (numTextures_bump > 0)
+            {
+                //Get the file name of the texture by passing the variable by reference again
+                //Second param is 0, which is the first diffuse texture
+                //There can be more diffuse textures but for now we are only interested in the first one
+                ret = material->Get(AI_MATKEY_TEXTURE(aiTextureType_HEIGHT, 0), textureName_bump);
+
+
+                std::string textureFileName = textureName_bump.data;//The actual name of the texture file
+                cout << "init mat height map " << textureFileName << endl;
+
+                mat->add_texture(Bind_Type::NORMAL , this->m_srcDirecotory + '\\' + textureFileName);
+            }
+
+
+            // Fininsh Loading this material
 			this->materials.push_back(mat);
 		}
 

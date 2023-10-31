@@ -36,9 +36,9 @@ Material::~Material()
 
 void Material::add_texture(Bind_Type _type, string _tex_path)
 {
-	cout << "Load tex , path: " << _tex_path <<" Bind name "<< s_bind_types[_type] << endl;
 	//this->m_textures
 	Texture* _new_tex = new Texture(_tex_path);
+	cout << "Load tex , path: " << _tex_path <<" Bind name "<< s_bind_types[_type] <<" bind add "<< _new_tex  << endl;
 	this->m_textures.insert({ _type  , _new_tex });
 }
 

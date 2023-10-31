@@ -12,6 +12,7 @@
 #include "basic/Hierarchy.h"
 #include "basic/GameObject.h"
 #include "FileDialog.h"
+#include <Debugger.hpp>
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -91,12 +92,14 @@ int main(int argc , char** argv) {
 #pragma endregion
 	
 #pragma region DEBUG_PRE_LOAD_MODEL
-	/*
 	GameObject obj = GameObject("Building");
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
+	Mesh*  mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
 	obj.add_component(mesh);		
+
 	Hierarchy::instance().add_object(&obj);
-	*/
+	Hierarchy::instance().add_object((GameObject*)&camera);
+	/*
 	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
 	Mesh* head_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\head.obj", s_default_shader);	
 	Mesh* body_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\body.obj", s_default_shader);
@@ -209,7 +212,7 @@ int main(int argc , char** argv) {
 	robot_leg_r2_b.m_transform->move(vec3(0, -0.5, 0));
 	robot_leg_r3_b.m_transform->move(vec3(0.25, 0.2, 0.3));
 	////////////////////////////////////////////////////////
-
+	*/
 	/*  //////  HAVE BUG, NoT FIX YET
 	vector<GameObject*> robot_leg_clone = robot_leg_r1.clone();
 	for (auto _copy : robot_leg_clone) {
@@ -260,6 +263,7 @@ int main(int argc , char** argv) {
 		//清除顏色
 		ui_manager.new_frame();
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);
+		/*
 		////////////////////// HW1 Animation  ////////////////////////
 		robot_leg_l1_f.m_transform->m_rotation = vec3(0, std::sin(_previous_time *4)*50,0);
 		robot_leg_l2_f.m_transform->m_rotation = vec3(0, 0,std::abs( std::cos(_previous_time*2))*30);
@@ -285,6 +289,7 @@ int main(int argc , char** argv) {
 		
 		dog.m_transform->m_position = (vec3(0, abs( sin(1.25 * sin(2.5 * sin(_previous_time * 0.5 + 500)) * 7)) * 0.1 + 1.7, 0));
 		/////////////////////////////////////////////////////////////
+		*/
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -344,9 +349,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-
+//float prex =0 , prey=0;
+vec3 prev_mouse = vec3(0);
 void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
+	/*
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -374,6 +381,65 @@ void processInput(GLFWwindow* window, double dt) {
 	}
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 		camera.updateCameraDirection(-5.0f*dt, 0);
+	}*/
+
+	if (glfwGetMouseButton(window, 0)) {		
+		// top left (0,0) -> right btm 
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		/*
+		cout << xpos <<","<< ypos << endl;
+		*/
+		// Track ball here
+		//		x and y coordinates are directly taken from the click in camera coordinates
+		//		z coordinate is computed using the classical Pythagorean theorem
+
+		float move_x = xpos / SCR_WIDTH * 2 - 1 ;
+		float move_y = -(ypos / SCR_HEIGHT * 2 - 1);
+
+		vec3 mouse_pos = vec3(move_x, move_y , 1.0);
+		Debugger::Log(mouse_pos);
+
+		float op_sqrd = move_x * move_x + move_y * move_y;
+		mouse_pos.z = sqrt(1.0f - op_sqrd);
+		if ( op_sqrd < 1.0f) {
+			mouse_pos.z = sqrt(1.0f - op_sqrd);
+		}
+		else
+		{
+			mouse_pos = glm::normalize(mouse_pos);
+		}
+		cout << "mouse pos " << "leng " <<glm::length(mouse_pos) <<endl;
+
+		if (glm::length(prev_mouse) == 0) {
+			prev_mouse = mouse_pos;
+			return;
+		}
+		//cout << mouse_pos.x <<" , " << mouse_pos.y << " , " << mouse_pos.z  << endl;
+		//		angle = arccos (op1 * op2)
+
+		vec3 op1 = prev_mouse;
+		//vec3 op1 = camera.get_view_dir();		
+		//vec3 op1 = -camera.m_transform->m_forward;
+		float angle = glm::acos( glm::min (1.0f , glm::dot( op1 , mouse_pos)));
+		cout << " Angle " << angle<<" dot" << dot(op1, mouse_pos) << endl;
+		//		Get the rotation axis in 3D
+		vec3 rotation_axis = glm::cross(op1, mouse_pos);
+
+		mat4 offset = glm::rotate(mat4(1.0), angle, rotation_axis);
+		Debugger::Log(offset);
+		camera.m_transform->m_position = offset *vec4(camera.m_transform->m_position,1);
+		
+		//mat4 look = glm::lookAt(camera.m_transform->m_position, camera.get_view_dir(), camera.m_transform->m_up);
+		//camera.m_transform->m_model_matrix *= look;
+		/*
+		*/
+
+		//mat4 forward_mat4 = translate(mat4(1.0f) , camera.get_view_center_position());
+		//mat4 rt = rotate(forward_mat4, angle , rotation_axis);
+		//camera.m_transform->m_rotation = glm::eulerAngles(glm::quat_cast(camera.m_transform->m_rot_matrix *rt));
+		prev_mouse = mouse_pos;
 	}
 }
+
 

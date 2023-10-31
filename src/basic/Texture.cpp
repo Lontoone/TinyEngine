@@ -4,12 +4,14 @@
 
 Texture::Texture()
 {
-
+	this->m_file_path = "";
 }
 
-Texture::Texture(const string& _file_path)
+Texture::Texture(const string _file_path)
 {
 	this->load_file(_file_path);
+	this->m_file_path = _file_path;
+	cout <<" texture const" << m_file_path << endl;
 }
 
 Texture::~Texture()
@@ -19,7 +21,7 @@ Texture::~Texture()
 	//TODO: unbind texture (?)
 }
 
-void Texture::load_file(const string& _file_path)
+void Texture::load_file(const string _file_path)
 {
 	glGenTextures(1, &this->m_texture_id);
 	glBindTexture(GL_TEXTURE_2D, this->m_texture_id);
@@ -41,13 +43,17 @@ void Texture::load_file(const string& _file_path)
 
 void Texture::init_texture()
 {
-	if (this->m_data) {		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->m_width, this->m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->m_data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+	if (this->m_data) {
+		if(this->m_channels ==3)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->m_width, this->m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->m_data);
+		
+		else if (this->m_channels == 4)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->m_width, this->m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->m_data);
+		//glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(this->m_data);
 	}
 	else
 	{
 		cout << "Texture Load Failed" << endl;
 	}
-	stbi_image_free(this->m_data);
 }

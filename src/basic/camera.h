@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Component.h"
+#include "GameObject.h"
 
 enum class CameraDirection {
 	NONE = 0,
@@ -15,8 +17,10 @@ enum class CameraDirection {
 	DOWN
 };
 
-class Camera {
+class Camera : public GameObject {
 public :
+	Camera();	
+	/*
 	glm::vec3 cameraPos;
 	glm::vec3 cameraFront;
 	glm::vec3 cameraRight;
@@ -24,15 +28,22 @@ public :
 
 	glm::vec3 worldUp;
 
+	glm::vec3 camera_center;
+
 	float yaw;  //x-axis
 	float pitch;
 	float speed;
-	float zoom;
 
+	*/
+	vec3 view_target = vec3(3.0f);
+	float zoom = 3;
 	Camera(glm::vec3  position);
 	void updateCameraDirection(double dx, double dy);
 	void updateCameraPos(CameraDirection dir , double dt);
 	void updateCameraZoom(double dy);
+
+	vec3 get_view_center_position();
+	vec3 get_view_dir();
 
 	glm::mat4 getViewMatrix();
 
