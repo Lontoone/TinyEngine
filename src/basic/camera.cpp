@@ -106,13 +106,13 @@ vec3 Camera::get_view_dir()
 	//vec3 dir =this->m_transform->m_position 
 	//return -this->m_transform->m_forward;
 	//return normalize(this->m_transform->m_position - this->get_view_center_position());
-	return  normalize(this->m_position - this->view_offset);
+	return  normalize(this->m_position - this->view_target);
 }
 
 void Camera::Do()
 {	
 	//this->m_position = -this->m_forward * zoom + view_offset;
-	//this->m_translate_matrix = glm::translate(mat4(1.0f), vec3(0,0,-zoom));
+	//this->m_translate_matrix = glm::translate(mat4(1.0f), this->m_position + this->view_target);
 	this->update_translate_matrix();
 	//this->update_rotation_matrix_eular();  // TODO: qutanion
 	this->update_scale_matrix();
@@ -123,12 +123,6 @@ void Camera::Do()
 	else
 		this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
 
-	/*
-	this->m_model_matrix = glm::lookAt(
-								this->m_position ,
-								this->m_position + this->m_forward * zoom + view_offset,
-								this->m_up);
-								*/
 }
 
 glm::mat4 Camera::getViewMatrix() {

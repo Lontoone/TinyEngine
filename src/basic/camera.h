@@ -35,7 +35,7 @@ public :
 	float pitch =0.0f;
 	float speed;
 
-	vec3 view_offset = vec3(0.0f);
+	vec3 view_target = vec3(0.0f);
 	float zoom = -3;
 	Camera(glm::vec3  position);
 	void updateCameraDirection(double dx, double dy);
