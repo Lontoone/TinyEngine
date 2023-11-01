@@ -9,7 +9,6 @@ void TransformObject::Do()
 		this->update_translate_matrix();
 		this->update_rotation_matrix_eular();  // TODO: qutanion
 		this->update_scale_matrix();
-	}
 
 		if(this->m_parent!=nullptr)
 			this->m_model_matrix = this->m_parent->m_model_matrix * this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
@@ -17,6 +16,7 @@ void TransformObject::Do()
 			this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
 
 		this->update_local();
+	}
 }
 
 void TransformObject::init_ui_content()

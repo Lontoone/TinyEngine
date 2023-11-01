@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\Projects\OpenGL_TinyEngine\x64\Debug\TinyEngine.exe</FullPath>
+      <FullPath>E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

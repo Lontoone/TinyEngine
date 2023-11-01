@@ -51,7 +51,7 @@ public:
 	void init_ui_content() override;
 	Component* copy() override;
 
-private:
+protected:
 	//void UpdateTransform();
 	void update_rotation_matrix_eular();
 	void update_translate_matrix();

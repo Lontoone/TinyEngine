@@ -17,7 +17,7 @@ enum class CameraDirection {
 	DOWN
 };
 
-class Camera : public GameObject {
+class Camera : public TransformObject {
 public :
 	Camera();	
 	/*
@@ -30,25 +30,28 @@ public :
 
 	glm::vec3 camera_center;
 
-	float yaw;  //x-axis
-	float pitch;
+	*/
+	float yaw =-90.0f;  //x-axis
+	float pitch =0.0f;
 	float speed;
 
-	*/
-	vec3 view_target = vec3(3.0f);
-	float zoom = 3;
+	vec3 view_offset = vec3(0.0f);
+	float zoom = -3;
 	Camera(glm::vec3  position);
 	void updateCameraDirection(double dx, double dy);
-	void updateCameraPos(CameraDirection dir , double dt);
+	//void updateCameraPos(CameraDirection dir , double dt);
 	void updateCameraZoom(double dy);
+	
 
 	vec3 get_view_center_position();
 	vec3 get_view_dir();
 
+	void Do() override;
+
 	glm::mat4 getViewMatrix();
 
 private :
-	void updateCameraVectors();
+	//void updateCameraVectors();
 
 
 

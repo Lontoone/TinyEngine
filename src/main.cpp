@@ -30,7 +30,7 @@ MechainState state;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float SCR_WIDTH		= 800;
+float SCR_WIDTH		= 1280;
 float SCR_HEIGHT	= 600;
 
 float vertices[] = {
@@ -93,12 +93,16 @@ int main(int argc , char** argv) {
 	
 #pragma region DEBUG_PRE_LOAD_MODEL
 	GameObject obj = GameObject("Building");
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	Mesh*  mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
-	obj.add_component(mesh);		
+	GameObject camera_obj = GameObject((TransformObject*)&camera);
+	camera_obj.set_name("Camera");
+	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
+	//Mesh*  mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
+	obj.add_component(mesh);	
+	camera_obj.add_component((Component*)&camera);
 
 	Hierarchy::instance().add_object(&obj);
-	Hierarchy::instance().add_object((GameObject*)&camera);
+	//Hierarchy::instance().add_object((GameObject*)&camera);
+	Hierarchy::instance().add_object(&camera_obj);
 	/*
 	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
 	Mesh* head_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\head.obj", s_default_shader);	
@@ -351,93 +355,122 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 //float prex =0 , prey=0;
 vec3 prev_mouse = vec3(0);
+vec3 mouse_pos = vec3(0);
+//vec2 prev_mouse = vec2(0);
+static glm::vec2 screenCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2);
+
 void processInput(GLFWwindow* window, double dt) {
 	//­Y«ö¤Uesc key => Ãö±¼window
-	/*
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::FORWARD, dt);
+		camera.zoom += dt;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::BACKWARD, dt);
+		camera.zoom -= dt;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::RIGHT, dt);
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::LEFT, dt);
-	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::UP, dt);
-	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-		camera.updateCameraPos(CameraDirection::DOWN, dt);
-	}
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		camera.updateCameraDirection(5.0f*dt, 0);
-	}
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		camera.updateCameraDirection(-5.0f*dt, 0);
-	}*/
 
-	if (glfwGetMouseButton(window, 0)) {		
-		// top left (0,0) -> right btm 
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		/*
-		cout << xpos <<","<< ypos << endl;
-		*/
-		// Track ball here
-		//		x and y coordinates are directly taken from the click in camera coordinates
-		//		z coordinate is computed using the classical Pythagorean theorem
 
-		float move_x = xpos / SCR_WIDTH * 2 - 1 ;
+		float move_x = xpos / SCR_WIDTH * 2 - 1;
 		float move_y = -(ypos / SCR_HEIGHT * 2 - 1);
 
-		vec3 mouse_pos = vec3(move_x, move_y , 1.0);
-		Debugger::Log(mouse_pos);
+		mouse_pos = vec3(move_x, move_y, 0);
+		//Debugger::Log(mouse_pos);
 
 		float op_sqrd = move_x * move_x + move_y * move_y;
 		mouse_pos.z = sqrt(1.0f - op_sqrd);
-		if ( op_sqrd < 1.0f) {
+		if (op_sqrd <= 1.0f) {
 			mouse_pos.z = sqrt(1.0f - op_sqrd);
 		}
 		else
 		{
+			return;
 			mouse_pos = glm::normalize(mouse_pos);
 		}
-		cout << "mouse pos " << "leng " <<glm::length(mouse_pos) <<endl;
+		//cout << "mouse pos " << "leng " << glm::length(mouse_pos) << endl;
 
 		if (glm::length(prev_mouse) == 0) {
 			prev_mouse = mouse_pos;
 			return;
 		}
-		//cout << mouse_pos.x <<" , " << mouse_pos.y << " , " << mouse_pos.z  << endl;
-		//		angle = arccos (op1 * op2)
 
 		vec3 op1 = prev_mouse;
-		//vec3 op1 = camera.get_view_dir();		
-		//vec3 op1 = -camera.m_transform->m_forward;
-		float angle = glm::acos( glm::min (1.0f , glm::dot( op1 , mouse_pos)));
-		cout << " Angle " << angle<<" dot" << dot(op1, mouse_pos) << endl;
-		//		Get the rotation axis in 3D
+		float angle = glm::acos(glm::min(1.0f, glm::dot(op1, mouse_pos)));
+		cout << " Angle " << angle << " dot" << dot(op1, mouse_pos) << endl;
 		vec3 rotation_axis = glm::cross(op1, mouse_pos);
 
-		mat4 offset = glm::rotate(mat4(1.0), angle, rotation_axis);
-		Debugger::Log(offset);
-		camera.m_transform->m_position = offset *vec4(camera.m_transform->m_position,1);
+
+		//		Get the rotation axis in 3D		
+		vec4 zoom_off = vec4(0,0,-camera.zoom , 1);
+		//mat4 zoom_offset = glm::translate(mat4(1.0f), vec3(0, 0, -camera.zoom));
+		mat4 rotate_offset = glm::rotate(mat4(1.0), angle, rotation_axis);
 		
-		//mat4 look = glm::lookAt(camera.m_transform->m_position, camera.get_view_dir(), camera.m_transform->m_up);
-		//camera.m_transform->m_model_matrix *= look;
+		//camera.m_rot_matrix = offset;
+		//mat4 trans = zoom_offset * rotate_offset;
+		camera.m_position = rotate_offset * zoom_off;
+		//camera.m_position = trans * vec4( camera.view_offset,1.0);
+		//camera.m_translate_matrix = trans;
+
+		camera.m_forward = camera.get_view_dir();
+		camera.m_right= glm::normalize(glm::cross(camera.m_forward, WORLD_UP));
+		camera.m_up = glm::normalize(glm::cross(camera.m_right, camera.m_forward));
+
+		glm::mat4 view = glm::lookAt(
+								camera.m_position,
+								camera.m_position + camera.m_forward * camera.zoom,
+								//vec3(0,0,0),
+								camera.m_up);
+		glm::mat3 rotation(view);
+		camera.m_rot_matrix = rotation;
+
 		/*
 		*/
 
-		//mat4 forward_mat4 = translate(mat4(1.0f) , camera.get_view_center_position());
-		//mat4 rt = rotate(forward_mat4, angle , rotation_axis);
-		//camera.m_transform->m_rotation = glm::eulerAngles(glm::quat_cast(camera.m_transform->m_rot_matrix *rt));
+		//mat4 offset = glm::rotate(translate(mat4(1.0), normalize(camera.m_position) ),angle, rotation_axis);
+		//camera.m_position *= offset  ;
+
+
+	}
+
+	/*
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ) {		  //Refference: http://blog.roy4801.tw/2020/07/17/opengl/opengl-note-7/
+
+		// top left (0,0) -> right btm 
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		glm::vec2 nowCursorPos(xpos, SCR_HEIGHT - ypos);
+		glm::vec2 off = nowCursorPos - prev_mouse;
+		if (length(prev_mouse)==0) {
+			prev_mouse = nowCursorPos;
+			return;
+		}
+		off *= -0.15;
+		camera.updateCameraDirection(off.x, off.y);
+		
+		prev_mouse = nowCursorPos;		
+	}
+
+	//Middle mouse to move center
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+		// top left (0,0) -> right btm 
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		glm::vec2 nowCursorPos(xpos, SCR_HEIGHT - ypos);
+		glm::vec2 off = nowCursorPos - prev_mouse;
+		if (length(prev_mouse) == 0) {
+			prev_mouse = nowCursorPos;
+			return;
+		}
+		off *= 0.15 * camera.zoom/100;
+		camera.view_offset += -camera.m_right * off.x + camera.m_up * off.y;	
+
+		prev_mouse = nowCursorPos;
+	}
+	*/
+	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
+		//prev_mouse = vec3(0);
 		prev_mouse = mouse_pos;
 	}
 }

@@ -26,6 +26,11 @@ GameObject::GameObject()
 	this->m_transform = trans;	
 
 }
+GameObject::GameObject(TransformObject* trans)
+{
+	this->add_component(trans);
+	this->m_transform = trans;
+}
 GameObject::GameObject(const char* _obj_name):GameObject()
 {
 	/*

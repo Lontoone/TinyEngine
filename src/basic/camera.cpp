@@ -1,11 +1,20 @@
 #include "camera.h"
-Camera::Camera() :GameObject("Camera")
-{
-}
 
-Camera::Camera(glm::vec3 position):GameObject("Camera") {
-	this->m_transform->m_position = position;
-	//this->m_transform->m_auto_update_matrix = false;
+
+Camera::Camera(glm::vec3 position):TransformObject(){
+	this->m_position = position;
+	this->m_auto_update_matrix = false;
+
+	this->update_translate_matrix();
+	this->update_rotation_matrix_eular();  // TODO: qutanion
+	this->update_scale_matrix();
+
+	this->m_forward = this->get_view_dir();
+	this->m_right = glm::normalize(glm::cross(this->m_forward, WORLD_UP));
+	this->m_up = glm::normalize(glm::cross(this->m_right, this->m_forward));
+
+	//delete this->m_gameobject->m_transform;
+	//this->m_gameobject->m_transform = this;
 }
 /*
 Camera::Camera(glm::vec3 position) 
@@ -20,16 +29,7 @@ Camera::Camera(glm::vec3 position)
 	updateCameraVectors();
 }
 
-void Camera::updateCameraDirection(double dx, double dy) {
-	yaw += dx;
-	pitch += dy;
-	if (pitch > 89.0f) {
-		pitch = 89.0f;
-	}
-	else if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
-	}
+
 }
 void Camera::updateCameraPos(CameraDirection dir, double dt) {
 	float velocity = (float)dt * speed; 
@@ -61,6 +61,28 @@ void Camera::updateCameraPos(CameraDirection dir, double dt) {
 
 }
 */
+void Camera::updateCameraDirection(double dx, double dy) {
+	yaw += dx;
+	pitch += dy;
+	/*
+	if (pitch > 89.0f) {
+		pitch = 89.0f;
+	}
+	else if (pitch < -89.0f)
+	{
+		pitch = -89.0f;
+	}*/
+	// 避免 yaw 因為 float 精度問題
+	if (yaw > 360.f || yaw < -360.f) {
+		yaw = glm::mod(yaw, 360.f);
+	}
+
+	glm::vec3 newCameraFront;
+	newCameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	newCameraFront.y = sin(glm::radians(pitch));
+	newCameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	this->m_forward = newCameraFront;
+}
 void Camera::updateCameraZoom(double dy) {
 	if (zoom >= 1.0f && zoom <= 45.0f) {
 		zoom -= dy;
@@ -75,7 +97,7 @@ void Camera::updateCameraZoom(double dy) {
 
 vec3 Camera::get_view_center_position()
 {
-	vec3 center = this->m_transform->m_position + this->m_transform->m_forward * zoom;
+	vec3 center = this->m_position + this->m_forward * zoom;
 	return center;
 }
 
@@ -84,21 +106,34 @@ vec3 Camera::get_view_dir()
 	//vec3 dir =this->m_transform->m_position 
 	//return -this->m_transform->m_forward;
 	//return normalize(this->m_transform->m_position - this->get_view_center_position());
-	return  normalize(this->view_target) -normalize(this->m_transform->m_position);
+	return  normalize(this->m_position - this->view_offset);
+}
+
+void Camera::Do()
+{	
+	//this->m_position = -this->m_forward * zoom + view_offset;
+	//this->m_translate_matrix = glm::translate(mat4(1.0f), vec3(0,0,-zoom));
+	this->update_translate_matrix();
+	//this->update_rotation_matrix_eular();  // TODO: qutanion
+	this->update_scale_matrix();
+	
+
+	if (this->m_parent != nullptr)
+		this->m_model_matrix = this->m_parent->m_model_matrix * this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+	else
+		this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+
+	/*
+	this->m_model_matrix = glm::lookAt(
+								this->m_position ,
+								this->m_position + this->m_forward * zoom + view_offset,
+								this->m_up);
+								*/
 }
 
 glm::mat4 Camera::getViewMatrix() {
-	//this->updateCameraVectors();	
-	//return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);		
-	//vec3 _tmp = this->get_view_center_position();
-	//vec3 _tmp = this->m_transform->m_forward;
-	//cout << _tmp.x << " , " << _tmp.y << "," << _tmp.z << endl;
-	// 
-	//return glm::lookAt( this->m_transform->m_position , this->get_view_dir() , this->m_transform->m_up);
 	
-	//mat4 look = glm::lookAt(this->m_transform->m_position , this->get_view_dir(), this->m_transform->m_up);
-	//this->m_transform->m_model_matrix *= look;
-	return inverse( this->m_transform->m_model_matrix);
+	return inverse( this->m_model_matrix);
 }
 
 /*

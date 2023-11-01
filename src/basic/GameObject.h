@@ -34,6 +34,7 @@ class GameObject : public Component , public UiPanel
 {
 public:
 	GameObject();
+	GameObject(TransformObject *trans);
 	GameObject(const char* _obj_name);
 	~GameObject();
 		

@@ -99,8 +99,9 @@ void Mesh::init_ui_content()
         //auto m_path_text = [&]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->get_file_path_char()); return true; };
         if (_mat->m_textures.size() > 0) {
             cout << _mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str() << endl;
-            auto m_path_text = [=]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str()); return true; };
-            this->add_draw_item(m_path_text);
+            //TODO: Material UI
+            //auto m_path_text = [=]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str()); return true; };
+            //this->add_draw_item(m_path_text);
         }
     }
 

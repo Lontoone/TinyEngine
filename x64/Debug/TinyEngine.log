@@ -1,8 +1,10 @@
 ﻿  main.cpp
-D:\IDE\VC\Tools\MSVC\14.37.32822\include\filesystem(13): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
-D:\Projects\OpenGL_TinyEngine\src\basic\Debugger.hpp(30,2): warning C4091: 'static ': 當沒有宣告變數時，忽略 'const Debugger' 的左方
-D:\Projects\OpenGL_TinyEngine\src\main.cpp(397,16): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-D:\Projects\OpenGL_TinyEngine\src\main.cpp(398,16): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-D:\Projects\OpenGL_TinyEngine\src\main.cpp(243): warning C4715: '`main'::`2'::<lambda_1>::operator()': 不是所有控制路徑都傳回值
-D:\Projects\OpenGL_TinyEngine\src\main.cpp(249): warning C4715: '`main'::`2'::<lambda_2>::operator()': 不是所有控制路徑都傳回值
-  TinyEngine.vcxproj -> D:\Projects\OpenGL_TinyEngine\x64\Debug\TinyEngine.exe
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.36.32532\include\filesystem(13): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
+E:\Projects\OpenGL\TinyEngine\src\basic\Debugger.hpp(30,2): warning C4091: 'static ': ignored on left of 'const Debugger' when no variable is declared
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(366,18): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(369,18): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(376,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(377,16): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(253): warning C4715: '`main'::`2'::<lambda_2>::operator()': not all control paths return a value
+E:\Projects\OpenGL\TinyEngine\src\main.cpp(247): warning C4715: '`main'::`2'::<lambda_1>::operator()': not all control paths return a value
+  TinyEngine.vcxproj -> E:\Projects\OpenGL\TinyEngine\x64\Debug\TinyEngine.exe
