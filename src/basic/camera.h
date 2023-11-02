@@ -20,6 +20,7 @@ enum class CameraDirection {
 class Camera : public TransformObject {
 public :
 	Camera();	
+	~Camera();
 	/*
 	glm::vec3 cameraPos;
 	glm::vec3 cameraFront;

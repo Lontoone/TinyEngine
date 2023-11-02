@@ -1,7 +1,14 @@
 #include "camera.h"
 
 
+Camera::~Camera()
+{
+	delete 	this->m_parent;
+}
+
 Camera::Camera(glm::vec3 position):TransformObject(){
+	this->m_parent = new TransformObject();
+
 	this->m_position = position;
 	this->m_auto_update_matrix = false;
 
@@ -111,6 +118,7 @@ vec3 Camera::get_view_dir()
 
 void Camera::Do()
 {	
+	this->m_parent->Do();
 	//this->m_position = -this->m_forward * zoom + view_offset;
 	//this->m_translate_matrix = glm::translate(mat4(1.0f), this->m_position + this->view_target);
 	this->update_translate_matrix();

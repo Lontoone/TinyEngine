@@ -296,11 +296,12 @@ void Mesh::MeshVert::Init(const vector<Vertex>& Vertices, const std::vector<unsi
     //cout << " mesh init " << NumIndices << endl;
     glGenVertexArrays(1, &this->VA);
     glBindVertexArray(this->VA);
-
+    //glEnableVertexAttribArray(0);
     glGenBuffers(1, &this->VB);
     glBindBuffer(GL_ARRAY_BUFFER, this->VB);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * Vertices.size(), &Vertices[0], GL_STATIC_DRAW);
     
+    //glEnableVertexAttribArray(1);
     glGenBuffers(1, &this->IB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * NumIndices, &Indices[0], GL_STATIC_DRAW);
