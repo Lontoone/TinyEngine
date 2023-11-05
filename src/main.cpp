@@ -13,6 +13,7 @@
 #include "basic/GameObject.h"
 #include "FileDialog.h"
 #include <Debugger.hpp>
+#include <FrameBufferObject.h>
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -31,8 +32,8 @@ MechainState state;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float SCR_WIDTH		= 1280;
-float SCR_HEIGHT	= 600;
+int SCR_WIDTH		= 720;
+int SCR_HEIGHT	= 720;
 
 float vertices[] = {
 		-0.5f , 1.0f , 0.0f,
@@ -44,6 +45,8 @@ float vertices[] = {
 static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
+
+
 using namespace std;
 int main(int argc , char** argv) {
 	std::cout << "hello"<<endl;	
@@ -66,13 +69,11 @@ int main(int argc , char** argv) {
 	gladLoadGL();	
 	/*
 	SetProgram(state , 
-		src_path + string("\\assets\\shaders\\vert.glsl"),
-		src_path + string("\\assets\\shaders\\frag.glsl"));
+		src_path + string("\\assets\\shaders\\default_vert.glsl"),
+		src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	*/	
-	Shader s_default_shader(
-		src_path + string("\\assets\\shaders"),
-		"default"
-	);
+	//Shader s_default_shader(src_path + string("\\assets\\shaders"),"default");
+	Shader s_default_shader(src_path + string("\\assets\\shaders\\default_vert.glsl"),src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	s_default_shader.activate();
 	cout << "activate pg " << s_default_shader.m_state.programId << endl;
 
@@ -144,14 +145,32 @@ int main(int argc , char** argv) {
 	} };
 	ui_manager.m_menu_cmds.push_back(animation_inp);
 
+
 #pragma region FrameBuffer
-	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
+	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
+	Shader frame_quantization_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_quantization_frag.glsl"));
+	Shader frame_dog_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_dog_frag.glsl"));
+	Shader frame_abst_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_abstraction_frag.glsl"));
+
+	Shader frame_water_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_water_frag.glsl"));
+	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
+	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
+	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
 		GL_COLOR_ATTACHMENT0,
 		GL_COLOR_ATTACHMENT1,
 		GL_COLOR_ATTACHMENT2
 		//GL_DEPTH_ATTACHMENT,
 	};
+	FramebufferObject fbo = FramebufferObject(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	/*
 	unsigned int FBO;  // 一個frame buffer物件，綁多張貼圖
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
@@ -209,7 +228,10 @@ int main(int argc , char** argv) {
 
 	frameBuffer_shader.activate();
 	glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId , "screenTexture") , 0);
+	*/
 
+	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
+	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
 #pragma endregion
 
 
@@ -222,7 +244,8 @@ int main(int argc , char** argv) {
 			_previous_time += delta_time * time_scale;
 		
 		processInput(window , 0.1f);
-		glBindFramebuffer(GL_FRAMEBUFFER , FBO);
+		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
+		fbo.activate();
 
 		//glUseProgram(state.programId);
 
@@ -281,21 +304,42 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+
+		//--------------------------------------------
+		// Default
+		//fbo.blit( fbo.framebuffer_texture[1], 0);
+		
+		// Abstration
+		//fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
+		//blur_fbo.blit(blur_fbo.framebuffer_texture[0], qua_fbo.fbo);
+		//qua_fbo.blit(qua_fbo.framebuffer_texture[0], dog_fbo.fbo);		
+		//dog_fbo.blit(fbo.framebuffer_texture[0], 0, qua_fbo.framebuffer_texture[0]);
+
+		// Water Color
+		/*
+		fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
+		blur_fbo.blit(blur_fbo.framebuffer_texture[0], water_fbo.fbo);		
+		water_fbo.blit(water_fbo.framebuffer_texture[0], qua_fbo.fbo, noise_texture.m_texture_id );
+		qua_fbo.blit(qua_fbo.framebuffer_texture[0], 0);		
+		*/
+
+		// Magnifier 
+		fbo.blit(fbo.framebuffer_texture[0], mag_fbo.fbo);
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		GLint location = glGetUniformLocation(mag_fbo.shader->m_state.programId, "mouse_pos");
+		glUniform2f(location ,  xpos,ypos ); ///TODO.... pass mouse position
+		mag_fbo.blit(mag_fbo.framebuffer_texture[0], 0);
+
+
+
+
+		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);
+		//--------------------------------------------
 		
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 
-
-		//--------------------------------------------
-		//========  Render Frame Buffer ============
-		glBindFramebuffer(GL_FRAMEBUFFER , 0);
-		frameBuffer_shader.activate();		
-		glActiveTexture(GL_TEXTURE0);
-		glBindVertexArray(rectVAO);
-		glDisable(GL_DEPTH_TEST);
-		glBindTexture(GL_TEXTURE_2D, framebuffer_texture[0]);
-		glDrawArrays(GL_TRIANGLES, 0 , 6 );
-		//--------------------------------------------
 
 		glfwSwapBuffers(window); //GPU在渲染當前的frame時，會準備下一個frame，當此frame結束時直接swap過去。
 		glfwPollEvents(); // processes all pending events。 (處理如input....等事件)
@@ -330,6 +374,11 @@ void input() {}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+void process_blit_stacks(vector<Shader>& blits_shaders, unsigned src_id)
+{
+
 }
 
 //float prex =0 , prey=0;

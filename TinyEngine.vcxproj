@@ -145,6 +145,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\basic\FileDialog.cpp" />
+    <ClCompile Include="src\basic\FrameBufferObject.cpp" />
     <ClCompile Include="src\basic\Hierarchy.cpp" />
     <ClCompile Include="src\basic\Component.cpp" />
     <ClCompile Include="src\basic\GameObject.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="src\basic\BasicFlags.h" />
     <ClInclude Include="src\basic\Debugger.hpp" />
     <ClInclude Include="src\basic\FileDialog.h" />
+    <ClInclude Include="src\basic\FrameBufferObject.h" />
     <ClInclude Include="src\basic\Hierarchy.h" />
     <ClInclude Include="src\basic\Component.h" />
     <ClInclude Include="src\basic\GameObject.h" />
@@ -199,8 +201,15 @@
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
+    <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
+    <None Include="src\assets\shaders\frame_blur_frag.glsl" />
+    <None Include="src\assets\shaders\frame_blur_vert.glsl" />
+    <None Include="src\assets\shaders\frame_dog_frag.glsl" />
     <None Include="src\assets\shaders\frame_frag.glsl" />
+    <None Include="src\assets\shaders\frame_mag_frag.glsl" />
+    <None Include="src\assets\shaders\frame_quantization_frag.glsl" />
     <None Include="src\assets\shaders\frame_vert.glsl" />
+    <None Include="src\assets\shaders\frame_water_frag.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
     <None Include="src\default_frag.glsl" />
     <None Include="src\default_vert.glsl" />

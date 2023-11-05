@@ -81,6 +81,9 @@
     <ClCompile Include="src\basic\FileDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\basic\FrameBufferObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic\TransformObject.h">
@@ -179,6 +182,9 @@
     <ClInclude Include="src\basic\Debugger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\basic\FrameBufferObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
@@ -193,6 +199,13 @@
     <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frame_frag.glsl" />
     <None Include="src\assets\shaders\frame_vert.glsl" />
+    <None Include="src\assets\shaders\frame_blur_frag.glsl" />
+    <None Include="src\assets\shaders\frame_blur_vert.glsl" />
+    <None Include="src\assets\shaders\frame_quantization_frag.glsl" />
+    <None Include="src\assets\shaders\frame_dog_frag.glsl" />
+    <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
+    <None Include="src\assets\shaders\frame_water_frag.glsl" />
+    <None Include="src\assets\shaders\frame_mag_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

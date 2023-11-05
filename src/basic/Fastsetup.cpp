@@ -110,12 +110,18 @@ Shader::Shader()
 {
 }
 
-Shader::Shader(const string src_path,const string _shaderName)
+//Shader::Shader(const string src_path,const string _shaderName)
+Shader::Shader(const string vert_path, const string frag_path)
 {
 	this->m_state = MechainState();
+	/*
 	SetProgram(this->m_state,
 		src_path +"\\"+ _shaderName + string("_vert.glsl"),
 		src_path +"\\"+ _shaderName + string("_frag.glsl"));
+	*/
+	SetProgram(this->m_state,
+		vert_path,
+		frag_path);
 }
 
 Shader::~Shader()
@@ -127,3 +133,4 @@ void Shader::activate()
 {
 	glUseProgram(this->m_state.programId);
 }
+
