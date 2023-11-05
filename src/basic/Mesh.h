@@ -19,10 +19,11 @@ struct Vertex
     vec3 m_pos;
     vec2 m_uv;
     vec3 m_normal;
+    vec3 m_tangent;
 
     Vertex() {}
 
-    Vertex(const vec3& pos, const vec2& tex, const vec3& normal)
+    Vertex(const vec3& pos, const vec2& tex, const vec3& normal )
     {
         m_pos = pos;
         m_uv = tex;
@@ -54,6 +55,7 @@ public:
 
         void Init(const vector<Vertex>& Vertices,
             const std::vector<unsigned int>& Indices);
+        void CalculateTangent(vector<Vertex>& Vertices, std::vector<unsigned int>& Indices);
 
         GLuint VA;
         GLuint VB;

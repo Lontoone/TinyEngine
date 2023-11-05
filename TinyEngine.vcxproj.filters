@@ -191,6 +191,8 @@
     <None Include="src\default_vert.glsl" />
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
+    <None Include="src\assets\shaders\frame_frag.glsl" />
+    <None Include="src\assets\shaders\frame_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

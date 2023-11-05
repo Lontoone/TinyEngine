@@ -38,13 +38,15 @@ void Mesh::Render()
         glBindBuffer(GL_ARRAY_BUFFER, this->m_Entries[i].VB);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_Entries[i].IB);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)20);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);  //vertex
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12); //uv
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)20); //normal
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)32); //tangent
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
         const unsigned int MaterialIndex = this->m_Entries[i].MaterialIndex;
         
         
@@ -146,6 +148,7 @@ bool Mesh::LoadModel(const string& path)
 
     return Ret;
 }
+
 
 bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
 {
@@ -253,9 +256,11 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
     for (unsigned int i = 0; i < paiMesh->mNumVertices; i++) {
         const aiVector3D* pPos			= &(paiMesh->mVertices[i]);		
         const aiVector3D* pNormal		= paiMesh->HasNormals() ?  &(paiMesh->mNormals[i]) : &Zero3D;
-        const aiVector3D* pTexCoord		= paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;
+        const aiVector3D* pTexCoord		= paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;        
+        const aiVector3D* tangent       = paiMesh->HasTangentsAndBitangents()? &paiMesh->mTangents[i] : &Zero3D;
 
-        Vertex v(vec3(pPos->x, pPos->y, pPos->z),
+        Vertex v(
+            vec3(pPos->x, pPos->y, pPos->z),
             vec2(pTexCoord->x, pTexCoord->y),
             vec3(pNormal->x, pNormal->y, pNormal->z));
 
@@ -271,10 +276,10 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
         Indices.push_back(Face.mIndices[2]);
     }	
 
-    cout << Index <<" mesh obj contains " << Vertices.size() << " verts " << Indices.size() << " index" << endl;
 
     m_Entries[Index].Init(Vertices, Indices);
-
+    m_Entries[Index].CalculateTangent(Vertices, Indices);
+    cout << Index <<" mesh obj contains " << Vertices.size() << " verts " << Indices.size() << " index" << endl;
 
 }
 
@@ -309,3 +314,32 @@ void Mesh::MeshVert::Init(const vector<Vertex>& Vertices, const std::vector<unsi
     /*
     */
 }
+
+void Mesh::MeshVert::CalculateTangent(vector<Vertex>& Vertices, std::vector<unsigned int>& Indices)
+{
+    for (int i = 0; i < Indices.size(); i += 3) {
+
+        Vertex& v0 = Vertices[Indices[i] ];
+        Vertex& v1 = Vertices[Indices[i+1]];
+        Vertex& v2 = Vertices[Indices[i+2]];
+
+        glm::vec3 edge1 = v1.m_pos- v0.m_pos;
+        glm::vec3 edge2 = v2.m_pos - v0.m_pos;
+        glm::vec2 deltaUV1 = v1.m_uv - v0.m_uv;
+        glm::vec2 deltaUV2 = v2.m_uv - v0.m_uv;
+
+        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        glm::vec3 tangent;
+        tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        tangent = glm::normalize(tangent);
+
+        v0.m_tangent = tangent;
+        v1.m_tangent = tangent;
+        v2.m_tangent = tangent;
+    }
+}
+
+

@@ -199,6 +199,8 @@
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
+    <None Include="src\assets\shaders\frame_frag.glsl" />
+    <None Include="src\assets\shaders\frame_vert.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
     <None Include="src\default_frag.glsl" />
     <None Include="src\default_vert.glsl" />
