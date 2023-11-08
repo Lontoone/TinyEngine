@@ -29,8 +29,8 @@ public:
 	~Shader();
 
 	map<const char*, GLuint> shader_variables = {
-		{"u_textureSize" , 0} , 
-		{"mouse_pos" , 0} ,
+		{"u_texelsize" , 0} , 
+		{"u_mouse_position" , 0} ,
 	};
 
 	MechainState m_state;

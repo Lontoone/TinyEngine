@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -145,6 +145,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\basic\FileDialog.cpp" />
+    <ClCompile Include="src\basic\FrameBufferDebugger.cpp" />
     <ClCompile Include="src\basic\FrameBufferObject.cpp" />
     <ClCompile Include="src\basic\Hierarchy.cpp" />
     <ClCompile Include="src\basic\Component.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="src\basic\BasicFlags.h" />
     <ClInclude Include="src\basic\Debugger.hpp" />
     <ClInclude Include="src\basic\FileDialog.h" />
+    <ClInclude Include="src\basic\FrameBufferDebugger.h" />
     <ClInclude Include="src\basic\FrameBufferObject.h" />
     <ClInclude Include="src\basic\Hierarchy.h" />
     <ClInclude Include="src\basic\Component.h" />
@@ -205,6 +207,7 @@
     <None Include="src\assets\shaders\frame_bloom_frag.glsl" />
     <None Include="src\assets\shaders\frame_blur_frag.glsl" />
     <None Include="src\assets\shaders\frame_blur_vert.glsl" />
+    <None Include="src\assets\shaders\frame_compareLine_frag.glsl" />
     <None Include="src\assets\shaders\frame_dog_frag.glsl" />
     <None Include="src\assets\shaders\frame_frag.glsl" />
     <None Include="src\assets\shaders\frame_mag_frag.glsl" />

@@ -4,6 +4,8 @@
 FramebufferObject::FramebufferObject(Shader* shader,const GLenum* draw_buffers,  int buffer_cnt, int width, int height)
 {
 	this->shader = shader;
+	this->width = width;
+	this->height = height;
 	glGenFramebuffers(1, &this->fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 		
@@ -64,12 +66,12 @@ void FramebufferObject::blit(unsigned int src_id, unsigned int dst_id)
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, dst_id);
 	this->shader->activate();
+	this->set_frame_uniform();
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(this->rectVAO);
 	glDisable(GL_DEPTH_TEST);
 	glBindTexture(GL_TEXTURE_2D, src_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	
 
 }
 
@@ -77,6 +79,7 @@ void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo,c
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo);
 	this->shader->activate();
+	this->set_frame_uniform();
 	glBindVertexArray(this->rectVAO);
 	glDisable(GL_DEPTH_TEST);
 
@@ -95,11 +98,17 @@ void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo,c
 
 }
 
+void FramebufferObject::set_frame_uniform()
+{
+	glUniform2f(this->shader->shader_variables["u_texelsize"], 1.0f / this->width, 1.0f / this->height);
+}
+
 void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo , unsigned int additional_texture)
 {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo);
 	this->shader->activate();
+	this->set_frame_uniform();
 	glBindVertexArray(this->rectVAO);
 	glDisable(GL_DEPTH_TEST);
 

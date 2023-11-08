@@ -32,7 +32,7 @@ public:
 	void blit( unsigned int src_texture_id  , unsigned int dst_fbo);
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo, unsigned int additional_texture);
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo, const unsigned int additional_textures[]);
-
+	void set_frame_uniform();
 	
 	//TODO: Make them shared.
 	unsigned int rbo ;

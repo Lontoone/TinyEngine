@@ -84,6 +84,9 @@
     <ClCompile Include="src\basic\FrameBufferObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\basic\FrameBufferDebugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic\TransformObject.h">
@@ -185,6 +188,9 @@
     <ClInclude Include="src\basic\FrameBufferObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\basic\FrameBufferDebugger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
@@ -206,6 +212,8 @@
     <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
     <None Include="src\assets\shaders\frame_water_frag.glsl" />
     <None Include="src\assets\shaders\frame_mag_frag.glsl" />
+    <None Include="src\assets\shaders\frame_bloom_frag.glsl" />
+    <None Include="src\assets\shaders\frame_compareLine_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

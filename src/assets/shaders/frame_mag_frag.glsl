@@ -1,6 +1,6 @@
 #version 330 core
 uniform sampler2D screenTexture;
-uniform vec2 mouse_pos;
+uniform vec2 u_mouse_position;
 
 in vec2 texcoord;
 out vec4 color;
@@ -15,15 +15,15 @@ void main() {
     vec2 uv = texcoord;
     // Calculate the distance from the magnify center
     //float dist = distance(uv, u_magnifyCenter);
-    float dist = distance(uv, mouse_pos);
+    float dist = distance(uv, u_mouse_position);
 
     if (dist < u_magnifyRadius) {
         // Inside the magnify circle, scale the UV coordinates
-        vec2 dir = uv - mouse_pos;
-        uv = mouse_pos + dir * u_magnifyScale;
+        vec2 dir = uv - u_mouse_position;
+        uv = u_mouse_position + dir * u_magnifyScale;
     }
 
-    float ring_mask = 1- step( abs(length(texcoord- mouse_pos)- u_magnifyRadius), 0.001);
+    float ring_mask = 1- step( abs(length(texcoord- u_mouse_position)- u_magnifyRadius), 0.001);
     // Sample the texture with the modified UV coordinates
     color = texture2D(screenTexture, uv) * ring_mask + ring_color* (1- ring_mask);
 
