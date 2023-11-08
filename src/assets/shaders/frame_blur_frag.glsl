@@ -7,17 +7,7 @@ out vec4 color;
 vec2 u_textureSize = vec2(1280,600);  //TODO: Set it via cpu
 float u_blurRadius = 1; //TODO: Set it via cpu
 
-vec4 gaussianBlur(sampler2D tex, vec2 texSize, float radius , vec2 texcoord) {
-    vec2 texelSize = 1.0 / texSize;
-    vec4 blur_color = vec4(0.0);
-    for (float i = -radius; i <= radius; i++) {
-        for (float j = -radius; j <= radius; j++) {
-            blur_color += texture2D(tex, texcoord + vec2(i, j) * texelSize);
-        }
-    }
-    blur_color /= (2.0 * radius + 1.0) * (2.0 * radius + 1.0);
-    return blur_color;
-}
+
 
 void main() {
 

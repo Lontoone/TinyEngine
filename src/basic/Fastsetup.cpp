@@ -92,8 +92,9 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 	glDeleteShader(v);
 	glDeleteShader(f);
 
-	if (success)
+	if (success) {
 		glUseProgram(p);
+	}
 	else
 	{
 		system("pause");
@@ -122,11 +123,20 @@ Shader::Shader(const string vert_path, const string frag_path)
 	SetProgram(this->m_state,
 		vert_path,
 		frag_path);
+
+	this->init_variables();
 }
 
 Shader::~Shader()
 {
 	//delete &this->m_state;
+}
+
+void Shader::init_variables()
+{
+	for (auto &pair : this->shader_variables) {
+		pair.second = glGetUniformLocation(this->m_state.programId, pair.first);
+	}
 }
 
 void Shader::activate()

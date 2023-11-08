@@ -202,6 +202,7 @@
     <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
     <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
+    <None Include="src\assets\shaders\frame_bloom_frag.glsl" />
     <None Include="src\assets\shaders\frame_blur_frag.glsl" />
     <None Include="src\assets\shaders\frame_blur_vert.glsl" />
     <None Include="src\assets\shaders\frame_dog_frag.glsl" />

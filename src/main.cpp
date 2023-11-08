@@ -155,6 +155,7 @@ int main(int argc , char** argv) {
 
 	Shader frame_water_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_water_frag.glsl"));
 	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
+	Shader frame_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
@@ -170,65 +171,7 @@ int main(int argc , char** argv) {
 	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	/*
-	unsigned int FBO;  // 一個frame buffer物件，綁多張貼圖
-	glGenFramebuffers(1, &FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	
-	unsigned int framebuffer_texture[3];
-	glGenTextures( 3 , &framebuffer_texture[0]);
-
-	for (int i = 0; i < 3; i++) {
-		glBindTexture(GL_TEXTURE_2D, framebuffer_texture[i]);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
-		glFramebufferTexture(GL_FRAMEBUFFER, draw_buffers[i], framebuffer_texture[i] , 0);		
-	}
-
-	glDrawBuffers(3, draw_buffers );
-
-	unsigned int RBO;
-	glGenRenderbuffers(1 , &RBO);
-	glBindRenderbuffer(GL_RENDERBUFFER , RBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-
-	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-	if (fbo_status!= GL_FRAMEBUFFER_COMPLETE) {
-		cout << "frame buffer error " << fbo_status << endl ;
-	}
-	float rectangleVertices[] =
-	{
-		// Coords    // texCoords
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		-1.0f,  1.0f,  0.0f, 1.0f,
-
-		 1.0f,  1.0f,  1.0f, 1.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f,  0.0f, 1.0f
-	};
-	// Prepare framebuffer rectangle VBO and VAO
-	unsigned int rectVAO, rectVBO;
-	glGenVertexArrays(1, &rectVAO);
-	glGenBuffers(1, &rectVBO);
-	glBindVertexArray(rectVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-	frameBuffer_shader.activate();
-	glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId , "screenTexture") , 0);
-	*/
+	FramebufferObject bloom_fbo = FramebufferObject(&frame_bloom_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
 
 	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
 	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
@@ -256,34 +199,7 @@ int main(int argc , char** argv) {
 		SliderFloat3("sun position", &sun_postion[0], -10, 10);
 		End();
 
-		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);
-		/*
-		////////////////////// HW1 Animation  ////////////////////////
-		robot_leg_l1_f.m_transform->m_rotation = vec3(0, std::sin(_previous_time *4)*50,0);
-		robot_leg_l2_f.m_transform->m_rotation = vec3(0, 0,std::abs( std::cos(_previous_time*2))*30);
-		robot_leg_l3_f.m_transform->m_rotation = vec3(std::sin(_previous_time *4) * 30,0, 0);
-
-		robot_leg_l1_b.m_transform->m_rotation = vec3(0, std::sin(_previous_time * 4 + 200) * 50, 0);
-		robot_leg_l2_b.m_transform->m_rotation = vec3(0, 0, std::abs(std::cos(_previous_time * 2 + 200)) * 30);
-		robot_leg_l3_b.m_transform->m_rotation = vec3(std::sin(_previous_time * 4) * 30, 0, 0);
-
-		robot_leg_r1_f.m_transform->m_rotation = vec3(0, std::sin(_previous_time * 4 + 500) * 50, 0);
-		robot_leg_r2_f.m_transform->m_rotation = vec3(0, 0, std::abs(std::cos(_previous_time * 2 +500)) * 30);
-		robot_leg_r3_f.m_transform->m_rotation = vec3(std::sin(_previous_time * 4) * 30, 0, 0);
-
-		robot_leg_r1_b.m_transform->m_rotation = vec3(0, std::sin(_previous_time * 4 +200) * 50, 0);
-		robot_leg_r2_b.m_transform->m_rotation = vec3(0, 0, std::abs(std::cos(_previous_time * 2 +200 )) * 30);
-		robot_leg_r3_b.m_transform->m_rotation = vec3(std::sin(_previous_time * 4) * 30, 0, 0);
-
-		robot_head.m_transform->m_rotation = vec3(0 , std::sin(_previous_time *1.25) * 70, 0);
-		robot_head.m_transform->m_position = (vec3(0, sin(1.25 * sin(10 * sin(_previous_time *0.2)) *7) *0.01 +0.15, 0));
-		
-		robot_body.m_transform->m_rotation = vec3(0, std::sin(_previous_time * 0.5) * 15, 0);
-		robot_body.m_transform->m_position = (vec3(0, cos(1.25 * cos(10 * cos(_previous_time * 0.2)) * 7) * 0.01 , 0));
-		
-		dog.m_transform->m_position = (vec3(0, abs( sin(1.25 * sin(2.5 * sin(_previous_time * 0.5 + 500)) * 7)) * 0.1 + 1.7, 0));
-		/////////////////////////////////////////////////////////////
-		*/
+		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -324,14 +240,20 @@ int main(int argc , char** argv) {
 		*/
 
 		// Magnifier 
+		/*
 		fbo.blit(fbo.framebuffer_texture[0], mag_fbo.fbo);
+		mag_fbo.shader->activate();
 		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		GLint location = glGetUniformLocation(mag_fbo.shader->m_state.programId, "mouse_pos");
-		glUniform2f(location ,  xpos,ypos ); ///TODO.... pass mouse position
+		glfwGetCursorPos(window, &xpos, &ypos);		
+		//GLint location = glGetUniformLocation(mag_fbo.shader->m_state.programId, "mouse_pos");
+		GLint location = mag_fbo.shader->shader_variables["mouse_pos"];
+		glUniform2f(location ,  xpos /SCR_WIDTH , 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
 		mag_fbo.blit(mag_fbo.framebuffer_texture[0], 0);
+		*/
 
-
+		// Bloom
+		fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
+		bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], 0);
 
 
 		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);

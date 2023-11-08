@@ -6,6 +6,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <map>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,8 +28,13 @@ public:
 	Shader(const string src_path, const string _shaderName);	
 	~Shader();
 
+	map<const char*, GLuint> shader_variables = {
+		{"u_textureSize" , 0} , 
+		{"mouse_pos" , 0} ,
+	};
+
 	MechainState m_state;
-	void init_program();
+	void init_variables();
 	void activate();
 private:
 	
