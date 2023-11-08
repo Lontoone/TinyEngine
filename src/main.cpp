@@ -421,10 +421,10 @@ void processInput(GLFWwindow* window, double dt) {
 
 
 		//		Get the rotation axis in 3D	
-		vec3 _startPos = normalize(endPos - camera.view_target) * camera.zoom;
-		vec4 zoom_off = vec4(_startPos, 1); // start from vec4(0, 0, -camera.zoom, 0);		
+		vec3 _startPos		= normalize(endPos - camera.view_target) * camera.zoom;
+		vec4 zoom_off		= vec4(_startPos, 1); // start from vec4(0, 0, -camera.zoom, 0);		
 		//vec4 zoom_off = vec4(0,0, -camera.zoom ,0); // start from vec4(0, 0, -camera.zoom, 0);		
-		mat4 rotate_offset =  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
+		mat4 rotate_offset	=  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
 
 		camera.m_position =rotate_offset * zoom_off;
 
