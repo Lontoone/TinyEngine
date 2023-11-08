@@ -117,7 +117,7 @@ void TransformObject::update_scale_matrix()
 void TransformObject::update_local()
 {		
 	mat4 local_dir_trans = inverse( this->m_rot_matrix);
-	this->m_forward = normalize( local_dir_trans * glm::vec4(WORLD_UP, 1.0));
+	this->m_forward = normalize( local_dir_trans * glm::vec4(WORLD_FORWARD, 1.0));
 	this->m_right = normalize (local_dir_trans * glm::vec4(WORLD_RIGHT, 1.0));
 	this->m_up= normalize( local_dir_trans * glm::vec4(WORLD_UP, 1.0));
 

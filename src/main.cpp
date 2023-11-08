@@ -13,6 +13,7 @@
 #include "basic/GameObject.h"
 #include "FileDialog.h"
 #include <Debugger.hpp>
+#include <FrameBufferObject.h>
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -26,12 +27,13 @@ void input();
 using namespace std;
 void processInput(GLFWwindow* window, double dt);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void process_blit_stacks(vector<Shader>& blits_shaders , unsigned src_id );
 MechainState state;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float SCR_WIDTH		= 1280;
-float SCR_HEIGHT	= 600;
+int SCR_WIDTH		= 720;
+int SCR_HEIGHT	= 720;
 
 float vertices[] = {
 		-0.5f , 1.0f , 0.0f,
@@ -43,6 +45,8 @@ float vertices[] = {
 static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
+
+
 using namespace std;
 int main(int argc , char** argv) {
 	std::cout << "hello"<<endl;	
@@ -53,7 +57,7 @@ int main(int argc , char** argv) {
 #pragma region LoadWindow
 
 	// 檢查
-	GLFWwindow* window = glfwCreateWindow(800, 600, "title", NULL, NULL); //monitor先設為NULL
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "title", NULL, NULL); //monitor先設為NULL
 	if (window == NULL) {
 		cout << "No Window" << endl;
 		glfwTerminate();
@@ -65,13 +69,11 @@ int main(int argc , char** argv) {
 	gladLoadGL();	
 	/*
 	SetProgram(state , 
-		src_path + string("\\assets\\shaders\\vert.glsl"),
-		src_path + string("\\assets\\shaders\\frag.glsl"));
+		src_path + string("\\assets\\shaders\\default_vert.glsl"),
+		src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	*/	
-	Shader s_default_shader(
-		src_path + string("\\assets\\shaders"),
-		"default"
-	);
+	//Shader s_default_shader(src_path + string("\\assets\\shaders"),"default");
+	Shader s_default_shader(src_path + string("\\assets\\shaders\\default_vert.glsl"),src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	s_default_shader.activate();
 	cout << "activate pg " << s_default_shader.m_state.programId << endl;
 
@@ -93,139 +95,27 @@ int main(int argc , char** argv) {
 	
 #pragma region DEBUG_PRE_LOAD_MODEL
 	GameObject obj = GameObject("Building");
+	//GameObject dog_obj = GameObject("Dog");
 	GameObject camera_obj = GameObject((TransformObject*)&camera);
-	//GameObject camera_root = GameObject("camera root");
 	camera_obj.set_name("Camera");
+	
 	//camera_obj.m_transform->set_transform_parent(camera_root.m_transform);
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	//Mesh*  mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
+	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);		
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sibenik\\sibenik.obj" , s_default_shader);		
+	//Mesh*  dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
 	obj.add_component(mesh);	
+	//dog_obj.add_component(dog_mesh);
 	camera_obj.add_component((Component*)&camera);
 
 	Hierarchy::instance().add_object(&obj);
+	//Hierarchy::instance().add_object(&dog_obj);
 	//Hierarchy::instance().add_object((GameObject*)&camera);
 	Hierarchy::instance().add_object(&camera_obj);
-	/*
-	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
-	Mesh* head_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\head.obj", s_default_shader);	
-	Mesh* body_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\body.obj", s_default_shader);
-	Mesh* leg1_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\leg1.obj", s_default_shader);	
-	Mesh* leg2_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\leg2.obj", s_default_shader);
-	Mesh* leg3_mesh = new Mesh(src_path + "\\assets\\models\\hw1_robot\\leg3.obj", s_default_shader);
-
-	GameObject dog = GameObject("dog");
-	dog.add_component(dog_mesh);
-	dog.m_transform->m_scale = vec3(1.5,1.5,1.5);
-	dog.m_transform->m_position = vec3(0.33, 1.8,0);
-	Hierarchy::instance().add_object(&dog);
-
-	GameObject robot_empty = GameObject("ROOT");
-	Hierarchy::instance().add_object(&robot_empty);
-
-	GameObject robot_head = GameObject("Robot_Head");
-	robot_head.add_component(head_mesh);
-	Hierarchy::instance().add_object(&robot_head);
-
-	GameObject robot_body = GameObject("Robot_Body");
-	robot_body.add_component(body_mesh);
-	Hierarchy::instance().add_object(&robot_body);
-
-
-	GameObject robot_leg_r1_f = GameObject("Robot_leg_r1");
-	robot_leg_r1_f.add_component(leg1_mesh);
-	Hierarchy::instance().add_object(&robot_leg_r1_f);
-
-	GameObject robot_leg_r2_f = GameObject("Robot_leg_r2");
-	robot_leg_r2_f.add_component(leg2_mesh);
-	Hierarchy::instance().add_object(&robot_leg_r2_f);
-
-	GameObject robot_leg_r3_f = GameObject("Robot_leg_r3");
-	robot_leg_r3_f.add_component(leg3_mesh);
-	Hierarchy::instance().add_object(&robot_leg_r3_f);
-
-	robot_body.m_transform->set_transform_parent(robot_empty.m_transform);
-	robot_head.m_transform->set_transform_parent(robot_body.m_transform);
-	robot_leg_r1_f.m_transform->set_transform_parent(robot_body.m_transform);
-	robot_leg_r2_f.m_transform->set_transform_parent(robot_leg_r1_f.m_transform);
-	robot_leg_r3_f.m_transform->set_transform_parent(robot_leg_r2_f.m_transform);
-	dog.m_transform->set_transform_parent(robot_head.m_transform);
-
-	robot_leg_r3_f.m_transform->move(vec3(0.25,0.2,0.3));
-	robot_leg_r2_f.m_transform->move(vec3(0, -0.5, 0));
-	robot_leg_r1_f.m_transform->move(vec3(0.5, -0.1, 0.325));
-	dog.m_transform->move(vec3(0, 0.1,0.025));
-
-	///////////////// FRONT LEFT LEG //////////////////////
-	GameObject robot_leg_l1_f = GameObject("Robot_leg_l1-front");	
-	GameObject robot_leg_l2_f = GameObject("Robot_leg_l2-front");
-	GameObject robot_leg_l3_f = GameObject("Robot_leg_l3-front");
-	robot_leg_l1_f.add_component(leg1_mesh->copy());
-	robot_leg_l3_f.add_component(leg3_mesh->copy());
-	robot_leg_l2_f.add_component(leg2_mesh->copy());
-	Hierarchy::instance().add_object(&robot_leg_l1_f);
-	Hierarchy::instance().add_object(&robot_leg_l2_f);
-	Hierarchy::instance().add_object(&robot_leg_l3_f);
-
-	robot_leg_l1_f.m_transform->set_transform_parent(robot_body.m_transform);
-	robot_leg_l2_f.m_transform->set_transform_parent(robot_leg_l1_f.m_transform);
-	robot_leg_l3_f.m_transform->set_transform_parent(robot_leg_l2_f.m_transform);
-
-	robot_leg_l1_f.m_transform->move(vec3(-0.5, -0.1, 0.325));
-	robot_leg_l1_f.m_transform->m_scale =vec3(-1, 1, 1);
-	robot_leg_l2_f.m_transform->move(vec3(0, -0.5, 0));
-	robot_leg_l3_f.m_transform->move(vec3(0.25, 0.2, 0.3));
-	////////////////////////////////////////////////////////
-
-	///////////////// BACK LEFT LEG //////////////////////
-	GameObject robot_leg_l1_b = GameObject("Robot_leg_l1-back");
-	GameObject robot_leg_l2_b = GameObject("Robot_leg_l2-back");
-	GameObject robot_leg_l3_b = GameObject("Robot_leg_l3-back");
-	robot_leg_l1_b.add_component(leg1_mesh->copy());
-	robot_leg_l3_b.add_component(leg3_mesh->copy());
-	robot_leg_l2_b.add_component(leg2_mesh->copy());
-	Hierarchy::instance().add_object(&robot_leg_l1_b);
-	Hierarchy::instance().add_object(&robot_leg_l2_b);
-	Hierarchy::instance().add_object(&robot_leg_l3_b);
-
-	robot_leg_l1_b.m_transform->set_transform_parent(robot_body.m_transform);
-	robot_leg_l2_b.m_transform->set_transform_parent(robot_leg_l1_b.m_transform);
-	robot_leg_l3_b.m_transform->set_transform_parent(robot_leg_l2_b.m_transform);
-
-	robot_leg_l1_b.m_transform->move(vec3(-0.5, -0.1, -0.325));
-	robot_leg_l1_b.m_transform->m_scale = vec3(-1, 1, -1);
-	robot_leg_l2_b.m_transform->move(vec3(0, -0.5, 0));
-	robot_leg_l3_b.m_transform->move(vec3(0.25, 0.2, 0.3));
-	////////////////////////////////////////////////////////
-
-	///////////////// BACK RIGHT LEG //////////////////////
-	GameObject robot_leg_r1_b = GameObject("Robot_leg_r1-back");
-	GameObject robot_leg_r2_b = GameObject("Robot_leg_r2-back");
-	GameObject robot_leg_r3_b = GameObject("Robot_leg_r3-back");
-	robot_leg_r1_b.add_component(leg1_mesh->copy());
-	robot_leg_r3_b.add_component(leg3_mesh->copy());
-	robot_leg_r2_b.add_component(leg2_mesh->copy());
-	Hierarchy::instance().add_object(&robot_leg_r1_b);
-	Hierarchy::instance().add_object(&robot_leg_r2_b);
-	Hierarchy::instance().add_object(&robot_leg_r3_b);
-
-	robot_leg_r1_b.m_transform->set_transform_parent(robot_body.m_transform);
-	robot_leg_r2_b.m_transform->set_transform_parent(robot_leg_r1_b.m_transform);
-	robot_leg_r3_b.m_transform->set_transform_parent(robot_leg_r2_b.m_transform);
-
-	robot_leg_r1_b.m_transform->move(vec3(0.5, -0.1, -0.325));
-	robot_leg_r1_b.m_transform->m_scale = vec3(1, 1, -1);
-	robot_leg_r1_b.m_transform->m_rotation= vec3(0, 90, 0);
-	robot_leg_r2_b.m_transform->move(vec3(0, -0.5, 0));
-	robot_leg_r3_b.m_transform->move(vec3(0.25, 0.2, 0.3));
-	////////////////////////////////////////////////////////
-	*/
-	/*  //////  HAVE BUG, NoT FIX YET
-	vector<GameObject*> robot_leg_clone = robot_leg_r1.clone();
-	for (auto _copy : robot_leg_clone) {
-		Hierarchy::instance().add_object(_copy);
+	vec3 sun_postion = normalize(vec3(0, 100, 0));
 	
-	}*/
-
+	vector<Shader> stacked_blits_shaders;
 
 #pragma endregion
 
@@ -255,6 +145,96 @@ int main(int argc , char** argv) {
 	} };
 	ui_manager.m_menu_cmds.push_back(animation_inp);
 
+
+#pragma region FrameBuffer
+	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
+	Shader frame_quantization_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_quantization_frag.glsl"));
+	Shader frame_dog_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_dog_frag.glsl"));
+	Shader frame_abst_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_abstraction_frag.glsl"));
+
+	Shader frame_water_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_water_frag.glsl"));
+	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
+	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
+	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
+	static const GLenum draw_buffers[]={
+		GL_COLOR_ATTACHMENT0,
+		GL_COLOR_ATTACHMENT1,
+		GL_COLOR_ATTACHMENT2
+		//GL_DEPTH_ATTACHMENT,
+	};
+	FramebufferObject fbo = FramebufferObject(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	/*
+	unsigned int FBO;  // 一個frame buffer物件，綁多張貼圖
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	
+	unsigned int framebuffer_texture[3];
+	glGenTextures( 3 , &framebuffer_texture[0]);
+
+	for (int i = 0; i < 3; i++) {
+		glBindTexture(GL_TEXTURE_2D, framebuffer_texture[i]);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
+		glFramebufferTexture(GL_FRAMEBUFFER, draw_buffers[i], framebuffer_texture[i] , 0);		
+	}
+
+	glDrawBuffers(3, draw_buffers );
+
+	unsigned int RBO;
+	glGenRenderbuffers(1 , &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER , RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fbo_status!= GL_FRAMEBUFFER_COMPLETE) {
+		cout << "frame buffer error " << fbo_status << endl ;
+	}
+	float rectangleVertices[] =
+	{
+		// Coords    // texCoords
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		-1.0f,  1.0f,  0.0f, 1.0f,
+
+		 1.0f,  1.0f,  1.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f,  0.0f, 1.0f
+	};
+	// Prepare framebuffer rectangle VBO and VAO
+	unsigned int rectVAO, rectVBO;
+	glGenVertexArrays(1, &rectVAO);
+	glGenBuffers(1, &rectVBO);
+	glBindVertexArray(rectVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	frameBuffer_shader.activate();
+	glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId , "screenTexture") , 0);
+	*/
+
+	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
+	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
+#pragma endregion
+
+
 #pragma endregion
 	
 	double delta_time = 0.025 ;
@@ -264,10 +244,18 @@ int main(int argc , char** argv) {
 			_previous_time += delta_time * time_scale;
 		
 		processInput(window , 0.1f);
+		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
+		fbo.activate();
+
 		//glUseProgram(state.programId);
 
 		//清除顏色
 		ui_manager.new_frame();
+
+		Begin("Sun positon");
+		SliderFloat3("sun position", &sun_postion[0], -10, 10);
+		End();
+
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);
 		/*
 		////////////////////// HW1 Animation  ////////////////////////
@@ -299,7 +287,10 @@ int main(int argc , char** argv) {
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+
 		s_default_shader.activate();
+		glUniform3fv(glGetUniformLocation(s_default_shader.m_state.programId, "sun_postion")  , 1 , value_ptr(sun_postion));
 		//update();
 		// 
 		//-------------- [ TEMP 暫時的MVP ] ------------------
@@ -313,12 +304,42 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+
+		//--------------------------------------------
+		// Default
+		//fbo.blit( fbo.framebuffer_texture[1], 0);
+		
+		// Abstration
+		//fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
+		//blur_fbo.blit(blur_fbo.framebuffer_texture[0], qua_fbo.fbo);
+		//qua_fbo.blit(qua_fbo.framebuffer_texture[0], dog_fbo.fbo);		
+		//dog_fbo.blit(fbo.framebuffer_texture[0], 0, qua_fbo.framebuffer_texture[0]);
+
+		// Water Color
+		/*
+		fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
+		blur_fbo.blit(blur_fbo.framebuffer_texture[0], water_fbo.fbo);		
+		water_fbo.blit(water_fbo.framebuffer_texture[0], qua_fbo.fbo, noise_texture.m_texture_id );
+		qua_fbo.blit(qua_fbo.framebuffer_texture[0], 0);		
+		*/
+
+		// Magnifier 
+		fbo.blit(fbo.framebuffer_texture[0], mag_fbo.fbo);
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		GLint location = glGetUniformLocation(mag_fbo.shader->m_state.programId, "mouse_pos");
+		glUniform2f(location ,  xpos,ypos ); ///TODO.... pass mouse position
+		mag_fbo.blit(mag_fbo.framebuffer_texture[0], 0);
+
+
+
+
+		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);
+		//--------------------------------------------
 		
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 
-
-		//--------------------------------------------
 
 		glfwSwapBuffers(window); //GPU在渲染當前的frame時，會準備下一個frame，當此frame結束時直接swap過去。
 		glfwPollEvents(); // processes all pending events。 (處理如input....等事件)
@@ -355,6 +376,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
+void process_blit_stacks(vector<Shader>& blits_shaders, unsigned src_id)
+{
+
+}
+
 //float prex =0 , prey=0;
 vec3 prev_mouse = vec3(0);
 vec3 mouse_pos = vec3(0);
@@ -368,17 +394,13 @@ static glm::vec2 screenCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2);
 void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera.zoom += dt;
-		camera.m_position = camera.view_target + camera.get_view_dir() * camera.zoom;
-		//endPos = camera.m_position;
-		endPos = normalize(camera.m_forward) * -camera.zoom;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
+		camera.m_parent->m_position -= vec3(camera.m_rot_matrix * vec4( camera.m_parent->m_forward * vec3(dt),1.0));
+		
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera.zoom -= dt;
-		camera.m_position = camera.view_target + camera.get_view_dir() * camera.zoom;
-		endPos = normalize(camera.m_forward) * -camera.zoom;
-		//endPos = camera.m_position;
+		
+		camera.m_parent->m_position += vec3(camera.m_rot_matrix * vec4(camera.m_parent->m_forward * vec3(dt), 1.0));
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
@@ -444,12 +466,18 @@ void processInput(GLFWwindow* window, double dt) {
 		*/
 	}
 
-
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
+		camera.m_parent->m_position += vec3(vec4((camera.m_up) * vec3(dt ), 1.0));
+	}
+	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
+		camera.m_parent->m_position -= vec3(vec4((camera.m_up) * vec3(dt ), 1.0));
+	}
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		float move_x = xpos / SCR_WIDTH * 2 - 1;
+		float move_x = -xpos / SCR_WIDTH * 2 - 1;
 		float move_y = -(ypos / SCR_HEIGHT * 2 - 1);
 
 		mouse_pos = vec3(move_x, move_y, 0);
@@ -460,13 +488,12 @@ void processInput(GLFWwindow* window, double dt) {
 		}
 
 		vec2 diff = mouse_pos - prev_mouse;
-		//camera.m_position += camera.m_right * diff.x * scroll_speed - camera.m_up * diff.y * scroll_speed;
-		//camera.view_target += camera.m_right * diff.x * scroll_speed - camera.m_up * diff.y * scroll_speed;
-		camera.m_parent->m_position += camera.m_right * diff.x * scroll_speed - camera.m_up * diff.y * scroll_speed;
+		vec3 local_move = camera.m_right * diff.x * scroll_speed - camera.m_up * diff.y * scroll_speed;
+		camera.m_parent->m_position += vec3( camera.m_rot_matrix * vec4(local_move,1.0));
 		prev_mouse = mouse_pos;
-
 	}
-
+	
+	///////////////////////////////////////////////////////////////////////////////
 
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);

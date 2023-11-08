@@ -24,7 +24,7 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 class Shader {
 public:
 	Shader();
-	Shader(const string src_path, const string _shaderName);
+	Shader(const string src_path, const string _shaderName);	
 	~Shader();
 
 	MechainState m_state;
