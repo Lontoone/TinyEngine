@@ -3,8 +3,8 @@ uniform sampler2D screenTexture;
 
 in vec2 texcoord;
 out vec4 color;
-
-vec2 u_textureSize = vec2(1280,600);  //TODO: Set it via cpu
+uniform vec2 u_texelsize;
+//vec2 u_textureSize = vec2(1280,600);  //TODO: Set it via cpu
 float u_blurRadius = 1; //TODO: Set it via cpu
 
 
@@ -16,11 +16,11 @@ void main() {
 
     /*
     */
-    vec2 texelSize = 1.0 / u_textureSize;
+    //vec2 texelSize = 1.0 / u_textureSize;
     vec4 blur_color = vec4(0.0);
     for (float i = -u_blurRadius; i <= u_blurRadius; i++) {
         for (float j = -u_blurRadius; j <= u_blurRadius; j++) {
-            blur_color += texture2D(screenTexture, texcoord + vec2(i, j) * texelSize);
+            blur_color += texture2D(screenTexture, texcoord + vec2(i, j) * u_texelsize);
         }
     }
     blur_color /= (2.0 * u_blurRadius + 1.0) * (2.0 * u_blurRadius + 1.0);

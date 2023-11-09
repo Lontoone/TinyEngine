@@ -156,6 +156,8 @@ int main(int argc , char** argv) {
 	Shader frame_water_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_water_frag.glsl"));
 	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
 	Shader frame_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
+	Shader frame_compare_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_compareLine_frag.glsl"));
+
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
@@ -165,13 +167,14 @@ int main(int argc , char** argv) {
 		//GL_DEPTH_ATTACHMENT,
 	};
 	FramebufferObject fbo = FramebufferObject(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject bloom_fbo = FramebufferObject(&frame_bloom_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject bloom_fbo = FramebufferObject(&frame_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject compare_fbo = FramebufferObject(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 
 	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
 	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
@@ -223,6 +226,8 @@ int main(int argc , char** argv) {
 
 		//--------------------------------------------
 		// Default
+		// 
+		ImGui::Begin("Frame Debuggr");
 		//fbo.blit( fbo.framebuffer_texture[1], 0);
 		
 		// Abstration
@@ -252,9 +257,25 @@ int main(int argc , char** argv) {
 		*/
 
 		// Bloom
+		/*
 		fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
 		bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], 0);
+		*/
+		
+		//fbo.blit(fbo.framebuffer_texture[0], compare_fbo.fbo , compare_fbo.framebuffer_texture[0]);
 
+		compare_fbo.shader->activate();
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		GLint location = compare_fbo.shader->shader_variables["u_mouse_position"];
+		glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
+		fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
+		bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], compare_fbo.fbo);
+		compare_fbo.blit(compare_fbo.framebuffer_texture[0], 0, fbo.framebuffer_texture[0]);
+		// Compare Line
+
+		ImGui::Image((void*)compare_fbo.framebuffer_texture[0], ImVec2(50, 50));
+		ImGui::End();
 
 		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);
 		//--------------------------------------------
