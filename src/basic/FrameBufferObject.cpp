@@ -61,10 +61,16 @@ void FramebufferObject::activate()
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 }
 
-void FramebufferObject::blit(unsigned int src_id, unsigned int dst_id)
+void FramebufferObject::blit(unsigned int src_id, FramebufferObject& fbo )
 {
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, dst_id);
+	this->blit(src_id, fbo.fbo);
+	this->update_debugger(fbo.framebuffer_texture[0]);
+	//this->update_debugger(src_id);
+}
+void FramebufferObject::blit(unsigned int src_id, unsigned int dst_fbo_id)
+{
+
+	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo_id);
 	this->shader->activate();
 	this->set_frame_uniform();
 	glActiveTexture(GL_TEXTURE0);
@@ -72,41 +78,12 @@ void FramebufferObject::blit(unsigned int src_id, unsigned int dst_id)
 	glDisable(GL_DEPTH_TEST);
 	glBindTexture(GL_TEXTURE_2D, src_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-
 }
 
-void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo,const unsigned int additional_textures[])
+void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo, unsigned int additional_texture)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo);
-	this->shader->activate();
-	this->set_frame_uniform();
-	glBindVertexArray(this->rectVAO);
-	glDisable(GL_DEPTH_TEST);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, src_texture_id);
-
-	int length = sizeof(additional_textures) / sizeof(additional_textures[0]);
-	for (int i = 1; i <= length; i++) {
-		glActiveTexture(GL_TEXTURE0+i);
-		glBindTexture(GL_TEXTURE_2D, additional_textures[i-1]);		
-		GLint texture2Location = glGetUniformLocation(this->shader->m_state.programId, "texture"+(i));
-		glUniform1i(texture2Location, i); 
-	}
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-}
-
-void FramebufferObject::set_frame_uniform()
-{
-	glUniform2f(this->shader->shader_variables["u_texelsize"], 1.0f / this->width, 1.0f / this->height);
-}
-
-void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo , unsigned int additional_texture)
-{
-
-	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo );
 	this->shader->activate();
 	this->set_frame_uniform();
 	glBindVertexArray(this->rectVAO);
@@ -127,6 +104,54 @@ void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo ,
 	glUniform1i(texture2Location, 1); // Texture unit 1
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+}
+
+void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo,const unsigned int additional_textures[])
+{	
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+	this->shader->activate();
+	this->set_frame_uniform();
+	glBindVertexArray(this->rectVAO);
+	glDisable(GL_DEPTH_TEST);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, src_texture_id);
+
+	int length = sizeof(additional_textures) / sizeof(additional_textures[0]);
+	for (int i = 1; i <= length; i++) {
+		glActiveTexture(GL_TEXTURE0+i);
+		glBindTexture(GL_TEXTURE_2D, additional_textures[i-1]);		
+		GLint texture2Location = glGetUniformLocation(this->shader->m_state.programId, "texture"+(i));
+		glUniform1i(texture2Location, i); 
+	}
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	this->update_debugger(fbo.framebuffer_texture[0]);
+
+}
+
+void FramebufferObject::set_frame_uniform()
+{
+	glUniform1f(this->shader->shader_variables["u_time"], glfwGetTime() );
+	glUniform2f(this->shader->shader_variables["u_texturesize"], this->width, this->height);
+	glUniform2f(this->shader->shader_variables["u_texelsize"], 1.0f / this->width, 1.0f / this->height);
+}
+
+void FramebufferObject::update_debugger(unsigned int& texture_idx)
+{
+	if (this->frame_debugger != nullptr) {
+		this->frame_debugger->Draw_Single_Frame(texture_idx);
+	}
+}
+
+void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo, unsigned int additional_texture)
+{
+
+	this->blit(src_texture_id, fbo.fbo, additional_texture);
+	//this->update_debugger(fbo.framebuffer_texture[0]);
+	this->update_debugger(src_texture_id);
 
 
 }

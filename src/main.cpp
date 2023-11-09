@@ -14,6 +14,7 @@
 #include "FileDialog.h"
 #include <Debugger.hpp>
 #include <FrameBufferObject.h>
+#include <FrameBufferDebugger.h>
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -103,6 +104,7 @@ int main(int argc , char** argv) {
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
 	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);		
+	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sibenik\\sibenik.obj" , s_default_shader);		
 	//Mesh*  dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
 	obj.add_component(mesh);	
@@ -145,7 +147,7 @@ int main(int argc , char** argv) {
 	} };
 	ui_manager.m_menu_cmds.push_back(animation_inp);
 
-
+	FrameBufferDebugger frame_buffer_debugger;
 #pragma region FrameBuffer
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
@@ -157,6 +159,8 @@ int main(int argc , char** argv) {
 	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
 	Shader frame_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
 	Shader frame_compare_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_compareLine_frag.glsl"));
+	Shader frame_pixelize_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_pixelization_frag.glsl"));
+	Shader frame_sin_wave_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_sin_wave_frag.glsl"));
 
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
@@ -166,7 +170,18 @@ int main(int argc , char** argv) {
 		GL_COLOR_ATTACHMENT2
 		//GL_DEPTH_ATTACHMENT,
 	};
-	FramebufferObject fbo = FramebufferObject(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* blur_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* qua_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* dog_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_dog_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* abst_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_abst_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* water_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_water_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* mag_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_mag_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* bloom_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* compare_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* pixelize_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_pixelize_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* sinwave_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_sin_wave_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	/*
 	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
@@ -175,6 +190,9 @@ int main(int argc , char** argv) {
 	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject bloom_fbo = FramebufferObject(&frame_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject compare_fbo = FramebufferObject(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject pixelize_fbo = FramebufferObject(&frame_pixelize_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject sinwave_fbo = FramebufferObject(&frame_sin_wave_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	*/
 
 	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
 	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
@@ -182,7 +200,8 @@ int main(int argc , char** argv) {
 
 
 #pragma endregion
-	
+	int hw2_effect_panel = 0 ;
+
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // µ¥¨ìconsole °e¥Xkill flag
 		
@@ -191,7 +210,7 @@ int main(int argc , char** argv) {
 		
 		processInput(window , 0.1f);
 		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
-		fbo.activate();
+		fbo->activate();
 
 		//glUseProgram(state.programId);
 
@@ -227,59 +246,94 @@ int main(int argc , char** argv) {
 		//--------------------------------------------
 		// Default
 		// 
-		ImGui::Begin("Frame Debuggr");
-		//fbo.blit( fbo.framebuffer_texture[1], 0);
+		frame_buffer_debugger.Init_Panel(0, 150);
+		frame_buffer_debugger.Begin_Panel();
+
+		switch (hw2_effect_panel)
+		{
+		case 1: {
+			fbo->blit(fbo->framebuffer_texture[1], *compare_fbo);
+			}
+			break; 
+		case 2: {
+			// Abstration			
+				fbo->blit(fbo->framebuffer_texture[0], *blur_fbo);
+				blur_fbo->blit(blur_fbo->framebuffer_texture[0], *qua_fbo);
+				qua_fbo->blit(qua_fbo->framebuffer_texture[0], *dog_fbo);
+				dog_fbo->blit(fbo->framebuffer_texture[0], *compare_fbo, qua_fbo->framebuffer_texture[0]);
+			}
+			break;
+		case 3:
+		{
+			// Water Color
+			fbo->blit(fbo->framebuffer_texture[0], *blur_fbo);
+			blur_fbo->blit(blur_fbo->framebuffer_texture[0], *water_fbo);
+			water_fbo->blit(water_fbo->framebuffer_texture[0], *qua_fbo, noise_texture.m_texture_id);
+			qua_fbo->blit(qua_fbo->framebuffer_texture[0], *compare_fbo);
+		}
+			break;
+
+		case 4:
+			// Magnifier 			
+		{
+			fbo->blit(fbo->framebuffer_texture[0], *mag_fbo);
+			mag_fbo->shader->activate();
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			GLint location = mag_fbo->shader->shader_variables["u_mouse_position"];
+			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
+			//mag_fbo->blit(mag_fbo->framebuffer_texture[0], compare_fbo->fbo);
+			mag_fbo->blit(mag_fbo->framebuffer_texture[0], 0);
+		}
+			break;
+		case 5:
+		{
+			// Bloom
+			fbo->blit(fbo->framebuffer_texture[0], *bloom_fbo);
+			bloom_fbo->blit(bloom_fbo->framebuffer_texture[0], *compare_fbo);			
+		}
+			break;
+
+		case 6:
+		{
+			// Pixelization
+			fbo->blit(fbo->framebuffer_texture[0], *pixelize_fbo);
+			pixelize_fbo->blit(pixelize_fbo->framebuffer_texture[0], *compare_fbo);
+		}
+			break;
+		case 7:
+		{
+			// Sine wave distortion		
+			fbo->blit(fbo->framebuffer_texture[0], *sinwave_fbo);
+			sinwave_fbo->blit(sinwave_fbo->framebuffer_texture[0], *compare_fbo);
+		}
+			break;
+
+		default:
+			fbo->blit(fbo->framebuffer_texture[0], *compare_fbo);
+			break;
+		}
 		
-		// Abstration
-		//fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
-		//blur_fbo.blit(blur_fbo.framebuffer_texture[0], qua_fbo.fbo);
-		//qua_fbo.blit(qua_fbo.framebuffer_texture[0], dog_fbo.fbo);		
-		//dog_fbo.blit(fbo.framebuffer_texture[0], 0, qua_fbo.framebuffer_texture[0]);
-
-		// Water Color
-		/*
-		fbo.blit(fbo.framebuffer_texture[0],  blur_fbo.fbo);				
-		blur_fbo.blit(blur_fbo.framebuffer_texture[0], water_fbo.fbo);		
-		water_fbo.blit(water_fbo.framebuffer_texture[0], qua_fbo.fbo, noise_texture.m_texture_id );
-		qua_fbo.blit(qua_fbo.framebuffer_texture[0], 0);		
-		*/
-
-		// Magnifier 
-		/*
-		fbo.blit(fbo.framebuffer_texture[0], mag_fbo.fbo);
-		mag_fbo.shader->activate();
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);		
-		//GLint location = glGetUniformLocation(mag_fbo.shader->m_state.programId, "mouse_pos");
-		GLint location = mag_fbo.shader->shader_variables["mouse_pos"];
-		glUniform2f(location ,  xpos /SCR_WIDTH , 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
-		mag_fbo.blit(mag_fbo.framebuffer_texture[0], 0);
-		*/
-
-		// Bloom
-		/*
-		fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
-		bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], 0);
-		*/
-		
-		//fbo.blit(fbo.framebuffer_texture[0], compare_fbo.fbo , compare_fbo.framebuffer_texture[0]);
-
-		compare_fbo.shader->activate();
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		GLint location = compare_fbo.shader->shader_variables["u_mouse_position"];
-		glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
-		fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
-		bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], compare_fbo.fbo);
-		compare_fbo.blit(compare_fbo.framebuffer_texture[0], 0, fbo.framebuffer_texture[0]);
 		// Compare Line
+		if (hw2_effect_panel != 4) {
+			compare_fbo->shader->activate();
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			GLint location = compare_fbo->shader->shader_variables["u_mouse_position"];
+			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
+			//fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
+			//bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], compare_fbo.fbo);
+			compare_fbo->blit(compare_fbo->framebuffer_texture[0], 0, fbo->framebuffer_texture[0]);
+		}
 
-		ImGui::Image((void*)compare_fbo.framebuffer_texture[0], ImVec2(50, 50));
-		ImGui::End();
+		//frame_buffer_debugger.Draw_Frames_on_Panel();
+		frame_buffer_debugger.End_Panel();
+		frame_buffer_debugger.create_hw2_panel(hw2_effect_panel);
+
 
 		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);
 		//--------------------------------------------
-		
+
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 

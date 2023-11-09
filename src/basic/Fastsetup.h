@@ -29,6 +29,7 @@ public:
 	~Shader();
 
 	map<const char*, GLuint> shader_variables = {
+		{"u_time" , 0} ,
 		{"u_texelsize" , 0} , 
 		{"u_mouse_position" , 0} ,
 	};

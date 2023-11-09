@@ -5,7 +5,7 @@ in vec2 texcoord;
 out vec4 color;
 uniform vec2 u_texelsize;
 //vec2 u_textureSize = vec2(1280,600);  //TODO: Set it via cpu
-float u_blurRadius = 1; //TODO: Set it via cpu
+float u_blurRadius = 10; //TODO: Set it via cpu
 
 
 
