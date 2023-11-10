@@ -1,6 +1,6 @@
 #include "FrameBufferDebugger.h"
 
-FramebufferObject* FrameBufferDebugger::gen_frame_object_and_registor(Shader* shader, const GLenum* draw_buffers, int buffer_cnt, int width, int height)
+FramebufferObject* FrameBufferDebugger::gen_frame_object_and_registor(Shader* shader, const GLenum* draw_buffers, int buffer_cnt, unsigned int& width, unsigned int& height)
 {
 	FramebufferObject* fbo = new FramebufferObject(shader, draw_buffers, buffer_cnt, width, height);
 	this->m_framebuffers.push_back(fbo);
@@ -53,7 +53,7 @@ void FrameBufferDebugger::Draw_Single_Frame(GLuint& texture_id)
 void FrameBufferDebugger::create_hw2_panel(int& setting)
 {
 	ImGui::Begin("Hw2 Select Effect");
-	if (ImGui::Button("None")) {
+	if (ImGui::Button("Playground")) {
 		setting = 0;
 	};
 	if (ImGui::Button("Normal")) {

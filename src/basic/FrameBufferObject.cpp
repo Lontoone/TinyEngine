@@ -1,11 +1,10 @@
 #include "FrameBufferObject.h"
 #include <vector>
-
-FramebufferObject::FramebufferObject(Shader* shader,const GLenum* draw_buffers,  int buffer_cnt, int width, int height)
+FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers, int buffer_cnt, unsigned int& width, unsigned int& height)
 {
 	this->shader = shader;
-	this->width = width;
-	this->height = height;
+	this->width = &width;
+	this->height = &height;
 	glGenFramebuffers(1, &this->fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
 		
@@ -54,6 +53,8 @@ FramebufferObject::FramebufferObject(Shader* shader,const GLenum* draw_buffers, 
 
 	glUniform1i(glGetUniformLocation(this->shader->m_state.programId, "screenTexture"), 0);
 }
+
+
 
 void FramebufferObject::activate()
 {
@@ -135,8 +136,8 @@ void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo
 void FramebufferObject::set_frame_uniform()
 {
 	glUniform1f(this->shader->shader_variables["u_time"], glfwGetTime() );
-	glUniform2f(this->shader->shader_variables["u_texturesize"], this->width, this->height);
-	glUniform2f(this->shader->shader_variables["u_texelsize"], 1.0f / this->width, 1.0f / this->height);
+	glUniform2i(this->shader->shader_variables["u_texturesize"], *this->width, *this->height);
+	glUniform2f(this->shader->shader_variables["u_texelsize"], 1.0f / *this->width, 1.0f / *this->height);
 }
 
 void FramebufferObject::update_debugger(unsigned int& texture_idx)

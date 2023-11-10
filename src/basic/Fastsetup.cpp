@@ -33,23 +33,14 @@ char* textFileRead(const char* fn) {
 
 
 //void SetProgram(MechainState& mechainState , const char* vs_file , const char* fs_file)
-void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)
-{
-	GLuint v, f, p;
-	char* vs = NULL;
-	char* fs = NULL;
+void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs) {
 
+	GLuint v, f, p;
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 
-	vs = textFileRead(vs_file.c_str());
-	fs = textFileRead(fs_file.c_str());
-
-	glShaderSource(v, 1, (const GLchar**)&vs, NULL);
-	glShaderSource(f, 1, (const GLchar**)&fs, NULL);
-
-	free(vs);
-	free(fs);
+	glShaderSource(v, 1, &vs, NULL);
+	glShaderSource(f, 1, &fs, NULL);
 
 	GLint success;
 	char infoLog[1000];
@@ -101,25 +92,101 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 		exit(123);
 	}
 
-	mechainState.fragShaderId	= f;
-	mechainState.vertShaderId	= v;
-	mechainState.programId		= p;
+	mechainState.fragShaderId = f;
+	mechainState.vertShaderId = v;
+	mechainState.programId = p;
+
+
+}
+void Shader::UpdateFromSource(const string vs, const string fs)
+{
+
+}
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)
+{
+	char* vs = NULL;
+	char* fs = NULL;
 	
+	vs = textFileRead(vs_file.c_str());
+	fs = textFileRead(fs_file.c_str());
+
+	//SetProgramFromSource(mechainState , vs,fs);
+	GLuint v, f, p;
+	v = glCreateShader(GL_VERTEX_SHADER);
+	f = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(v, 1, (const GLchar**)&vs, NULL);
+	glShaderSource(f, 1, (const GLchar**)&fs, NULL);
+
+	GLint success;
+	char infoLog[1000];
+	// compile vertex shader
+	glCompileShader(v);
+	// check for shader compile errors
+	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(v, 1000, NULL, infoLog);
+		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+	}
+
+	// compile fragment shader
+	glCompileShader(f);
+	// check for shader compile errors
+	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(f, 1000, NULL, infoLog);
+		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+	}
+
+	// create program object
+	p = glCreateProgram();
+
+	// attach shaders to program object
+	glAttachShader(p, f);
+	glAttachShader(p, v);
+
+	// link program
+	glLinkProgram(p);
+	// check for linking errors
+	glGetProgramiv(p, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(p, 1000, NULL, infoLog);
+		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n" << infoLog << std::endl;
+	}
+
+	glDeleteShader(v);
+	glDeleteShader(f);
+
+	if (success) {
+		glUseProgram(p);
+	}
+	else
+	{
+		system("pause");
+		exit(123);
+	}
+
+	mechainState.fragShaderId = f;
+	mechainState.vertShaderId = v;
+	mechainState.programId = p;
+
+	free(vs);
+	free(fs);
+
+
 }
 
 Shader::Shader()
 {
+	this->m_state = MechainState();
 }
 
 //Shader::Shader(const string src_path,const string _shaderName)
 Shader::Shader(const string vert_path, const string frag_path)
 {
 	this->m_state = MechainState();
-	/*
-	SetProgram(this->m_state,
-		src_path +"\\"+ _shaderName + string("_vert.glsl"),
-		src_path +"\\"+ _shaderName + string("_frag.glsl"));
-	*/
 	SetProgram(this->m_state,
 		vert_path,
 		frag_path);

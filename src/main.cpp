@@ -15,6 +15,7 @@
 #include <Debugger.hpp>
 #include <FrameBufferObject.h>
 #include <FrameBufferDebugger.h>
+#include <RuntimeShaderEditor.h>
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
@@ -33,8 +34,8 @@ MechainState state;
 
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-int SCR_WIDTH		= 720;
-int SCR_HEIGHT	= 720;
+unsigned int SCR_WIDTH		= 1500;
+unsigned int SCR_HEIGHT	= 720;
 
 float vertices[] = {
 		-0.5f , 1.0f , 0.0f,
@@ -148,6 +149,7 @@ int main(int argc , char** argv) {
 	ui_manager.m_menu_cmds.push_back(animation_inp);
 
 	FrameBufferDebugger frame_buffer_debugger;
+	ShaderEditor shaderEditor;
 #pragma region FrameBuffer
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
@@ -181,6 +183,7 @@ int main(int argc , char** argv) {
 	FramebufferObject* compare_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject* pixelize_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_pixelize_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject* sinwave_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_sin_wave_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* playground_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&shaderEditor.shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	/*
 	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
@@ -249,6 +252,8 @@ int main(int argc , char** argv) {
 		frame_buffer_debugger.Init_Panel(0, 150);
 		frame_buffer_debugger.Begin_Panel();
 
+		shaderEditor.begin_panel();
+
 		switch (hw2_effect_panel)
 		{
 		case 1: {
@@ -281,7 +286,8 @@ int main(int argc , char** argv) {
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
 			GLint location = mag_fbo->shader->shader_variables["u_mouse_position"];
-			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
+			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); 
+			glUniform2f(mag_fbo->shader->shader_variables["u_texturesize"], SCR_WIDTH, SCR_HEIGHT);
 			//mag_fbo->blit(mag_fbo->framebuffer_texture[0], compare_fbo->fbo);
 			mag_fbo->blit(mag_fbo->framebuffer_texture[0], 0);
 		}
@@ -310,7 +316,9 @@ int main(int argc , char** argv) {
 			break;
 
 		default:
-			fbo->blit(fbo->framebuffer_texture[0], *compare_fbo);
+			//fbo->blit(fbo->framebuffer_texture[0], *compare_fbo);
+			fbo->blit(fbo->framebuffer_texture[0], *playground_fbo);
+			playground_fbo->blit(playground_fbo->framebuffer_texture[0], *compare_fbo);
 			break;
 		}
 		
@@ -370,7 +378,43 @@ void render() {}
 void input() {}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
+	cout << "resizing is banned" << endl;
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	//TODO:
+	// Framebuffer textture­n­«·screate
+	
+	//glViewport(0, 0, width, height);
+	//SCR_WIDTH = width;
+	//SCR_HEIGHT = height;
+	/*
+	// Ensure we don't divide by zero
+		if (height == 0) {
+			height = 1;
+		}
+
+		GLfloat aspectRatio = (GLfloat)width / (GLfloat)height;
+
+		// Set the viewport to cover the new window
+		glViewport(0, 0, width, height);
+
+		// Set the projection matrix
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+
+		// Adjust the aspect ratio
+		if (width >= height) {
+			// width is larger, so widen the viewing volume
+			glOrtho(-1.0 * aspectRatio, 1.0 * aspectRatio, -1.0, 1.0, 1.0, -1.0);
+		}
+		else {
+			// height is larger, so increase the viewing volume
+			glOrtho(-1.0, 1.0, -1.0 / aspectRatio, 1.0 / aspectRatio, 1.0, -1.0);
+		}
+
+		// Switch back to the model view matrix
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+	*/
 }
 
 void process_blit_stacks(vector<Shader>& blits_shaders, unsigned src_id)

@@ -11,10 +11,11 @@ using namespace std;
 class FramebufferObject
 {
 public:
-	FramebufferObject(Shader* shader, const GLenum* draw_buffers,  int buffer_cnt, int width, int height);
+	FramebufferObject(Shader* shader, const GLenum* draw_buffers,  int buffer_cnt, unsigned int& width, unsigned int& height);
 	Shader* shader;
 	unsigned int framebuffer_texture[10];
-	unsigned int width, height;
+	unsigned int* width;
+	unsigned int* height;
 	
 	unsigned int fbo = NULL;
 	bool is_enabled = false;

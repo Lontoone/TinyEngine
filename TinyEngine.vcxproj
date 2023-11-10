@@ -159,6 +159,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\test.cpp" />
     <ClCompile Include="src\basic\Texture.cpp" />
+    <ClCompile Include="src\ui\RuntimeShaderEditor.cpp" />
     <ClCompile Include="src\ui\UiItem.cpp" />
     <ClCompile Include="src\ui\UiManager.cpp" />
     <ClCompile Include="src\ui\UiPanel.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
     <ClInclude Include="src\basic\Texture.h" />
+    <ClInclude Include="src\ui\RuntimeShaderEditor.h" />
     <ClInclude Include="src\ui\UIableComponent.h" />
     <ClInclude Include="src\ui\UiItem.h" />
     <ClInclude Include="src\ui\UiManager.h" />
