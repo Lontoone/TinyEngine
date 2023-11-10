@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include <map>
-//#include "camera.h"
+//#include "camera->h"
 //#include "Component.h"
 #include "GameObject.h"
 class GameObject;

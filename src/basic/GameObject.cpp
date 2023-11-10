@@ -108,9 +108,20 @@ vector<GameObject*> GameObject::clone()
 
 GameObject::~GameObject()
 {
-	for (auto ptr : this->m_comps) {
-		cout << "freeing " << ptr << endl;
-		delete ptr;
+	for (auto& ptr : this->m_comps) {
+		try
+		{
+			if (ptr != nullptr) {
+				cout << this->name << ptr->m_name << " freeing " << ptr << endl;
+				delete ptr;
+				ptr = NULL;
+			}
+		}
+		catch (const std::exception&)
+		{
+			cout << this->name << ptr->m_name << " freeing " << ptr << endl;
+
+		}
 	}
 	/*
 	

@@ -32,7 +32,7 @@ void main() {									\n\
 	Shader shader;
 
 	void begin_panel();
-	void compile_shader();
+	void compile_shader(bool  is_init);
 	
 private:
 

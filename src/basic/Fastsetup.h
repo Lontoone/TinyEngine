@@ -21,7 +21,7 @@ struct MechainState
 };
 
 void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file);
-void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs);
+void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs , bool create_one = true);
 
 class Shader {
 public:
@@ -35,7 +35,7 @@ public:
 		{"u_mouse_position" , 0} ,
 	};
 
-	void UpdateFromSource(const string vs, const string fs);
+	//void UpdateFromSource(const string vs, const string fs);
 	MechainState m_state;
 	void init_variables();
 	void activate();

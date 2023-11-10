@@ -33,11 +33,25 @@ char* textFileRead(const char* fn) {
 
 
 //void SetProgram(MechainState& mechainState , const char* vs_file , const char* fs_file)
-void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs) {
+void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs , bool create_one ) {
 
 	GLuint v, f, p;
-	v = glCreateShader(GL_VERTEX_SHADER);
-	f = glCreateShader(GL_FRAGMENT_SHADER);
+	if (create_one) {
+		v = glCreateShader(GL_VERTEX_SHADER);
+		f = glCreateShader(GL_FRAGMENT_SHADER);		
+		p = glCreateProgram();
+
+		mechainState.fragShaderId = f;
+		mechainState.vertShaderId = v;
+		mechainState.programId = p;
+	}
+	else
+	{
+		v = mechainState.vertShaderId;
+		f = mechainState.fragShaderId;
+		p = mechainState.programId;
+
+	}
 
 	glShaderSource(v, 1, &vs, NULL);
 	glShaderSource(f, 1, &fs, NULL);
@@ -64,9 +78,6 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n" << infoLog << std::endl;
 	}
 
-	// create program object
-	p = glCreateProgram();
-
 	// attach shaders to program object
 	glAttachShader(p, f);
 	glAttachShader(p, v);
@@ -92,14 +103,14 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 		exit(123);
 	}
 
-	mechainState.fragShaderId = f;
-	mechainState.vertShaderId = v;
-	mechainState.programId = p;
+	
 
 
 }
-void Shader::UpdateFromSource(const string vs, const string fs)
+void UpdateFromSource(const MechainState& mechainState, const char* v_text, const char* fs_char)
 {
+
+
 
 }
 void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)

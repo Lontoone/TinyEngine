@@ -1,10 +1,12 @@
 #include "camera.h"
 
-
+/*
 Camera::~Camera()
 {
-	delete 	this->m_parent;
+	//delete 	this->m_parent;
+
 }
+*/
 
 Camera::Camera(glm::vec3 position):TransformObject(){
 	this->m_parent = new TransformObject();
@@ -23,51 +25,6 @@ Camera::Camera(glm::vec3 position):TransformObject(){
 	//delete this->m_gameobject->m_transform;
 	//this->m_gameobject->m_transform = this;
 }
-/*
-Camera::Camera(glm::vec3 position) 
-	:	cameraPos(position), 
-		worldUp(glm::vec3(0.0f , 1.0f , 0.0f)),
-		yaw(-90.0f) ,
-		pitch(0.0f),
-		speed(2.5f),
-		zoom(45.0f),
-		cameraFront(glm::vec3 (0.0f,0.0f,-1.0f)) // Look at origin
-{
-	updateCameraVectors();
-}
-
-
-}
-void Camera::updateCameraPos(CameraDirection dir, double dt) {
-	float velocity = (float)dt * speed; 
-
-	switch (dir)
-	{
-	case CameraDirection::FORWARD:
-		cameraPos += cameraFront * velocity;
-		break;
-	case CameraDirection::BACKWARD:
-		cameraPos -= cameraFront * velocity;
-		break;
-	case CameraDirection::RIGHT:
-		cameraPos += cameraRight * velocity;
-		break;
-	case CameraDirection::LEFT:
-		cameraPos -= cameraRight * velocity;
-		break;
-	case CameraDirection::UP:
-		cameraPos += cameraUp * velocity;
-		break;
-	case CameraDirection::DOWN:
-		cameraPos -= cameraUp * velocity;
-		break;
-
-	default:
-		break;
-	}
-
-}
-*/
 void Camera::updateCameraDirection(double dx, double dy) {
 	yaw += dx;
 	pitch += dy;
@@ -121,8 +78,9 @@ void Camera::Do()
 	this->m_parent->Do();
 	//this->m_position = -this->m_forward * zoom + view_offset;
 	//this->m_translate_matrix = glm::translate(mat4(1.0f), this->m_position + this->view_target);
-	this->update_translate_matrix();
 	//this->update_rotation_matrix_eular();  // TODO: qutanion
+	
+	this->update_translate_matrix();
 	this->update_scale_matrix();
 	
 

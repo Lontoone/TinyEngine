@@ -2,7 +2,8 @@
 
 ShaderEditor::ShaderEditor()
 {
-	compile_shader();
+	compile_shader(true);
+	this->shader.init_variables();
 }
 
 void ShaderEditor::begin_panel()
@@ -21,13 +22,14 @@ void ShaderEditor::begin_panel()
 	
 	if (ImGui::Button("Compile")) {
 		cout << "Compile Shader Playground" << endl;
-		this->compile_shader();
+		this->compile_shader(false);
+		this->shader.init_variables();
 	}
 	ImGui::End();
 
 }
 
-void ShaderEditor::compile_shader()
+void ShaderEditor::compile_shader(bool is_init)
 {
 	/*
 	char* _vert = this->vert_buffer;
@@ -38,5 +40,5 @@ void ShaderEditor::compile_shader()
 
 	SetProgramFromSource(this->shader.m_state , _vert, _frag);
 	*/
-	SetProgramFromSource(this->shader.m_state, this->vert_buffer, this->frag_buffer);
+	SetProgramFromSource(this->shader.m_state, this->vert_buffer, this->frag_buffer , is_init);
 }

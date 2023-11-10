@@ -9,8 +9,10 @@ float pixelSize = 0.015;
 
 void main() {
 
-    vec2 offset = 0.01 * vec2(sin(texcoord.x + u_time*5) , sin(texcoord.y + u_time * 5));
+    //vec2 offset = 0.01 * vec2(sin(texcoord.x + u_time*5) , sin(texcoord.y + u_time * 5));
+    vec2 uv = texcoord;
+    uv.x += 0.01 * sin(texcoord.y * u_time * 5);
     
-    color = texture(screenTexture, texcoord + offset);
+    color = texture(screenTexture, uv);
     
 }

@@ -33,7 +33,7 @@ void process_blit_stacks(vector<Shader>& blits_shaders , unsigned src_id );
 MechainState state;
 
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
 
@@ -69,12 +69,7 @@ int main(int argc , char** argv) {
 	glfwMakeContextCurrent(window);
 	ui_manager.init_imgui(window);
 	gladLoadGL();	
-	/*
-	SetProgram(state , 
-		src_path + string("\\assets\\shaders\\default_vert.glsl"),
-		src_path + string("\\assets\\shaders\\default_frag.glsl"));
-	*/	
-	//Shader s_default_shader(src_path + string("\\assets\\shaders"),"default");
+	
 	Shader s_default_shader(src_path + string("\\assets\\shaders\\default_vert.glsl"),src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	s_default_shader.activate();
 	cout << "activate pg " << s_default_shader.m_state.programId << endl;
@@ -98,25 +93,19 @@ int main(int argc , char** argv) {
 #pragma region DEBUG_PRE_LOAD_MODEL
 	GameObject obj = GameObject("Building");
 	//GameObject dog_obj = GameObject("Dog");
-	GameObject camera_obj = GameObject((TransformObject*)&camera);
+	GameObject camera_obj = GameObject((TransformObject*)camera);
 	camera_obj.set_name("Camera");
 	
-	//camera_obj.m_transform->set_transform_parent(camera_root.m_transform);
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
+	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
+	obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);		
-	//obj.m_transform->m_scale = vec3(0.05);
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sibenik\\sibenik.obj" , s_default_shader);		
-	//Mesh*  dog_mesh = new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj", s_default_shader);
-	obj.add_component(mesh);	
-	//dog_obj.add_component(dog_mesh);
-	camera_obj.add_component((Component*)&camera);
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);			
+	obj.add_component(mesh);		
+	camera_obj.add_component((Component*)camera);
 
-	Hierarchy::instance().add_object(&obj);
-	//Hierarchy::instance().add_object(&dog_obj);
-	//Hierarchy::instance().add_object((GameObject*)&camera);
+	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_object(&camera_obj);
-	vec3 sun_postion = normalize(vec3(0, 100, 0));
+	vec3 sun_postion = normalize(vec3(0, 1, 1));
 	
 	vector<Shader> stacked_blits_shaders;
 
@@ -237,7 +226,7 @@ int main(int argc , char** argv) {
 		//-------------- [ TEMP 暫時的MVP ] ------------------
 		glm::mat4 view			= glm::mat4(1.0f);
 		glm::mat4 projection	= glm::mat4(1.0f);
-		view			= camera.getViewMatrix();
+		view			= camera->getViewMatrix();
 		projection		= glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 1000.0f);
 		
 		//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
@@ -425,7 +414,7 @@ void process_blit_stacks(vector<Shader>& blits_shaders, unsigned src_id)
 //float prex =0 , prey=0;
 vec3 prev_mouse = vec3(0);
 vec3 mouse_pos = vec3(0);
-vec3 endPos = vec3(0,0,-camera.zoom);
+vec3 endPos = vec3(0,0,-camera->zoom);
 mat4 current_camera_model = mat4(0);
 mat4 previouseRot = mat4(1);
 float scroll_speed = 5;
@@ -436,12 +425,12 @@ void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		camera.m_parent->m_position -= vec3(camera.m_rot_matrix * vec4( camera.m_parent->m_forward * vec3(dt),1.0));
+		camera->m_parent->m_position -= vec3(camera->m_rot_matrix * vec4( camera->m_parent->m_forward * vec3(dt),1.0));
 		
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		
-		camera.m_parent->m_position += vec3(camera.m_rot_matrix * vec4(camera.m_parent->m_forward * vec3(dt), 1.0));
+		camera->m_parent->m_position += vec3(camera->m_rot_matrix * vec4(camera->m_parent->m_forward * vec3(dt), 1.0));
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
@@ -452,7 +441,6 @@ void processInput(GLFWwindow* window, double dt) {
 		float move_y = -(ypos / SCR_HEIGHT * 2 - 1);
 
 		mouse_pos = vec3(move_x, move_y, 0);
-		//Debugger::Log(mouse_pos);
 
 		float op_sqrd = move_x * move_x + move_y * move_y;
 		mouse_pos.z = sqrt(1.0f - op_sqrd);
@@ -471,10 +459,17 @@ void processInput(GLFWwindow* window, double dt) {
 			return;
 		}
 		if (current_camera_model == mat4(0)) {
-			current_camera_model = camera.m_model_matrix;
+			current_camera_model = camera->m_model_matrix;
 		}
 
 		vec3 op1 = prev_mouse;
+		/*
+		vec2 diff = mouse_pos - prev_mouse;
+		camera->m_rotation.x += diff.y *20;
+		camera->m_rotation.y += diff.x *20;
+		prev_mouse = mouse_pos;
+		*/
+
 		float angle = glm::acos(glm::min(1.0f, glm::dot(op1, mouse_pos)));
 		if(angle ==0 ){
 			return;
@@ -484,35 +479,35 @@ void processInput(GLFWwindow* window, double dt) {
 
 
 		//		Get the rotation axis in 3D	
-		vec3 _startPos		= normalize(endPos - camera.view_target) * camera.zoom;
-		vec4 zoom_off		= vec4(_startPos, 1); // start from vec4(0, 0, -camera.zoom, 0);		
-		//vec4 zoom_off = vec4(0,0, -camera.zoom ,0); // start from vec4(0, 0, -camera.zoom, 0);		
+		vec3 _startPos		= normalize(endPos - camera->view_target) * camera->zoom;
+		vec4 zoom_off		= vec4(_startPos, 1); // start from vec4(0, 0, -camera->zoom, 0);		
+		//vec4 zoom_off = vec4(0,0, -camera->zoom ,0); // start from vec4(0, 0, -camera->zoom, 0);		
 		mat4 rotate_offset	=  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
 
-		camera.m_position =rotate_offset * zoom_off;
+		camera->m_position =rotate_offset * zoom_off;
 
-		camera.m_forward = -camera.get_view_dir();
-		camera.m_right= glm::normalize(glm::cross(camera.m_forward, WORLD_UP));
-		camera.m_up = glm::normalize(glm::cross(camera.m_right, camera.m_forward));
+		camera->m_forward = -camera->get_view_dir();
+		camera->m_right= glm::normalize(glm::cross(camera->m_forward, WORLD_UP));
+		camera->m_up = glm::normalize(glm::cross(camera->m_right, camera->m_forward));
 		previouseRot *= rotate_offset;
 		glm::mat4 view = glm::lookAt(
-								camera.m_position,
-								//camera.m_position + camera.m_forward * camera.zoom,
-								//camera.get_view_center_position(),
-								camera.view_target,
-								camera.m_up);
+								camera->m_position,
+								//camera->m_position + camera->m_forward * camera->zoom,
+								//camera->get_view_center_position(),
+								camera->view_target,
+								camera->m_up);
 		glm::mat3 rotation(view);
-		camera.m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
+		camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
 		/*
 		*/
 	}
 
 	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
-		camera.m_parent->m_position += vec3(vec4((camera.m_up) * vec3(dt ), 1.0));
+		camera->m_parent->m_position += vec3(vec4((camera->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
-		camera.m_parent->m_position -= vec3(vec4((camera.m_up) * vec3(dt ), 1.0));
+		camera->m_parent->m_position -= vec3(vec4((camera->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
 		double xpos, ypos;
@@ -529,8 +524,8 @@ void processInput(GLFWwindow* window, double dt) {
 		}
 
 		vec2 diff = mouse_pos - prev_mouse;
-		vec3 local_move = camera.m_right * diff.x * scroll_speed - camera.m_up * diff.y * scroll_speed;
-		camera.m_parent->m_position += vec3( camera.m_rot_matrix * vec4(local_move,1.0));
+		vec3 local_move = camera->m_right * diff.x * scroll_speed - camera->m_up * diff.y * scroll_speed;
+		camera->m_parent->m_position += vec3( camera->m_rot_matrix * vec4(local_move,1.0));
 		prev_mouse = mouse_pos;
 	}
 	
@@ -539,10 +534,10 @@ void processInput(GLFWwindow* window, double dt) {
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);
 		//prev_mouse = mouse_pos;
-		current_camera_model = camera.m_model_matrix;
-		endPos =  normalize( camera.m_forward) * -camera.zoom;
-		//endPos = camera.m_position;
-		//endPos = normalize(endPos - camera.view_target) * camera.zoom;
+		current_camera_model = camera->m_model_matrix;
+		endPos =  normalize( camera->m_forward) * -camera->zoom ;
+		//endPos = camera->m_position;
+		//endPos = normalize(endPos - camera->view_target) * camera->zoom;
 	}
 }
 

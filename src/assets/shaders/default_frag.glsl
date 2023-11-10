@@ -21,9 +21,8 @@ void main(){
 	tangentNormal = normalize(TBN * tangentNormal);
 
 	vec3 tangentLightDir = normalize(light_dir);
-	float light = dot(tangentNormal, tangentLightDir) *0.5 +0.5; 
-	//FragColor = (vec4(tangentNormal,1.0)*0.5+0.5) * light;
-	//FragColor = vec4(1.0) * light;
+	float light =max( dot(tangentNormal, tangentLightDir) , 0) *0.5 +0.5; 
+	//FragColor = vec4(light,0,0,1);
 	FragColor =  texture(DIFFUSE , texcoord ) * light;
 	//FragColor = vec4(normal_map_color,1.0);
 
