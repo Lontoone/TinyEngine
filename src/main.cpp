@@ -16,15 +16,21 @@
 #include <FrameBufferObject.h>
 #include <FrameBufferDebugger.h>
 #include <RuntimeShaderEditor.h>
+#include <DefaultGrid.h>
+#include <CameraFrustum.h>
+
 //#include "basic/TransformObject.h"
 
 #define STRINGIFY(x) #x
 #define EXPAND(x) STRINGIFY(x)
 
-void init();
+GLFWwindow* init();
 void update();
 void render();
 void input();
+void render_grid(mat4& vp);
+void setup_menu(UiManager * uimanager);
+void render_game_view(FramebufferObject* fbo , Camera* camera, Shader* shader);
 
 using namespace std;
 void processInput(GLFWwindow* window, double dt);
@@ -32,10 +38,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_blit_stacks(vector<Shader>& blits_shaders , unsigned src_id );
 MechainState state;
 
-
-Camera* camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
+
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,10);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,0.1,1000 );
+
 
 float vertices[] = {
 		-0.5f , 1.0f , 0.0f,
@@ -47,61 +55,72 @@ float vertices[] = {
 static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
+DefaultEditorGrid* grid;
 
+
+GLfloat vertex[] = { 1.0, 1.0f, 1.0f };
+GLuint index = 0; // The index of the point
+GLuint vao,vbo;
+GLuint ebo;
+void test_point() {
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glPointSize(100) ;
+	glGenVertexArrays(1,&vao);
+	glBindVertexArray(vao);
+	glGenBuffers(1, &vbo); // Generate a buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind the buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+	
+	glGenBuffers(1, &ebo); // Generate a buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); // Bind the buffer
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), &index, GL_STATIC_DRAW); // Load the index
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(
+		0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,        // size
+		GL_FLOAT, // type
+		GL_FALSE, // normalized?
+		0,        // stride
+		(void*)0 // array buffer offset
+	);
+	glDisableVertexAttribArray(0);
+}
 
 using namespace std;
 int main(int argc , char** argv) {
 	std::cout << "hello"<<endl;	
-	init();  // TODO: init
+	GLFWwindow* window =  init();  // TODO: init 
 
 	double _previous_time = 0;
 	float time_scale = 1;
-#pragma region LoadWindow
-
-	// 檢查
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "title", NULL, NULL); //monitor先設為NULL
-	if (window == NULL) {
-		cout << "No Window" << endl;
-		glfwTerminate();
-		return -1;
-	}
-	//把window放到thread上
-	glfwMakeContextCurrent(window);
-	ui_manager.init_imgui(window);
-	gladLoadGL();	
 	
-	Shader s_default_shader(src_path + string("\\assets\\shaders\\default_vert.glsl"),src_path + string("\\assets\\shaders\\default_frag.glsl"));
+	scene_camera->m_parent->m_position = vec3(50,100,50);
+	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
+
+	test_point();
+	
+#pragma region DEBUG_PRE_LOAD_MODEL
+	Shader s_default_shader(
+		src_path + string("\\assets\\shaders\\default_vert.glsl"),
+		src_path + string("\\assets\\shaders\\default_frag.glsl"));
 	s_default_shader.activate();
 	cout << "activate pg " << s_default_shader.m_state.programId << endl;
 
-	//初始化glad
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		cout << "Failed init glad" << endl;
-		glfwTerminate();
-		return-1;
-	}
-	//定義視窗
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT); //(x, y , width , height)
+	grid = new DefaultEditorGrid(
+		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
+		src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 
-	//指定視窗resize的處理方法
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW); // counter clock wise
-#pragma endregion
-	
-#pragma region DEBUG_PRE_LOAD_MODEL
 	GameObject obj = GameObject("Building");
 	//GameObject dog_obj = GameObject("Dog");
-	GameObject camera_obj = GameObject((TransformObject*)camera);
-	camera_obj.set_name("Camera");
+	GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
+	camera_obj.set_name("Camera");	
 	
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
-	obj.m_transform->m_scale = vec3(0.05);
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
+	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);			
+	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);			
 	obj.add_component(mesh);		
-	camera_obj.add_component((Component*)camera);
+	camera_obj.add_component((Component*)game_camera);
 
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_object(&camera_obj);
@@ -110,6 +129,10 @@ int main(int argc , char** argv) {
 	vector<Shader> stacked_blits_shaders;
 
 #pragma endregion
+
+	const int _test_camera_cast = 0;
+	RViewFrustum frustum(1 , game_camera);
+	frustum.init(game_camera);
 
 #pragma region SET_UP_MENU
 	////////////////// Add Load model opts: /////////////////
@@ -137,21 +160,16 @@ int main(int argc , char** argv) {
 	} };
 	ui_manager.m_menu_cmds.push_back(animation_inp);
 
+#pragma endregion
+#pragma region FrameBuffer
 	FrameBufferDebugger frame_buffer_debugger;
 	ShaderEditor shaderEditor;
-#pragma region FrameBuffer
+	
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
-	Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
-	Shader frame_quantization_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_quantization_frag.glsl"));
-	Shader frame_dog_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_dog_frag.glsl"));
-	Shader frame_abst_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_abstraction_frag.glsl"));
+	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
+	Shader gizmose_shader = Shader(src_path + string("\\assets\\shaders\\vertexShader_ogl_450.glsl"), src_path + string("\\assets\\shaders\\fragmentShader_ogl_450.glsl"));
 
-	Shader frame_water_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_water_frag.glsl"));
-	Shader frame_mag_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_mag_frag.glsl"));
-	Shader frame_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
-	Shader frame_compare_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_compareLine_frag.glsl"));
-	Shader frame_pixelize_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_pixelization_frag.glsl"));
-	Shader frame_sin_wave_shader = Shader(src_path + string("\\assets\\shaders\\frame_blur_vert.glsl"), src_path + string("\\assets\\shaders\\frame_sin_wave_frag.glsl"));
 
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
@@ -161,38 +179,19 @@ int main(int argc , char** argv) {
 		GL_COLOR_ATTACHMENT2
 		//GL_DEPTH_ATTACHMENT,
 	};
-	FramebufferObject* fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* blur_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* qua_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* dog_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_dog_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* abst_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_abst_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* water_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_water_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* mag_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_mag_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* bloom_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* compare_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* pixelize_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_pixelize_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* sinwave_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_sin_wave_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	//FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	//FramebufferObject* fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_grid_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject* playground_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&shaderEditor.shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	/*
-	FramebufferObject blur_fbo = FramebufferObject(&frame_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject qua_fbo = FramebufferObject(&frame_quantization_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject dog_fbo = FramebufferObject(&frame_dog_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject abst_fbo = FramebufferObject(&frame_abst_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject water_fbo = FramebufferObject(&frame_water_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject mag_fbo = FramebufferObject(&frame_mag_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject bloom_fbo = FramebufferObject(&frame_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject compare_fbo = FramebufferObject(&frame_compare_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject pixelize_fbo = FramebufferObject(&frame_pixelize_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject sinwave_fbo = FramebufferObject(&frame_sin_wave_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	*/
-
-	Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
+	
+	Texture rt_game = Texture(SCR_WIDTH/2 , SCR_HEIGHT);
+	Texture rt_scene = Texture(SCR_WIDTH / 2, SCR_HEIGHT);
+	//Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
 	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
-#pragma endregion
 
 
 #pragma endregion
-	int hw2_effect_panel = 0 ;
 
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // 等到console 送出kill flag
@@ -202,7 +201,7 @@ int main(int argc , char** argv) {
 		
 		processInput(window , 0.1f);
 		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
-		fbo->activate();
+		game_fbo->activate();
 
 		//glUseProgram(state.programId);
 
@@ -215,122 +214,52 @@ int main(int argc , char** argv) {
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		s_default_shader.activate();
-		glUniform3fv(glGetUniformLocation(s_default_shader.m_state.programId, "sun_postion")  , 1 , value_ptr(sun_postion));
-		//update();
-		// 
-		//-------------- [ TEMP 暫時的MVP ] ------------------
-		glm::mat4 view			= glm::mat4(1.0f);
-		glm::mat4 projection	= glm::mat4(1.0f);
-		view			= camera->getViewMatrix();
-		projection		= glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 1000.0f);
-		
-		//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
-		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
+		//========== Split View ===========
+		render_game_view(game_fbo ,game_camera, &s_default_shader);
 
-		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+
+		scene_camera->Do();
+		render_game_view(scene_fbo,scene_camera, &s_default_shader);
+
+		scene_fbo->activate();
+		gizmose_shader.activate();
+		glm::mat4 view = scene_camera->getViewMatrix();
+		glm::mat4 projection = scene_camera->getProjectionMatrix();
+		glm::mat4 model = game_camera->m_model_matrix;
+
+		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_V"), 1, GL_FALSE, value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_P"), 1, GL_FALSE, value_ptr(projection));
+
+		frustum.update(game_camera);
+		frustum.render();
+
+		// [Test]
+		//glBindVertexArray(vao);				
+		//glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0); // Draw the point
+		//================================
 
 		//--------------------------------------------
 		// Default
 		// 
+		/*
 		frame_buffer_debugger.Init_Panel(0, 150);
 		frame_buffer_debugger.Begin_Panel();
 
 		shaderEditor.begin_panel();
+		game_fbo->blit(game_fbo->framebuffer_texture[0], 0);
 
-		switch (hw2_effect_panel)
-		{
-		case 1: {
-			fbo->blit(fbo->framebuffer_texture[1], *compare_fbo);
-			}
-			break; 
-		case 2: {
-			// Abstration			
-				fbo->blit(fbo->framebuffer_texture[0], *blur_fbo);
-				blur_fbo->blit(blur_fbo->framebuffer_texture[0], *qua_fbo);
-				qua_fbo->blit(qua_fbo->framebuffer_texture[0], *dog_fbo);
-				dog_fbo->blit(fbo->framebuffer_texture[0], *compare_fbo, qua_fbo->framebuffer_texture[0]);
-			}
-			break;
-		case 3:
-		{
-			// Water Color
-			fbo->blit(fbo->framebuffer_texture[0], *blur_fbo);
-			blur_fbo->blit(blur_fbo->framebuffer_texture[0], *water_fbo);
-			water_fbo->blit(water_fbo->framebuffer_texture[0], *qua_fbo, noise_texture.m_texture_id);
-			qua_fbo->blit(qua_fbo->framebuffer_texture[0], *compare_fbo);
-		}
-			break;
-
-		case 4:
-			// Magnifier 			
-		{
-			fbo->blit(fbo->framebuffer_texture[0], *mag_fbo);
-			mag_fbo->shader->activate();
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			GLint location = mag_fbo->shader->shader_variables["u_mouse_position"];
-			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); 
-			glUniform2f(mag_fbo->shader->shader_variables["u_texturesize"], SCR_WIDTH, SCR_HEIGHT);
-			//mag_fbo->blit(mag_fbo->framebuffer_texture[0], compare_fbo->fbo);
-			mag_fbo->blit(mag_fbo->framebuffer_texture[0], 0);
-		}
-			break;
-		case 5:
-		{
-			// Bloom
-			fbo->blit(fbo->framebuffer_texture[0], *bloom_fbo);
-			bloom_fbo->blit(bloom_fbo->framebuffer_texture[0], *compare_fbo);			
-		}
-			break;
-
-		case 6:
-		{
-			// Pixelization
-			fbo->blit(fbo->framebuffer_texture[0], *pixelize_fbo);
-			pixelize_fbo->blit(pixelize_fbo->framebuffer_texture[0], *compare_fbo);
-		}
-			break;
-		case 7:
-		{
-			// Sine wave distortion		
-			fbo->blit(fbo->framebuffer_texture[0], *sinwave_fbo);
-			sinwave_fbo->blit(sinwave_fbo->framebuffer_texture[0], *compare_fbo);
-		}
-			break;
-
-		default:
-			//fbo->blit(fbo->framebuffer_texture[0], *compare_fbo);
-			fbo->blit(fbo->framebuffer_texture[0], *playground_fbo);
-			playground_fbo->blit(playground_fbo->framebuffer_texture[0], *compare_fbo);
-			break;
-		}
-		
-		// Compare Line
-		if (hw2_effect_panel != 4) {
-			compare_fbo->shader->activate();
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-			GLint location = compare_fbo->shader->shader_variables["u_mouse_position"];
-			glUniform2f(location, xpos / SCR_WIDTH, 1 - ypos / SCR_HEIGHT); ///TODO.... pass mouse position
-			//fbo.blit(fbo.framebuffer_texture[0], bloom_fbo.fbo);
-			//bloom_fbo.blit(bloom_fbo.framebuffer_texture[0], compare_fbo.fbo);
-			compare_fbo->blit(compare_fbo->framebuffer_texture[0], 0, fbo->framebuffer_texture[0]);
-		}
-
-		//frame_buffer_debugger.Draw_Frames_on_Panel();
 		frame_buffer_debugger.End_Panel();
-		frame_buffer_debugger.create_hw2_panel(hw2_effect_panel);
 
-
-		//blur_fbo.draw_on_screen(blur_fbo.framebuffer_texture[0]);
-		//--------------------------------------------
-
+		*/
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//--------------------------------------------		
+		//ui_manager.create_sceneNgame_window(rt_scene.m_texture_id , rt_game.m_texture_id);
+		ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 
@@ -345,7 +274,32 @@ int main(int argc , char** argv) {
 
 	return 0;
 }
-void init() {
+
+void render_game_view(FramebufferObject* fbo , Camera* camera , Shader* shader) {  //TODO: shader uniform... 
+	fbo->activate();
+	glClearColor(0.2, 0.2, 0.2, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	//-------------- [ TEMP 暫時的MVP ] ------------------
+	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 projection = glm::mat4(1.0f);
+	view = camera->getViewMatrix();
+	projection = camera->getProjectionMatrix();
+	glm::mat4 vp = projection * view;
+
+	render_grid(vp);
+	shader->activate();
+	//Render Game view
+	//glUniform3fv(glGetUniformLocation(s_default_shader.m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
+	//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
+	Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+	
+}
+
+GLFWwindow* init() {
 	glfwInit();
 
 	src_path.erase(0, 1); // erase the first quote
@@ -361,10 +315,54 @@ void init() {
 # ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+#pragma region LoadWindow
+
+	// 檢查
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "title", NULL, NULL); //monitor先設為NULL
+	if (window == NULL) {
+		cout << "No Window" << endl;
+		glfwTerminate();
+		return nullptr;
+	}
+	//把window放到thread上
+	glfwMakeContextCurrent(window);
+	ui_manager.init_imgui(window);
+	gladLoadGL();
+
+
+	//初始化glad
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		cout << "Failed init glad" << endl;
+		glfwTerminate();
+		return nullptr;
+	}
+	//定義視窗
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT); //(x, y , width , height)
+
+	//指定視窗resize的處理方法
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glEnable(GL_DEPTH_TEST);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW); // counter clock wise
+#pragma endregion
+	return window;
 }
 void update() {}
 void render() {}
 void input() {}
+
+void render_grid( mat4& vp ) {
+	// Render Grid
+	grid->grid_shader.activate();
+	glUniformMatrix4fv(glGetUniformLocation(grid->grid_shader.m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
+	glUniformMatrix4fv(glGetUniformLocation(grid->grid_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(glm::mat4(1.0f)));
+	grid->render();
+
+}
+void setup_menu(UiManager* uimanager)
+{
+
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	cout << "resizing is banned" << endl;
@@ -406,15 +404,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	*/
 }
 
-void process_blit_stacks(vector<Shader>& blits_shaders, unsigned src_id)
-{
-
-}
 
 //float prex =0 , prey=0;
 vec3 prev_mouse = vec3(0);
 vec3 mouse_pos = vec3(0);
-vec3 endPos = vec3(0,0,-camera->zoom);
+vec3 endPos = vec3(0,0,-game_camera->zoom);
 mat4 current_camera_model = mat4(0);
 mat4 previouseRot = mat4(1);
 float scroll_speed = 5;
@@ -425,12 +419,12 @@ void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		camera->m_parent->m_position -= vec3(camera->m_rot_matrix * vec4( camera->m_parent->m_forward * vec3(dt),1.0));
+		game_camera->m_parent->m_position -= vec3(game_camera->m_rot_matrix * vec4( game_camera->m_parent->m_forward * vec3(dt),1.0));
 		
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		
-		camera->m_parent->m_position += vec3(camera->m_rot_matrix * vec4(camera->m_parent->m_forward * vec3(dt), 1.0));
+		game_camera->m_parent->m_position += vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
@@ -459,7 +453,7 @@ void processInput(GLFWwindow* window, double dt) {
 			return;
 		}
 		if (current_camera_model == mat4(0)) {
-			current_camera_model = camera->m_model_matrix;
+			current_camera_model = game_camera->m_model_matrix;
 		}
 
 		vec3 op1 = prev_mouse;
@@ -479,35 +473,35 @@ void processInput(GLFWwindow* window, double dt) {
 
 
 		//		Get the rotation axis in 3D	
-		vec3 _startPos		= normalize(endPos - camera->view_target) * camera->zoom;
+		vec3 _startPos		= normalize(endPos - game_camera->view_target) * game_camera->zoom;
 		vec4 zoom_off		= vec4(_startPos, 1); // start from vec4(0, 0, -camera->zoom, 0);		
 		//vec4 zoom_off = vec4(0,0, -camera->zoom ,0); // start from vec4(0, 0, -camera->zoom, 0);		
 		mat4 rotate_offset	=  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
 
-		camera->m_position =rotate_offset * zoom_off;
+		game_camera->m_position =rotate_offset * zoom_off;
 
-		camera->m_forward = -camera->get_view_dir();
-		camera->m_right= glm::normalize(glm::cross(camera->m_forward, WORLD_UP));
-		camera->m_up = glm::normalize(glm::cross(camera->m_right, camera->m_forward));
+		game_camera->m_forward = -game_camera->get_view_dir();
+		game_camera->m_right= glm::normalize(glm::cross(game_camera->m_forward, WORLD_UP));
+		game_camera->m_up = glm::normalize(glm::cross(game_camera->m_right, game_camera->m_forward));
 		previouseRot *= rotate_offset;
 		glm::mat4 view = glm::lookAt(
-								camera->m_position,
+								game_camera->m_position,
 								//camera->m_position + camera->m_forward * camera->zoom,
 								//camera->get_view_center_position(),
-								camera->view_target,
-								camera->m_up);
+								game_camera->view_target,
+								game_camera->m_up);
 		glm::mat3 rotation(view);
-		camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
+		game_camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
 		/*
 		*/
 	}
 
 	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
-		camera->m_parent->m_position += vec3(vec4((camera->m_up) * vec3(dt ), 1.0));
+		game_camera->m_parent->m_position += vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
-		camera->m_parent->m_position -= vec3(vec4((camera->m_up) * vec3(dt ), 1.0));
+		game_camera->m_parent->m_position -= vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
 		double xpos, ypos;
@@ -524,8 +518,8 @@ void processInput(GLFWwindow* window, double dt) {
 		}
 
 		vec2 diff = mouse_pos - prev_mouse;
-		vec3 local_move = camera->m_right * diff.x * scroll_speed - camera->m_up * diff.y * scroll_speed;
-		camera->m_parent->m_position += vec3( camera->m_rot_matrix * vec4(local_move,1.0));
+		vec3 local_move = game_camera->m_right * diff.x * scroll_speed - game_camera->m_up * diff.y * scroll_speed;
+		game_camera->m_parent->m_position += vec3( game_camera->m_rot_matrix * vec4(local_move,1.0));
 		prev_mouse = mouse_pos;
 	}
 	
@@ -534,8 +528,8 @@ void processInput(GLFWwindow* window, double dt) {
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);
 		//prev_mouse = mouse_pos;
-		current_camera_model = camera->m_model_matrix;
-		endPos =  normalize( camera->m_forward) * -camera->zoom ;
+		current_camera_model = game_camera->m_model_matrix;
+		endPos =  normalize( game_camera->m_forward) * -game_camera->zoom ;
 		//endPos = camera->m_position;
 		//endPos = normalize(endPos - camera->view_target) * camera->zoom;
 	}

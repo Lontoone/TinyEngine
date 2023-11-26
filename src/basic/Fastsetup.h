@@ -38,6 +38,7 @@ public:
 	//void UpdateFromSource(const string vs, const string fs);
 	MechainState m_state;
 	void init_variables();
+	void add_variables(const char* name);
 	void activate();
 private:
 	

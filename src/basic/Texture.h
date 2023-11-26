@@ -23,6 +23,7 @@ static map<Bind_Type, const char*> s_bind_types = {
 class Texture {	
 public :
 	Texture();
+	Texture(unsigned _width , unsigned int _height);
 	Texture(const string _file_path);
 	~Texture();
 

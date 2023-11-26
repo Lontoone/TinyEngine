@@ -56,6 +56,31 @@ void UiManager::create_menubar()
 	//End();
 }
 
+void UiManager::create_sceneNgame_window(uint &scene_buffer_id, uint &game_buffer_id  )
+{
+	ImGuiIO io = ImGui::GetIO();
+	uint w = io.DisplaySize.x;
+	uint h = io.DisplaySize.y;
+	
+	ImGui::SetNextWindowPos(ImVec2(0,0));
+	ImGui::SetNextWindowSize(ImVec2(w/2 , h));
+
+	auto flag = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoInputs;
+	ImGui::Begin("Scene" ,0, flag);	
+	ImGui::Image((void*)scene_buffer_id, io.DisplaySize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+
+	ImGui::SetNextWindowPos(ImVec2(w/2 , 0));
+	ImGui::SetNextWindowSize(ImVec2(w / 2, h));
+	ImGui::Begin("Game" ,0 , flag);
+	ImGui::Image((void*)game_buffer_id, io.DisplaySize, ImVec2(0, 1), ImVec2(1, 0));
+	//ImGui::Image(0, io.DisplaySize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+
+
+}
+
 void UiManager::render_ui()
 {
 	/*

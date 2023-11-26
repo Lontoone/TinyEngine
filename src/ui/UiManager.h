@@ -17,7 +17,7 @@ public:
 	UiManager();
 	//~UiManager();
 
-	//******** TEMP **********	
+	//******** Registored ui command **********	
 	typedef function<bool()> t_draw_cmd;
 	vector<t_draw_cmd> m_menu_cmds;
 	//**********************
@@ -27,6 +27,7 @@ public:
 	void destory();
 
 	void create_menubar();
+	void create_sceneNgame_window(uint &scene_buffer_id , uint &game_buffer_id);
 	void render_ui();
 
 	void create_window(const char* _window_name);

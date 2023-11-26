@@ -90,6 +90,12 @@
     <ClCompile Include="src\ui\RuntimeShaderEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\basic\DefaultGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\basic\CameraFrustum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic\TransformObject.h">
@@ -197,6 +203,12 @@
     <ClInclude Include="src\ui\RuntimeShaderEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\basic\DefaultGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\basic\CameraFrustum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
@@ -222,6 +234,10 @@
     <None Include="src\assets\shaders\frame_compareLine_frag.glsl" />
     <None Include="src\assets\shaders\frame_pixelization_frag.glsl" />
     <None Include="src\assets\shaders\frame_sin_wave_frag.glsl" />
+    <None Include="src\assets\shaders\frame_grid_frag.glsl" />
+    <None Include="src\assets\shaders\unlit_vert.glsl" />
+    <None Include="src\assets\shaders\fragmentShader_ogl_450.glsl" />
+    <None Include="src\assets\shaders\vertexShader_ogl_450.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

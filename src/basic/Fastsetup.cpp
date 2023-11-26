@@ -216,6 +216,10 @@ void Shader::init_variables()
 		pair.second = glGetUniformLocation(this->m_state.programId, pair.first);
 	}
 }
+void Shader::add_variables(const char* name)
+{
+	this->shader_variables.insert(std::pair<const char* , GLuint>( name, 0));
+}
 
 void Shader::activate()
 {

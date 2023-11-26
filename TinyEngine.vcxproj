@@ -144,6 +144,8 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\basic\CameraFrustum.cpp" />
+    <ClCompile Include="src\basic\DefaultGrid.cpp" />
     <ClCompile Include="src\basic\FileDialog.cpp" />
     <ClCompile Include="src\basic\FrameBufferDebugger.cpp" />
     <ClCompile Include="src\basic\FrameBufferObject.cpp" />
@@ -174,7 +176,9 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="src\basic\BasicFlags.h" />
+    <ClInclude Include="src\basic\CameraFrustum.h" />
     <ClInclude Include="src\basic\Debugger.hpp" />
+    <ClInclude Include="src\basic\DefaultGrid.h" />
     <ClInclude Include="src\basic\FileDialog.h" />
     <ClInclude Include="src\basic\FrameBufferDebugger.h" />
     <ClInclude Include="src\basic\FrameBufferObject.h" />
@@ -205,6 +209,7 @@
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
+    <None Include="src\assets\shaders\fragmentShader_ogl_450.glsl" />
     <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
     <None Include="src\assets\shaders\frame_bloom_frag.glsl" />
     <None Include="src\assets\shaders\frame_blur_frag.glsl" />
@@ -212,13 +217,16 @@
     <None Include="src\assets\shaders\frame_compareLine_frag.glsl" />
     <None Include="src\assets\shaders\frame_dog_frag.glsl" />
     <None Include="src\assets\shaders\frame_frag.glsl" />
+    <None Include="src\assets\shaders\frame_grid_frag.glsl" />
     <None Include="src\assets\shaders\frame_mag_frag.glsl" />
     <None Include="src\assets\shaders\frame_pixelization_frag.glsl" />
     <None Include="src\assets\shaders\frame_quantization_frag.glsl" />
     <None Include="src\assets\shaders\frame_sin_wave_frag.glsl" />
     <None Include="src\assets\shaders\frame_vert.glsl" />
     <None Include="src\assets\shaders\frame_water_frag.glsl" />
+    <None Include="src\assets\shaders\unlit_vert.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
+    <None Include="src\assets\shaders\vertexShader_ogl_450.glsl" />
     <None Include="src\default_frag.glsl" />
     <None Include="src\default_vert.glsl" />
     <None Include="src\freeglut.dll" />

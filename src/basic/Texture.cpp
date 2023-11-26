@@ -7,6 +7,14 @@ Texture::Texture()
 	this->m_file_path = "";
 }
 
+Texture::Texture(unsigned _width, unsigned int _height)
+{
+	glGenTextures(1, &this->m_texture_id);
+	this->m_width = _width;
+	this->m_height= _height;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->m_width, this->m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+}
+
 Texture::Texture(const string _file_path)
 {
 	this->load_file(_file_path);
@@ -57,3 +65,4 @@ void Texture::init_texture()
 		cout << "Texture Load Failed" << endl;
 	}
 }
+

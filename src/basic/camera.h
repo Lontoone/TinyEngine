@@ -17,28 +17,22 @@ enum class CameraDirection {
 	DOWN
 };
 
+using namespace glm;
 class Camera : public TransformObject {
 public :
 	Camera();	
-	//~Camera();
-	/*
-	glm::vec3 cameraPos;
-	glm::vec3 cameraFront;
-	glm::vec3 cameraRight;
-	glm::vec3 cameraUp;
-
-	glm::vec3 worldUp;
-
-	glm::vec3 camera_center;
-
-	*/
+	Camera(glm::vec3  position , float ratio ,float near, float far);
+	
+	
 	float yaw =-90.0f;  //x-axis
 	float pitch =0.0f;
 	float speed;
+	float m_aspect_ratio;
+	float m_near = 0.1f;
+	float m_far = 10.0f;
 
 	vec3 view_target = vec3(0.0f);
 	float zoom = -3;
-	Camera(glm::vec3  position);
 	void updateCameraDirection(double dx, double dy);
 	//void updateCameraPos(CameraDirection dir , double dt);
 	void updateCameraZoom(double dy);
@@ -47,9 +41,12 @@ public :
 	vec3 get_view_center_position();
 	vec3 get_view_dir();
 
-	void Do() override;
+	void Do() override;	
+	void draw_frustum();
+	void viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners);
 
 	glm::mat4 getViewMatrix();
+	glm::mat4 getProjectionMatrix();
 
 private :
 	//void updateCameraVectors();
@@ -59,5 +56,6 @@ private :
 };
 
 #endif // !CAMERA_H
+
 
 
