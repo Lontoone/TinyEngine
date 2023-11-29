@@ -48,6 +48,8 @@ public:
 
 	string m_srcPath = "";
 	string m_srcDirecotory ="";
+    vector<Vertex> m_vertices;
+    vector<unsigned int> m_indices;
 
     struct MeshVert {
         MeshVert();

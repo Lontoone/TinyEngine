@@ -31,6 +31,30 @@ char* textFileRead(const char* fn) {
 	return content;
 }
 
+int compile_shader(unsigned int& p , unsigned int& o_id ) {
+
+	GLint success;
+	char infoLog[1000];	
+	glCompileShader(o_id);
+	// check for shader compile errors
+	glGetShaderiv(o_id, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(o_id, 1000, NULL, infoLog);
+		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+	}
+	glAttachShader(p, o_id);	
+	glLinkProgram(p);
+	
+	glGetProgramiv(p, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(p, 1000, NULL, infoLog);
+		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n" << infoLog << std::endl;
+	}
+	glDeleteShader(o_id);
+
+	return success;
+}
 
 //void SetProgram(MechainState& mechainState , const char* vs_file , const char* fs_file)
 void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs , bool create_one ) {
@@ -56,7 +80,10 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 	glShaderSource(v, 1, &vs, NULL);
 	glShaderSource(f, 1, &fs, NULL);
 
-	GLint success;
+	GLint success = 1;
+	success *= compile_shader(p,v);
+	success *= compile_shader(p,f);
+	/*
 	char infoLog[1000];
 	// compile vertex shader
 	glCompileShader(v);
@@ -93,7 +120,7 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 
 	glDeleteShader(v);
 	glDeleteShader(f);
-
+	*/
 	if (success) {
 		glUseProgram(p);
 	}
@@ -102,11 +129,10 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 		system("pause");
 		exit(123);
 	}
-
-	
-
-
 }
+
+
+
 void UpdateFromSource(const MechainState& mechainState, const char* v_text, const char* fs_char)
 {
 
@@ -117,58 +143,29 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 {
 	char* vs = NULL;
 	char* fs = NULL;
-	
-	vs = textFileRead(vs_file.c_str());
-	fs = textFileRead(fs_file.c_str());
 
+	// create program object
 	//SetProgramFromSource(mechainState , vs,fs);
 	GLuint v, f, p;
+	GLint success =1;
+
+	p = glCreateProgram();
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 
-	glShaderSource(v, 1, (const GLchar**)&vs, NULL);
-	glShaderSource(f, 1, (const GLchar**)&fs, NULL);
 
-	GLint success;
-	char infoLog[1000];
-	// compile vertex shader
-	glCompileShader(v);
-	// check for shader compile errors
-	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(v, 1000, NULL, infoLog);
-		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+	if (!vs_file.empty()) {
+		vs = textFileRead(vs_file.c_str());
+		glShaderSource(v, 1, (const GLchar**)&vs, NULL);
+		success *= compile_shader(p, v);	
+		free(vs);
 	}
-
-	// compile fragment shader
-	glCompileShader(f);
-	// check for shader compile errors
-	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(f, 1000, NULL, infoLog);
-		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n" << infoLog << std::endl;
+	if (!fs_file.empty()) {
+		fs = textFileRead(fs_file.c_str());
+		glShaderSource(f, 1, (const GLchar**)&fs, NULL);
+		success *= compile_shader(p, f);
+		free(fs);
 	}
-
-	// create program object
-	p = glCreateProgram();
-
-	// attach shaders to program object
-	glAttachShader(p, f);
-	glAttachShader(p, v);
-
-	// link program
-	glLinkProgram(p);
-	// check for linking errors
-	glGetProgramiv(p, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(p, 1000, NULL, infoLog);
-		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n" << infoLog << std::endl;
-	}
-
-	glDeleteShader(v);
-	glDeleteShader(f);
 
 	if (success) {
 		glUseProgram(p);
@@ -182,9 +179,6 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 	mechainState.fragShaderId = f;
 	mechainState.vertShaderId = v;
 	mechainState.programId = p;
-
-	free(vs);
-	free(fs);
 
 
 }

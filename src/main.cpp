@@ -41,7 +41,7 @@ MechainState state;
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,10);
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,50);
 Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,0.1,1000 );
 
 
@@ -97,7 +97,7 @@ int main(int argc , char** argv) {
 	scene_camera->m_parent->m_position = vec3(50,100,50);
 	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
 
-	test_point();
+	//test_point();
 	
 #pragma region DEBUG_PRE_LOAD_MODEL
 	Shader s_default_shader(
@@ -164,7 +164,8 @@ int main(int argc , char** argv) {
 #pragma region FrameBuffer
 	FrameBufferDebugger frame_buffer_debugger;
 	ShaderEditor shaderEditor;
-	
+
+	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
@@ -217,11 +218,13 @@ int main(int argc , char** argv) {
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_MULTISAMPLE);
 
 		//========== Split View ===========
+		// For game view
 		render_game_view(game_fbo ,game_camera, &s_default_shader);
 
-
+		// For scene view
 		scene_camera->Do();
 		render_game_view(scene_fbo,scene_camera, &s_default_shader);
 

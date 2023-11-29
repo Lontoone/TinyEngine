@@ -35,6 +35,8 @@ void Mesh::Render()
     for (unsigned int i = 0; i < this->m_Entries.size(); i++) {
 
         glBindVertexArray(this->m_Entries[i].VA);
+        /*
+        */
         glBindBuffer(GL_ARRAY_BUFFER, this->m_Entries[i].VB);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_Entries[i].IB);
 
@@ -54,13 +56,9 @@ void Mesh::Render()
         this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);        
 		this->materials[MaterialIndex]->render();
 
-        /*
-        if (MaterialIndex < m_Textures.size() && m_Textures[MaterialIndex]) {
-            m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
-        }*/
-        //glDrawElementsInstanced(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT,0 , 0);
         glDrawElements(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0);
-        //glDrawElementsInstanced(GL_TRIANGLES, m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0, 0);
+        //glDrawElementsInstanced(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0,100);
+        
         
     }
 
@@ -248,8 +246,12 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
 {
     m_Entries[Index].MaterialIndex = paiMesh->mMaterialIndex; //TODO : mat
 
+    //TODO: Release Memory
+    //std::vector<Vertex> &Vertices = this->m_vertices;
+    //std::vector<unsigned int> &Indices = this->m_indices;
+    //TODO: Fix this
     std::vector<Vertex> Vertices;
-    std::vector<unsigned int> Indices;
+    std::vector<unsigned int> Indices ;
 
     const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
@@ -278,7 +280,7 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
 
 
     m_Entries[Index].Init(Vertices, Indices);
-    m_Entries[Index].CalculateTangent(Vertices, Indices);
+    //m_Entries[Index].CalculateTangent(Vertices, Indices);
     cout << Index <<" mesh obj contains " << Vertices.size() << " verts " << Indices.size() << " index" << endl;
 
 }
@@ -306,7 +308,6 @@ void Mesh::MeshVert::Init(const vector<Vertex>& Vertices, const std::vector<unsi
     glBindBuffer(GL_ARRAY_BUFFER, this->VB);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * Vertices.size(), &Vertices[0], GL_STATIC_DRAW);
     
-    //glEnableVertexAttribArray(1);
     glGenBuffers(1, &this->IB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * NumIndices, &Indices[0], GL_STATIC_DRAW);
