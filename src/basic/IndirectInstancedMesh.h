@@ -2,10 +2,14 @@
 #ifndef IndirectInstancedMesh_H
 #define IndirectInstancedMesh_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <Mesh.h>
 #include <iostream>
 #include <vector>
 #include <Component.h>
+
 class IndirectInstancedMesh: public UiableComponent {
 
 struct DrawElementCommand
@@ -19,15 +23,26 @@ struct DrawElementCommand
 
 public :
 	IndirectInstancedMesh(Mesh meshes[]);
-	void load_Position();
+	void load_position();
+	void add_draw_cmds(GLuint vertex_count , GLuint instance_count , GLuint first_index , GLuint base_vertex , GLuint base_instance);
 
-	vector<Vertex> m_all_vertex;
-	//vector<float> m_all_uv;
-	vector<unsigned int> m_all_index;
 	vector<DrawElementCommand> m_draw_cmds;
-	virtual void Do() override {
-		
-	};
+
+	Material m_material;
+	void Do() override;
+	void Render();
+
+private:
+	GLuint vao;
+	GLuint ssbo;
+	GLuint ebo;
+	GLuint ibo; // indirect buffer object
+
+	vector<Vertex>			m_all_vertex;
+	//vector<float> m_all_uv;
+	vector<unsigned int>	m_all_index;
+
+	void InitBuffers();
 
 };
 

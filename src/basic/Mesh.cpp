@@ -278,7 +278,6 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
         Indices.push_back(Face.mIndices[2]);
     }	
 
-
     m_Entries[Index].Init(Vertices, Indices);
     //m_Entries[Index].CalculateTangent(Vertices, Indices);
     cout << Index <<" mesh obj contains " << Vertices.size() << " verts " << Indices.size() << " index" << endl;
@@ -312,8 +311,13 @@ void Mesh::MeshVert::Init(const vector<Vertex>& Vertices, const std::vector<unsi
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * NumIndices, &Indices[0], GL_STATIC_DRAW);
     
+    this->m_vertices = Vertices;
+    this->m_indices = Indices;
     /*
+    this->m_vertices.insert(this->m_vertices.end(), Vertices.begin(), Vertices.end());
+    this->m_indices.insert(this->m_indices.end(), Indices.begin(), Indices.end());
     */
+
 }
 
 void Mesh::MeshVert::CalculateTangent(vector<Vertex>& Vertices, std::vector<unsigned int>& Indices)
@@ -341,6 +345,12 @@ void Mesh::MeshVert::CalculateTangent(vector<Vertex>& Vertices, std::vector<unsi
         v1.m_tangent = tangent;
         v2.m_tangent = tangent;
     }
+}
+
+void Mesh::MeshVert::FlashVertexData()
+{
+    this->m_vertices.clear();
+    this->m_indices.clear();
 }
 
 

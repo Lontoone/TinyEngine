@@ -1,8 +1,17 @@
 #include <iostream>
+
 #include <filesystem>
-#include "ui/UiManager.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+/*
+#ifndef GLEW_INC
+#define GLEW_INC
+#include <GL/glew.h>
+#endif // !GLEW_INC
+*/
+
+
+#include "ui/UiManager.h"
 #include "basic/Mesh.h"
 #include "basic/Fastsetup.h"
 
@@ -18,6 +27,7 @@
 #include <RuntimeShaderEditor.h>
 #include <DefaultGrid.h>
 #include <CameraFrustum.h>
+#include <IndirectInstancedMesh.h>
 
 //#include "basic/TransformObject.h"
 
@@ -62,6 +72,7 @@ GLfloat vertex[] = { 1.0, 1.0f, 1.0f };
 GLuint index = 0; // The index of the point
 GLuint vao,vbo;
 GLuint ebo;
+
 void test_point() {
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glPointSize(100) ;
@@ -85,6 +96,9 @@ void test_point() {
 	);
 	glDisableVertexAttribArray(0);
 }
+
+
+
 
 using namespace std;
 int main(int argc , char** argv) {
@@ -194,6 +208,8 @@ int main(int argc , char** argv) {
 
 #pragma endregion
 
+	IndirectInstancedMesh id_mesh(mesh);
+
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // µ¥¨ìconsole °e¥Xkill flag
 		
@@ -223,6 +239,7 @@ int main(int argc , char** argv) {
 		//========== Split View ===========
 		// For game view
 		render_game_view(game_fbo ,game_camera, &s_default_shader);
+		id_mesh.Render(); //TEST
 
 		// For scene view
 		scene_camera->Do();

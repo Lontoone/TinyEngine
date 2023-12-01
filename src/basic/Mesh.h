@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <glad/glad.h>
+//#include <GL/glew.h>
 #include "GameObject.h"
 #include "Component.h"
 #include "Material.h"
@@ -48,8 +49,9 @@ public:
 
 	string m_srcPath = "";
 	string m_srcDirecotory ="";
-    vector<Vertex> m_vertices;
-    vector<unsigned int> m_indices;
+
+    //vector<Vertex> m_vertices;
+    //vector<unsigned int> m_baseVertex;
 
     struct MeshVert {
         MeshVert();
@@ -58,14 +60,20 @@ public:
         void Init(const vector<Vertex>& Vertices,
             const std::vector<unsigned int>& Indices);
         void CalculateTangent(vector<Vertex>& Vertices, std::vector<unsigned int>& Indices);
+        void FlashVertexData();  // You should clear vertices and index data after binding them to GPU.
 
         GLuint VA;
         GLuint VB;
         GLuint IB;
         unsigned int NumIndices;
         unsigned int MaterialIndex;
+
+        vector<Vertex> m_vertices;
+        vector<unsigned int> m_indices;
     };
+    vector<MeshVert> m_Entries;
 	
+    void flash_entity_data(); // TODO....
     void Render();
 	void Do() ; 
     
@@ -75,7 +83,6 @@ public:
 	 
 
 private:
-    vector<MeshVert> m_Entries;
 	Shader m_default_shader;
     //vector<Texture*> m_Textures; //TODO: model texture
 
