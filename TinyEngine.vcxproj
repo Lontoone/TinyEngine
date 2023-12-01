@@ -114,7 +114,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;$(solutionDir)\Linking\lib\glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

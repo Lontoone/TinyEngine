@@ -4,7 +4,7 @@
 #define FASET_SETUP
 
 #include <iostream>
-#include <glad/glad.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <map>
 

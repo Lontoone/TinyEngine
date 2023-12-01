@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <filesystem>
-#include <glad/glad.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 /*
 #ifndef GLEW_INC
@@ -208,7 +208,7 @@ int main(int argc , char** argv) {
 
 #pragma endregion
 
-	IndirectInstancedMesh id_mesh(mesh);
+	//IndirectInstancedMesh id_mesh(Mesh[]{ mesh });
 
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // 等到console 送出kill flag
@@ -239,7 +239,7 @@ int main(int argc , char** argv) {
 		//========== Split View ===========
 		// For game view
 		render_game_view(game_fbo ,game_camera, &s_default_shader);
-		id_mesh.Render(); //TEST
+		//id_mesh.Render(); //TEST
 
 		// For scene view
 		scene_camera->Do();
@@ -347,15 +347,21 @@ GLFWwindow* init() {
 	//把window放到thread上
 	glfwMakeContextCurrent(window);
 	ui_manager.init_imgui(window);
-	gladLoadGL();
-
-
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		/* Problem: glewInit failed, something is seriously wrong. */
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+	//gladLoadGL();
+	/*
 	//初始化glad
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		cout << "Failed init glad" << endl;
 		glfwTerminate();
 		return nullptr;
 	}
+	*/
 	//定義視窗
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT); //(x, y , width , height)
 

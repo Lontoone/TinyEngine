@@ -18,7 +18,7 @@ IndirectInstancedMesh::IndirectInstancedMesh(Mesh meshes[])
 
 
 			this->m_all_vertex.insert(	this->m_all_vertex.end() , meshes[i].m_Entries[j].m_vertices.begin() , meshes[i].m_Entries[j].m_vertices.end());
-			this->m_all_index.insert(	this->m_all_index.end(), meshes[i].m_Entries[j].m_vertices.begin(), meshes[i].m_Entries[j].m_vertices.end());
+			this->m_all_index.insert(	this->m_all_index.end(), meshes[i].m_Entries[j].m_indices.begin(), meshes[i].m_Entries[j].m_indices.end());
 
 			start_index_counter += meshes[i].m_Entries[j].m_indices.size();
 			start_vertex_counter += meshes[i].m_Entries[j].m_vertices.size();
@@ -47,7 +47,7 @@ void IndirectInstancedMesh::add_draw_cmds(GLuint vertex_count, GLuint instance_c
 
 void IndirectInstancedMesh::Do()
 {
-	this->Render();
+	//this->Render();
 }
 
 void IndirectInstancedMesh::Render()
@@ -65,19 +65,19 @@ void IndirectInstancedMesh::InitBuffers()
 	// storage buffer
 	glGenBuffers(1 , &this->ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER , this->ssbo);
-	glBufferStorage(GL_SHADER_STORAGE_BUFFER , sizeof(this->m_all_vertex) , &this->m_all_vertex , GL_DYNAMIC_STORAGE_BIT);
+	//glBufferStorage(GL_SHADER_STORAGE_BUFFER , sizeof(this->m_all_vertex) , &this->m_all_vertex[0], GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER , 0 , ssbo);
 	glBindBuffer(GL_ARRAY_BUFFER, this->ssbo); // Bind the buffer
 
 	// command buffer
 	glGenBuffers(1 , &this->ibo);
 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this->ibo);
-	glBufferStorage(GL_DRAW_INDIRECT_BUFFER, sizeof(this->m_draw_cmds), &this->m_draw_cmds, GL_MAP_READ_BIT);
+	glBufferStorage(GL_DRAW_INDIRECT_BUFFER, sizeof(this->m_draw_cmds), &this->m_draw_cmds[0], GL_MAP_READ_BIT);
 
 	// index buffer
 	glGenBuffers(1 , &this->ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->m_all_index), &this->m_all_index, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->m_all_index), &this->m_all_index[0], GL_STATIC_DRAW);
 
 	//TODO: VertexAttribArray....
 
