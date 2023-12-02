@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;$(SolutionDir)\src\config;$(SolutionDir)\src\utlis;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;$(SolutionDir)\src\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -201,13 +201,18 @@
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
     <ClInclude Include="src\basic\Texture.h" />
+    <ClInclude Include="src\config\env_path.h" />
     <ClInclude Include="src\ui\RuntimeShaderEditor.h" />
     <ClInclude Include="src\ui\UIableComponent.h" />
     <ClInclude Include="src\ui\UiItem.h" />
     <ClInclude Include="src\ui\UiManager.h" />
     <ClInclude Include="src\ui\UiPanel.h" />
+    <ClInclude Include="src\utlis\SpatialSample.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\assets\poissonPoints_1010s.ss2" />
+    <None Include="src\assets\poissonPoints_155304s.ss2" />
+    <None Include="src\assets\poissonPoints_2797s.ss2" />
     <None Include="src\assets\shaders\cs_grass.glsl" />
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
@@ -227,6 +232,10 @@
     <None Include="src\assets\shaders\frame_sin_wave_frag.glsl" />
     <None Include="src\assets\shaders\frame_vert.glsl" />
     <None Include="src\assets\shaders\frame_water_frag.glsl" />
+    <None Include="src\assets\shaders\hw3_reset_cs.glsl" />
+    <None Include="src\assets\shaders\hw3_view_culling.glsl" />
+    <None Include="src\assets\shaders\Indir_default_frag.glsl" />
+    <None Include="src\assets\shaders\Indir_default_vert.glsl" />
     <None Include="src\assets\shaders\unlit_vert.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
     <None Include="src\assets\shaders\vertexShader_ogl_450.glsl" />

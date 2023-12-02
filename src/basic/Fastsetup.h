@@ -26,7 +26,8 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 class Shader {
 public:
 	Shader();	
-	Shader(const string src_path, const string _shaderName);	
+	Shader(const string vert_path, const string frag_path);	
+	Shader(const string vert_path);
 	~Shader();
 
 	map<const char*, GLuint> shader_variables = {

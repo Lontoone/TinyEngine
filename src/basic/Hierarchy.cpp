@@ -21,6 +21,7 @@ void Hierarchy::add_object(GameObject* new_obj)
 	sInstance.m_gameobj_maps[new_obj->name ]= new_obj;
 	//this->add_ui_items(new_obj);
 }
+//void Hierarchy::add_object(IndirectInstancedMesh* indirect_groups){}
 void Hierarchy::add_main_camera()
 {
 	cout << "add main camera" << endl;

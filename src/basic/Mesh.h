@@ -17,25 +17,26 @@ using namespace std;
 using namespace glm;
 struct Vertex
 {
-    vec3 m_pos;
-    vec2 m_uv;
-    vec3 m_normal;
-    vec3 m_tangent;
+public:
+    vec4 m_pos;
+    vec4 m_uv;
+    vec4 m_normal;
+    vec4 m_tangent;
 
     Vertex() {}
 
     Vertex(const vec3& pos, const vec2& tex, const vec3& normal )
     {
-        m_pos = pos;
-        m_uv = tex;
-        m_normal = normal;
+        m_pos = vec4( pos , 1.0f);
+        m_uv = vec4(tex,0,0);
+        m_normal =  vec4(normal,1.0);
     }
 
     Vertex(const vec3& pos, const vec2& tex)
     {
-        m_pos = pos;
-        m_uv = tex;
-        m_normal = vec3(0.0f, 0.0f, 0.0f);
+        m_pos = vec4(pos, 1.0f);
+        m_uv = vec4(tex, 0, 0);
+        m_normal = vec4(0.0f, 0.0f, 0.0f,0.0f);
     }
 };
 
@@ -68,7 +69,8 @@ public:
         unsigned int NumIndices;
         unsigned int MaterialIndex;
 
-        vector<Vertex> m_vertices;
+        vector<vec4> m_vertices;
+        vector<Vertex> m_vertexs;
         vector<unsigned int> m_indices;
     };
     vector<MeshVert> m_Entries;

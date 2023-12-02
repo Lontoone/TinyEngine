@@ -215,6 +215,12 @@
     <ClInclude Include="src\basic\IndirectInstancedMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\config\env_path.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utlis\SpatialSample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
@@ -245,6 +251,13 @@
     <None Include="src\assets\shaders\fragmentShader_ogl_450.glsl" />
     <None Include="src\assets\shaders\vertexShader_ogl_450.glsl" />
     <None Include="src\assets\shaders\cs_grass.glsl" />
+    <None Include="src\assets\shaders\Indir_default_vert.glsl" />
+    <None Include="src\assets\shaders\Indir_default_frag.glsl" />
+    <None Include="src\assets\shaders\hw3_reset_cs.glsl" />
+    <None Include="src\assets\shaders\hw3_view_culling.glsl" />
+    <None Include="src\assets\poissonPoints_1010s.ss2" />
+    <None Include="src\assets\poissonPoints_2797s.ss2" />
+    <None Include="src\assets\poissonPoints_155304s.ss2" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

@@ -83,44 +83,7 @@ void SetProgramFromSource(MechainState& mechainState, const char* vs, const char
 	GLint success = 1;
 	success *= compile_shader(p,v);
 	success *= compile_shader(p,f);
-	/*
-	char infoLog[1000];
-	// compile vertex shader
-	glCompileShader(v);
-	// check for shader compile errors
-	glGetShaderiv(v, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(v, 1000, NULL, infoLog);
-		std::cout << "ERROR: VERTEX SHADER COMPILATION FAILED\n" << infoLog << std::endl;
-	}
-
-	// compile fragment shader
-	glCompileShader(f);
-	// check for shader compile errors
-	glGetShaderiv(f, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(f, 1000, NULL, infoLog);
-		std::cout << "ERROR: FRAGMENT SHADER COMPILATION FAILED\n" << infoLog << std::endl;
-	}
-
-	// attach shaders to program object
-	glAttachShader(p, f);
-	glAttachShader(p, v);
-
-	// link program
-	glLinkProgram(p);
-	// check for linking errors
-	glGetProgramiv(p, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(p, 1000, NULL, infoLog);
-		std::cout << "ERROR: SHADER PROGRAM LINKING FAILED\n" << infoLog << std::endl;
-	}
-
-	glDeleteShader(v);
-	glDeleteShader(f);
-	*/
+	
 	if (success) {
 		glUseProgram(p);
 	}
@@ -138,6 +101,27 @@ void UpdateFromSource(const MechainState& mechainState, const char* v_text, cons
 
 
 
+}
+
+/* Create Computer shader */
+void SetProgram(MechainState& mechainState , const string vs_file) {
+	mechainState.vertShaderId = glCreateShader(GL_COMPUTE_SHADER);
+	mechainState.programId = glCreateProgram();
+
+	char* vs = NULL;
+	vs = textFileRead(vs_file.c_str());
+
+	glShaderSource(mechainState.vertShaderId, 1, (const GLchar**)&vs, NULL);
+	GLint success = 1;
+	success *= compile_shader(mechainState.programId, mechainState.vertShaderId);
+	
+	if (success)
+		glUseProgram(mechainState.programId);
+	else
+	{
+		system("pause");
+		exit(123);
+	}
 }
 void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)
 {
@@ -197,6 +181,14 @@ Shader::Shader(const string vert_path, const string frag_path)
 		frag_path);
 
 	this->init_variables();
+}
+
+
+Shader::Shader(const string vert_path)
+{
+	// Load Compute Shader
+	this->m_state = MechainState();
+	SetProgram(this->m_state,vert_path);	
 }
 
 Shader::~Shader()

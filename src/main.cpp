@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 #include <filesystem>
@@ -8,8 +9,12 @@
 #define GLEW_INC
 #include <GL/glew.h>
 #endif // !GLEW_INC
-*/
 
+#define STRINGIFY(x) #x
+#define EXPAND(x) STRINGIFY(x)
+
+*/
+#include <env_path.h>
 
 #include "ui/UiManager.h"
 #include "basic/Mesh.h"
@@ -31,9 +36,6 @@
 
 //#include "basic/TransformObject.h"
 
-#define STRINGIFY(x) #x
-#define EXPAND(x) STRINGIFY(x)
-
 GLFWwindow* init();
 void update();
 void render();
@@ -46,13 +48,14 @@ using namespace std;
 void processInput(GLFWwindow* window, double dt);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_blit_stacks(vector<Shader>& blits_shaders , unsigned src_id );
+void set_shader_mvp(Shader* shader, Camera* camera);  //Debug...
 MechainState state;
 
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,50);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,0.1,1000 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,100);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,0.1,500 );
 
 
 float vertices[] = {
@@ -62,7 +65,7 @@ float vertices[] = {
 };
 
 
-static string src_path = EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
+const string src_path = GET_SRC_FOLDER();//EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
 DefaultEditorGrid* grid;
@@ -108,7 +111,7 @@ int main(int argc , char** argv) {
 	double _previous_time = 0;
 	float time_scale = 1;
 	
-	scene_camera->m_parent->m_position = vec3(50,100,50);
+	scene_camera->m_parent->m_position = vec3(50,50,50);
 	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
 
 	//test_point();
@@ -117,6 +120,11 @@ int main(int argc , char** argv) {
 	Shader s_default_shader(
 		src_path + string("\\assets\\shaders\\default_vert.glsl"),
 		src_path + string("\\assets\\shaders\\default_frag.glsl"));
+	Shader s_indirect_shader(
+		src_path + string("\\assets\\shaders\\Indir_default_vert.glsl"),
+		src_path + string("\\assets\\shaders\\Indir_default_frag.glsl"));
+	Shader cs_reset_shader(src_path + string("\\assets\\shaders\\hw3_reset_cs.glsl"));
+
 	s_default_shader.activate();
 	cout << "activate pg " << s_default_shader.m_state.programId << endl;
 
@@ -132,11 +140,13 @@ int main(int argc , char** argv) {
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);			
+	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_indirect_shader);			
+	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj" , s_indirect_shader);
+	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
 	obj.add_component(mesh);		
 	camera_obj.add_component((Component*)game_camera);
 
-	Hierarchy::instance().add_object(&obj);	
+	//Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_object(&camera_obj);
 	vec3 sun_postion = normalize(vec3(0, 1, 1));
 	
@@ -208,7 +218,8 @@ int main(int argc , char** argv) {
 
 #pragma endregion
 
-	//IndirectInstancedMesh id_mesh(Mesh[]{ mesh });
+	Mesh ind_mesh_list[] = {*mesh};	
+	IndirectInstancedMesh id_mesh(ind_mesh_list);
 
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // 等到console 送出kill flag
@@ -237,16 +248,27 @@ int main(int argc , char** argv) {
 		glEnable(GL_MULTISAMPLE);
 
 		//========== Split View ===========
-		// For game view
-		render_game_view(game_fbo ,game_camera, &s_default_shader);
-		//id_mesh.Render(); //TEST
+		// For game view		
+		render_game_view(game_fbo ,game_camera, &s_default_shader);		
+		//s_indirect_shader.activate();
+		id_mesh.DO_Before_Frame();
+		id_mesh.cs_view_culling_shader.activate();
+		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
+
+
+		set_shader_mvp(&s_indirect_shader, game_camera);
+		id_mesh.Do(); //TEST
 
 		// For scene view
 		scene_camera->Do();
 		render_game_view(scene_fbo,scene_camera, &s_default_shader);
+		set_shader_mvp(&s_indirect_shader, scene_camera);//TEST
+		id_mesh.Do(); //TEST
 
 		scene_fbo->activate();
 		gizmose_shader.activate();
+
+		// ========= Setting game camera for scene view =========
 		glm::mat4 view = scene_camera->getViewMatrix();
 		glm::mat4 projection = scene_camera->getProjectionMatrix();
 		glm::mat4 model = game_camera->m_model_matrix;
@@ -254,10 +276,11 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_V"), 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_P"), 1, GL_FALSE, value_ptr(projection));
-
+		
 		frustum.update(game_camera);
 		frustum.render();
-
+		// =====================================================
+		
 		// [Test]
 		//glBindVertexArray(vao);				
 		//glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0); // Draw the point
@@ -276,9 +299,9 @@ int main(int argc , char** argv) {
 		frame_buffer_debugger.End_Panel();
 
 		*/
+		//game_fbo->blit(game_fbo->framebuffer_texture[0], 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//--------------------------------------------		
-		//ui_manager.create_sceneNgame_window(rt_scene.m_texture_id , rt_game.m_texture_id);
+		//--------------------------------------------				
 		ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
@@ -293,6 +316,25 @@ int main(int argc , char** argv) {
 
 
 	return 0;
+}
+
+void set_shader_mvp(Shader * shader , Camera * camera) {
+	//-------------- [ TEMP 暫時的MVP ] ------------------
+	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 projection = glm::mat4(1.0f);
+	view = camera->getViewMatrix();
+	projection = camera->getProjectionMatrix();
+	glm::mat4 vp = projection * view;
+
+	render_grid(vp);
+	shader->activate();
+	//Render Game view
+	//glUniform3fv(glGetUniformLocation(s_default_shader.m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
+	//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
+
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
 }
 
 void render_game_view(FramebufferObject* fbo , Camera* camera , Shader* shader) {  //TODO: shader uniform... 
@@ -322,8 +364,10 @@ void render_game_view(FramebufferObject* fbo , Camera* camera , Shader* shader) 
 GLFWwindow* init() {
 	glfwInit();
 
+	/*
 	src_path.erase(0, 1); // erase the first quote
 	src_path.erase(src_path.size() - 1); // erase the last quote and the dot	
+	*/
 	printf(src_path.c_str());
 
 	// open gl version 3.3

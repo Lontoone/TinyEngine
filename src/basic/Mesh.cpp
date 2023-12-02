@@ -12,7 +12,7 @@ Mesh::Mesh(const string& path) :Mesh()
 
 }
 
-Mesh::Mesh(const string& path, Shader& _default_shader) :Mesh(path)
+Mesh::Mesh(const string& path, Shader& _default_shader)// :Mesh(path)
 {	
 	this->m_default_shader = _default_shader;
 	bool success = LoadModel(path);
@@ -39,11 +39,16 @@ void Mesh::Render()
         */
         glBindBuffer(GL_ARRAY_BUFFER, this->m_Entries[i].VB);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_Entries[i].IB);
-
+        /*
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);  //vertex
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12); //uv
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)20); //normal
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)32); //tangent
+        */
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);  //vertex
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)16); //uv
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)32); //normal
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)48); //tangent
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
@@ -151,12 +156,12 @@ bool Mesh::LoadModel(const string& path)
 bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
 {
     m_Entries.resize(pScene->mNumMeshes);
-    cout << "Loaded entries count " << m_Entries.size() << endl;
     //m_Textures.resize(pScene->mNumMaterials);
 
     // Initialize the meshes in the scene one by one
     // Scene是檔案下的空間，一個檔案可能包含多組mesh
     for (unsigned int i = 0; i < m_Entries.size(); i++) {
+        cout << "Loaded entries count " << m_Entries.size() << endl;
         const aiMesh* paiMesh = pScene->mMeshes[i];
         InitMesh(i, paiMesh);
     }
@@ -311,8 +316,15 @@ void Mesh::MeshVert::Init(const vector<Vertex>& Vertices, const std::vector<unsi
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * NumIndices, &Indices[0], GL_STATIC_DRAW);
     
-    this->m_vertices = Vertices;
-    this->m_indices = Indices;
+    
+    for (int i = 0; i < Vertices.size();i++) {
+        this->m_vertices.push_back(Vertices[i].m_pos);
+    }
+    for (int i = 0; i < Indices.size(); i++) {
+        this->m_indices.push_back(Indices[i]);
+    }
+    this->m_vertexs.insert(this->m_vertexs.end(), Vertices.begin(), Vertices.end());
+    //this->m_indices = Indices;
     /*
     this->m_vertices.insert(this->m_vertices.end(), Vertices.begin(), Vertices.end());
     this->m_indices.insert(this->m_indices.end(), Indices.begin(), Indices.end());
@@ -341,9 +353,9 @@ void Mesh::MeshVert::CalculateTangent(vector<Vertex>& Vertices, std::vector<unsi
         tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
         tangent = glm::normalize(tangent);
 
-        v0.m_tangent = tangent;
-        v1.m_tangent = tangent;
-        v2.m_tangent = tangent;
+        v0.m_tangent = vec4(tangent , 0.0);
+        v1.m_tangent = vec4(tangent, 0.0);
+        v2.m_tangent = vec4(tangent, 0.0);
     }
 }
 

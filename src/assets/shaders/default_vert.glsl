@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUv;
@@ -21,10 +21,9 @@ out vec3 light_dir;
 //out vec4 color;
 void main(){
 	
-	//gl_Position = projection * view * model * vec4(aPos, 1.0);//+ gl_InstanceID;
-	gl_Position = projection * view * model * vec4(aPos, 1.0) + gl_InstanceID;
+	gl_Position = projection * view * model * vec4(aPos, 1.0);//+ gl_InstanceID;
+	//gl_Position = projection * view * model * vec4(aPos, 1.0) + gl_InstanceID;
 	world_normal = aNormal;
-
 	//color =vec4(aColor , 1.0f) ;
 	texcoord = aUv;
 

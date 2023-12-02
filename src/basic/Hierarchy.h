@@ -1,6 +1,6 @@
 #pragma once
-#ifndef HIERARCHY
-#define HIERARCHY
+#ifndef HIERARCHY_H
+#define HIERARCHY_H
 
 #include <iostream>
 #include <BasicFlags.h>
@@ -28,6 +28,7 @@ public:
 	void draw_ui_loop();	
 
 	void add_object(GameObject* new_obj);
+	void add_indirect_object(GameObject* indirec_groups);
 	void add_main_camera();
 	vector<GameObject*> m_game_objects;
 
