@@ -8,10 +8,10 @@ uniform sampler2D DIFFUSE;
 uniform sampler2D NORMAL;
 
 void main() {
-    //frag_color = vec4(texcoord.xy,0,0);
-    frag_color = texture(DIFFUSE , texcoord.xy);
-    
+    frag_color = vec4(texcoord.xy,0,0);
+    //frag_color = texture(DIFFUSE , texcoord.xy);
+    /*
     if (frag_color.a <0.5) {
         discard;
-    }
+    }*/
 }

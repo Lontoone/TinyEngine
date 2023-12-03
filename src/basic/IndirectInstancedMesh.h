@@ -33,7 +33,6 @@ struct DrawElementCommand
 	GLuint first_index;
 	GLuint base_vertex;   //index ¤~­n : The value added to the vertex index before indexing into the vertex buffer
 	GLuint base_instance;
-	GLuint max_count;
 };
 
 public :
@@ -43,7 +42,7 @@ public :
 	Shader cs_reset_shader;
 	Shader cs_view_culling_shader;
 
-	IndirectInstancedMesh(Mesh meshes[]);
+	IndirectInstancedMesh(vector<Mesh>& meshes);
 	void load_position();
 	void add_draw_cmds(GLuint vertex_count , GLuint instance_count , GLuint first_index , GLuint base_vertex , GLuint base_instance);
 	

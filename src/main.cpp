@@ -132,7 +132,7 @@ int main(int argc , char** argv) {
 		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
 		src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 
-	GameObject obj = GameObject("Building");
+	//GameObject obj = GameObject("Building");
 	//GameObject dog_obj = GameObject("Dog");
 	GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
 	camera_obj.set_name("Camera");	
@@ -141,9 +141,11 @@ int main(int argc , char** argv) {
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_indirect_shader);			
-	Mesh* mesh =new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj" , s_indirect_shader);
+	Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj", s_indirect_shader);
+	Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj", s_indirect_shader);
+	Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" , s_indirect_shader);
 	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
-	obj.add_component(mesh);		
+	//obj.add_component(mesh_b1);
 	camera_obj.add_component((Component*)game_camera);
 
 	//Hierarchy::instance().add_object(&obj);	
@@ -218,7 +220,8 @@ int main(int argc , char** argv) {
 
 #pragma endregion
 
-	Mesh ind_mesh_list[] = {*mesh};	
+	vector<Mesh> ind_mesh_list = {*mesh_b1  , *mesh_b2 , *mesh_b3 };	
+	//vector<Mesh> ind_mesh_list = { *mesh_b1 , *mesh_b3 };
 	IndirectInstancedMesh id_mesh(ind_mesh_list);
 
 	double delta_time = 0.025 ;
@@ -255,13 +258,14 @@ int main(int argc , char** argv) {
 		id_mesh.cs_view_culling_shader.activate();
 		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
 
-
+		s_indirect_shader.activate();// temp
 		set_shader_mvp(&s_indirect_shader, game_camera);
 		id_mesh.Do(); //TEST
 
 		// For scene view
 		scene_camera->Do();
 		render_game_view(scene_fbo,scene_camera, &s_default_shader);
+		s_indirect_shader.activate(); // temp
 		set_shader_mvp(&s_indirect_shader, scene_camera);//TEST
 		id_mesh.Do(); //TEST
 

@@ -1,6 +1,6 @@
 #version 430 core
 
-layout(local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 3, local_size_y = 1, local_size_z = 1) in;
 
 struct Offset
 {
@@ -27,17 +27,17 @@ layout(std430, binding = 2)buffer In_cmd {
 };
 
 uniform float time = 0;
-uniform uint MAX_COUNT = 10000;
+uniform uint MAX_COUNT = 159111;
 void main() {
 
-	uint idx = gl_GlobalInvocationID.x;
-	uint cmd_instance_idx = int( floor(idx/ MAX_COUNT));
+	uint idx = gl_LocalInvocationID.x;
+	//uint cmd_instance_idx = int( floor(idx/ MAX_COUNT));
 	if (idx > MAX_COUNT) {return;}
 
 	//draw_cmd[cmd_instance_idx].instanceCount = int(floor(time*10)) ;
-	draw_cmd[cmd_instance_idx].instanceCount = 0;
+	//draw_cmd[cmd_instance_idx].instanceCount = 0;
 	//draw_pt[idx].position = all_pt[idx].position + sin(time);
-	
+	draw_cmd[idx].instanceCount = 0;
 	//draw_pt[idx].position = all_pt[idx].position;
 	//draw_pt[idx].position.x += sin(idx + time);
 
