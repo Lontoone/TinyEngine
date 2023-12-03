@@ -29,6 +29,7 @@ public:
 	TransformObject(GameObject* _obj);
 	bool m_auto_update_matrix = true;
 	vec3 m_position = vec3(0.0f);
+	vec3 m_world_position = vec3(0.0f);
 	vec3 m_scale = vec3(1.0f);
 	vec3 m_rotation = vec3(0.0f);
 	vec3 m_forward = vec3(0, 0, 1);
@@ -51,12 +52,12 @@ public:
 	void init_ui_content() override;
 	Component* copy() override;
 
-protected:
-	//void UpdateTransform();
 	void update_rotation_matrix_eular();
 	void update_translate_matrix();
 	void update_scale_matrix();
 	void update_local();
+protected:
+	//void UpdateTransform();
 
 };
 

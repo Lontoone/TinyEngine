@@ -14,7 +14,8 @@ public:
 public:
 	void init( Camera* camera);
 	inline void update(const Camera* camera) {
-		this->m_modelMat = camera->m_parent->m_model_matrix;
+		//this->m_modelMat = camera->m_parent->m_model_matrix;
+		this->m_modelMat = camera->m_model_matrix;
 	}
 	void resize( Camera* camera);
 	void render();

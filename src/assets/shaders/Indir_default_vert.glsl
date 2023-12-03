@@ -8,7 +8,10 @@ layout(location = 3) in vec4 aTangent;
 //layout(location = 10) in vec4 offset;
 //layout(location = 1) in vec4 color;
 struct OffsetData {
-    vec4 offset;
+    vec4 offset;    
+};
+struct AdditionalData{
+    vec4 state;
 };
 struct DrawCommand {
     uint count;
@@ -22,6 +25,9 @@ layout(std430, binding = 1) buffer visiable_offset {
 };
 layout(std430, binding = 2)buffer In_cmd {
     DrawCommand draw_cmd[];
+};
+layout(std430, binding = 3)buffer In_State {
+    AdditionalData additional_state[];
 };
 
 //vec3 slight_pos = vec3(0,1,0);

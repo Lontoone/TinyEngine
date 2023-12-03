@@ -153,7 +153,7 @@ vector<vec4> hw3_load_position() {
 	//int num_sp = 10000;
 	for (int idx = 0; idx < num_sp; idx++) {
 		const float* pos = sp0->position(idx);
-		offset.push_back(vec4(pos[0]+ x_offset, pos[1], pos[2]+ z_offset, 1));
+		offset.push_back( vec4(pos[0]+ x_offset, pos[1], pos[2]+ z_offset, 1));
 	}
 	DRAW_COUNT[0] = num_sp;
 	/*
@@ -173,6 +173,23 @@ vector<vec4> hw3_load_position() {
 	}
 	DRAW_COUNT[2] = num_sp;
 	return offset;
+}
+void hw3_set_additional_state(vector<vec4>& state) {
+
+	// Create a random device
+	std::random_device rd;
+	// Initialize Mersenne Twister pseudo-random number generator
+	std::mt19937 gen(rd());
+	for (int i = 0; i < state.size(); i++) {
+
+		// Uniform distribution between 1 and 100
+		std::uniform_int_distribution<> dis(0.5, 1.5);
+		float s = dis(gen);
+		state[i].x = s;
+		state[i].y = s;
+		state[i].z = s;
+		state[i].w = 1;
+	}
 }
 
 
@@ -350,7 +367,11 @@ IndirectInstancedMesh::IndirectInstancedMesh(vector<Mesh>& meshes)
 	this->hw3_init_textures();
 	//test_init();
 }
-
+void IndirectInstancedMesh::hw3_update_dog_position(vec3 pos)
+{
+	this->cs_view_culling_shader.activate();
+	glUniform3fv(glGetUniformLocation(this->cs_view_culling_shader.m_state.programId, "DOG_POS"), 1, value_ptr(pos));
+}
 void IndirectInstancedMesh::add_draw_cmds(GLuint vertex_count, GLuint instance_count, GLuint first_index, GLuint base_vertex, GLuint base_instance)
 {
 	DrawElementCommand cmd ;
@@ -443,6 +464,9 @@ void IndirectInstancedMesh::Render()
 	glBindVertexArray(0);
 }
 
+// ================ HW3 ==================
+// £¾===================================
+
 void IndirectInstancedMesh::init_buffers()
 {
 	glGenVertexArrays(1, &this->vao);
@@ -462,13 +486,16 @@ void IndirectInstancedMesh::init_buffers()
 	
 	// all offset -> ssbo
 	//this->m_all_offset= hw3_load_position( );
-	this->m_all_visiable_offset.resize(this->m_all_offset.size());
+	this->m_all_visiable_offset.resize(this->m_all_offset.size());	
+	this->m_all_state.resize(this->m_all_offset.size());
+	hw3_set_additional_state(this->m_all_state);
 
 	glGenBuffers(1, &this->ssbo_offset);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->ssbo_offset); // Bind the buffer
 	glBufferStorage(GL_SHADER_STORAGE_BUFFER, this->m_all_offset.size() * sizeof(float) * 4, &this->m_all_offset[0], GL_MAP_READ_BIT);
+	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, this->ssbo_offset);
-	glBindBuffer(GL_ARRAY_BUFFER, this->ssbo_offset); // Bind the buffer
+	//glBindBuffer(GL_ARRAY_BUFFER, this->ssbo_offset); // Bind the buffer
 
 	// only the draw target offset -> ssbo
 	glGenBuffers(1, &this->ssbo_draw);
@@ -478,6 +505,12 @@ void IndirectInstancedMesh::init_buffers()
 	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, this->ssbo_draw);
 	/*
 	*/
+
+	// additional status -> ssbo
+	glGenBuffers(1, &this->ssbo_additional);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->ssbo_additional); // Bind the buffer
+	glBufferStorage(GL_SHADER_STORAGE_BUFFER, this->m_all_state.size() * sizeof(float) * 4, &this->m_all_state[0], GL_MAP_READ_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, this->ssbo_additional);
 	
 	/*
 	//glUseProgram(cs_reset_p);

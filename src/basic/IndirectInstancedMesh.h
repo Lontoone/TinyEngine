@@ -16,7 +16,7 @@
 #include <format>
 #include <vector>
 #include <Component.h>
-
+#include <random>
 // ====== For HW3 =======
 #include <SpatialSample.h>
 using namespace INANOA::SCENE::EXPERIMENTAL;
@@ -43,10 +43,24 @@ public :
 	Shader cs_view_culling_shader;
 	Shader indirect_render_shader;
 
+	/*
+	struct IndirectDrawOffsetData
+	{
+		vec4 offset;
+		vec4 eaten;
+		IndirectDrawOffsetData();
+		IndirectDrawOffsetData(vec4 _offset) {
+			offset = _offset;
+			eaten = vec4(0);
+		};
+	};
+	*/
+
 	IndirectInstancedMesh(vector<Mesh>& meshes);
 	void load_position();
 	void add_draw_cmds(GLuint vertex_count , GLuint instance_count , GLuint first_index , GLuint base_vertex , GLuint base_instance);
 	
+	void hw3_update_dog_position(vec3 pos);
 
 	// Component Function override
 	void Do() override;
@@ -59,16 +73,19 @@ private:
 	GLuint vbo;
 	GLuint ssbo_draw;
 	GLuint ssbo_offset;
+	GLuint ssbo_additional; //for hw3
 	GLuint ebo;
 	GLuint ibo; // indirect buffer object
 	GLuint textures_id;
+
 
 	//vector<vec4>			m_all_vertex;
 	vector<Vertex>			m_all_vertex;
 	//vector<float> m_all_uv;
 	vector<unsigned int>	m_all_index;
-	vector<vec4>			m_all_offset;
+	vector<vec4>			m_all_offset;	
 	vector<vec4>			m_all_visiable_offset;
+	vector<vec4>			m_all_state; // scale (vec3) , eaten (1)
 
 	void init_buffers();
 	void init_compute_shader();

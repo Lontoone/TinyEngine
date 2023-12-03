@@ -125,8 +125,7 @@ void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* co
 	}
 }
 
-glm::mat4 Camera::getViewMatrix() {
-	
+glm::mat4 Camera::getViewMatrix() {	
 	return inverse( this->m_model_matrix);
 }
 

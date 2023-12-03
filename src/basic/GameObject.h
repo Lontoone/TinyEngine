@@ -53,7 +53,7 @@ public:
 
 	void set_name(const char* new_name);	
 	void add_component(Component* _new_comp );
-	void add_component(UiableComponent* _new_comp);
+	void add_component(UiableComponent* _new_comp);	
 	
 	void DO_Before_Frame() override;
 	void Do_End_Frame() override;

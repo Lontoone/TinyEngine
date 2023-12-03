@@ -208,3 +208,4 @@ void GameObject::add_component(UiableComponent* _new_comp)
 	this->m_components_panels.push_back((UiPanel*)_new_comp);
 	this->add_component((Component*)_new_comp);
 }
+

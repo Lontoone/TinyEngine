@@ -13,7 +13,9 @@ struct DrawCommand {
 	uint baseVertex;
 	uint baseInstance;	
 };
-
+struct AdditionalData {
+	vec4 state;
+};
 layout(std430, binding = 0)buffer InPart_all {
 	Offset all_pt[];
 };
@@ -24,26 +26,26 @@ layout(std430, binding = 1)buffer InPart_target {
 layout(std430, binding = 2)buffer In_cmd {
 	DrawCommand draw_cmd[];
 };
+layout(std430, binding = 3)buffer In_State {
+	AdditionalData additional_state[];
+};
 
 //uint data_count[3] = uint[3](0, 1010,2797);
 uint data_count[3] = uint[3](0, 155304, 156314);
 //uint data_count[3] = uint[3](0, 10000, 1510);
 uniform mat4 MATRIX_VP;
+uniform vec3 DOG_POS;
 //uniform uint MAX_COUNT=10000;
 void main() {
 
 	// Global Unique index
 	//uint idx = gl_GlobalInvocationID.x;
 	uint idx = gl_GlobalInvocationID.z * (gl_NumWorkGroups.x * gl_NumWorkGroups.y) + gl_GlobalInvocationID.y * gl_NumWorkGroups.x + gl_GlobalInvocationID.x;
-	if (idx > 159111) { return; }
+	if (idx > 159111 || additional_state[idx].state.w <1) { return; }
 
 	// get command index
 	uint cmd_instance_idx = 0;
-	/*
-	if (idx >= draw_cmd[1].baseInstance) {
-		cmd_instance_idx = 1; 
-	}
-	*/
+
 	if (idx <= data_count[1]) {
 		cmd_instance_idx = 0;
 	}
@@ -56,9 +58,14 @@ void main() {
 
 	// Culling
 	vec4 world_position = MATRIX_VP * all_pt[idx].position ;
-	float clip_range = world_position.w ;
-	//vec4 ndc_pos = world_position.xyzw / world_position.w;
+	float clip_range = world_position.w;
+	vec4 ndc_pos = world_position.xyzw / world_position.w;
+	//vec4 clip_space_dog = MATRIX_VP * vec4( DOG_POS,1.0);
 
+	if (distance(all_pt[idx].position.xyz, DOG_POS*2) <5) {   // I don't know why , but *2 works
+		additional_state[idx].state.w = 0;
+		return;
+	}
 	
 	/*
 	if (idx > 3819) {
@@ -66,8 +73,8 @@ void main() {
 	}
 	*/
 	
-	//if (ndc_pos.x >1 || ndc_pos.y> 1 || ndc_pos.z >1 || ndc_pos.x <-1 || ndc_pos.y < -1 || ndc_pos.z < -1) {
-	if (world_position.x > clip_range || world_position.y > clip_range*1.25 || world_position.z > clip_range || world_position.x < -clip_range || world_position.y < -clip_range*1.25 || world_position.z < -clip_range) {
+	if (ndc_pos.x >1.1 || ndc_pos.y> 1 || ndc_pos.z >1.1 || ndc_pos.x <-1.1 || ndc_pos.y < -1 || ndc_pos.z < -1.1) {
+	//if (world_position.x > clip_range * 1.1 || world_position.y > clip_range || world_position.z > clip_range*2 || world_position.x < -clip_range * 1.1 || world_position.y < -clip_range || world_position.z < -clip_range) {
 		return;
 	}
 

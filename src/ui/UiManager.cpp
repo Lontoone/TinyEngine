@@ -92,6 +92,30 @@ void UiManager::render_ui()
 	ImGui_ImplOpenGL3_RenderDrawData(GetDrawData());
 }
 
+void UiManager::update_fps()
+{
+	double currentTime = glfwGetTime();
+	double deltaTime = currentTime - this->temp_lastTime;
+	this->temp_nbFrames++;
+
+	if (deltaTime >= 1.0) { // If last print was more than 1 sec ago
+		// print and reset timer
+		this->m_fps = this->temp_nbFrames/deltaTime;
+		this->m_ms = 1000.0 / this->m_fps;
+		
+		this->temp_nbFrames = 0;
+		this->temp_lastTime += 1.0;
+	}
+}
+
+void UiManager::create_fps_window()
+{
+	Begin("FPS Window");
+	Text("fps %f" , this->m_fps);
+	Text("ms %f", this->m_ms);
+	End();
+}
+
 void UiManager::create_window(const char* _window_name)
 {
 	Begin(_window_name);

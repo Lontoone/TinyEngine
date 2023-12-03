@@ -126,14 +126,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_PRJ_SRC_PATH="$(ProjectDir)src";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;$(SolutionDir)\src\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Linking\include;imgui;$(SolutionDir)src\basic;$(SolutionDir)\src\ui;$(SolutionDir)\src\config;$(SolutionDir)\src\utlis;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(solutionDir)\Linking\lib\glfw3.lib;$(solutionDir)\Linking\lib\assimp\assimp-vc143-mtd.lib;opengl32.lib;$(solutionDir)\Linking\lib\glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\glew32;$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

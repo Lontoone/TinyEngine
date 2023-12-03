@@ -66,8 +66,8 @@ MechainState state;
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,0.1,100);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,0.1,500 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,5,50);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,10,500 );
 
 
 float vertices[] = {
@@ -76,7 +76,9 @@ float vertices[] = {
 		0.5f , 0.0f , 0.0f,
 };
 
-
+//=====================================
+// |        Basice Set up             |
+//=====================================
 const string src_path = GET_SRC_FOLDER();//EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
@@ -120,11 +122,10 @@ using namespace std;
 int main(int argc , char** argv) {
 	std::cout << "hello"<<endl;	
 	GLFWwindow* window =  init();  // TODO: init 
-
+	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
 	float time_scale = 1;
-	
-	scene_camera->m_parent->m_position = vec3(50,50,50);
+	scene_camera->m_parent->m_position = vec3(150,150, 150);
 	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
 
 	//test_point();
@@ -152,6 +153,7 @@ int main(int argc , char** argv) {
 	GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
 	camera_obj.set_name("Camera");	
 	
+	
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
@@ -168,6 +170,7 @@ int main(int argc , char** argv) {
 
 
 	camera_obj.add_component((Component*)game_camera);
+	//game_camera->set_transform_parent(camera_obj.m_transform);
 	Hierarchy::instance().add_object(&camera_obj);
 	
 	vector<Shader> stacked_blits_shaders;
@@ -248,21 +251,30 @@ int main(int argc , char** argv) {
 		if( time_scale>0)
 			_previous_time += delta_time * time_scale;
 		
+
 		processInput(window , 0.1f);
 		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
 		game_fbo->activate();
 
 		//glUseProgram(state.programId);
 
-		//清除顏色
+		/*=====================
+		*		CLEAR UP
+		=======================*/
 		ui_manager.new_frame();
+		ui_manager.create_fps_window();
+		ui_manager.update_fps();
 
+		/*============================
+		*		BEFORE FRAME SETTING
+		=============================*/
 		Begin("Sun positon");
 		SliderFloat3("sun position", &sun_postion[0], -10, 10);
 		End();
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
 		hw3_move_slim(obj);
+		id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -275,9 +287,9 @@ int main(int argc , char** argv) {
 		//s_indirect_shader.activate();
 		id_mesh.DO_Before_Frame();
 		id_mesh.cs_view_culling_shader.activate();
+		game_camera->Do();
 		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
-
-		//s_indirect_shader.activate();// temp
+				
 		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);
 		id_mesh.Do(); //TEST
 
@@ -345,11 +357,22 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	//-------------- [ TEMP 暫時的MVP ] ------------------
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
+	/*
+	if (camera->m_gameobject != nullptr) {
+		//view = camera->m_parent->m_model_matrix * camera->m_gameobject->m_transform->m_model_matrix * camera->getViewMatrix();
+		//view = inverse( camera->m_parent->m_model_matrix * camera->m_gameobject->m_transform->m_model_matrix );
+		projection = camera->getProjectionMatrix();
+	}
+	else {
+		view = camera->getViewMatrix();
+		projection =  camera->getProjectionMatrix();
+	}
+	*/
 	view = camera->getViewMatrix();
 	projection = camera->getProjectionMatrix();
 	glm::mat4 vp = projection * view;
 
-	render_grid(vp);
+	//render_grid(vp);
 	shader->activate();
 	//Render Game view
 	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "CAMERA_WORLD_POSITION"), 1, value_ptr(camera->m_position));
@@ -512,15 +535,21 @@ static glm::vec2 screenCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2);
 void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
+	/*  TODO: 統一camera和object設計
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		game_camera->m_parent->m_position -= vec3(game_camera->m_rot_matrix * vec4( game_camera->m_parent->m_forward * vec3(dt),1.0));
+		game_camera->m_parent->m_position -= vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));
 		
+		game_camera->update_translate_matrix();
+		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		
-		game_camera->m_parent->m_position += vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));
+		game_camera->m_parent->m_position += vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));		
+			
+		//game_camera->Do();
+		game_camera->update_translate_matrix();
+		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
 	}
-
+	*/
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
@@ -573,6 +602,7 @@ void processInput(GLFWwindow* window, double dt) {
 		mat4 rotate_offset	=  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
 
 		game_camera->m_position =rotate_offset * zoom_off;
+		//game_camera->update_translate_matrix();
 
 		game_camera->m_forward = -game_camera->get_view_dir();
 		game_camera->m_right= glm::normalize(glm::cross(game_camera->m_forward, WORLD_UP));
@@ -586,6 +616,8 @@ void processInput(GLFWwindow* window, double dt) {
 								game_camera->m_up);
 		glm::mat3 rotation(view);
 		game_camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
+		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
+		
 		/*
 		*/
 	}
