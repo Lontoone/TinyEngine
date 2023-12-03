@@ -26,6 +26,7 @@ layout(std430, binding = 2)buffer In_cmd {
 
 uniform mat4 MATRIX_VP;
 out vec4 texcoord;
+out  int draw_id;
 
 void main()
 {
@@ -35,7 +36,7 @@ void main()
     //uint idx = gl_InstanceID + gl_BaseInstance;     
     uint idx = draw_cmd[gl_DrawID].baseInstance + gl_InstanceID;
     uint cmd_idx = 0;
-
+    
     //if (idx >= draw_cmd[cmd_idx].instanceCount) {
     /*
     if (idx >= draw_cmd[cmd_idx].instanceCount) {
@@ -50,4 +51,5 @@ void main()
     gl_Position = MATRIX_VP * (vertex + visiable_data[idx].offset );
     
     texcoord = aUv;
+    draw_id = gl_DrawID;
 }

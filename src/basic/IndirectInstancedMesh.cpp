@@ -1,5 +1,6 @@
 
 #include "IndirectInstancedMesh.h"
+#include <stb/stb_image.h>
 
 #pragma region TEST_CODE
 float datas[] = {
@@ -174,6 +175,75 @@ vector<vec4> hw3_load_position() {
 	return offset;
 }
 
+
+void IndirectInstancedMesh::hw3_init_textures()
+{
+	//glEnable(GL_TEXTURE_2D_ARRAY);
+	const int NUM_TEXTURES = 3;
+	const int T_WIDTH = 1024;
+	const int T_HEIGHT = 1024;
+	const int CHANNEL = 4;
+
+	//glBindVertexArray(this->vao);
+	const string hw3_texture_file[] = {
+		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\bush01.png"),
+		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\bush05.png"),
+		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\grassB_albedo.png"),
+	};
+	int w,h,c;
+	//unsigned char* text_data = new unsigned char[T_WIDTH * T_HEIGHT * CHANNEL * NUM_TEXTURES];
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* t1_data= stbi_load(hw3_texture_file[0].c_str(), &w, &h, &c, 0);
+	glActiveTexture(GL_TEXTURE0 );
+	glGenTextures(1, &this->textures_id);
+	glBindTexture(GL_TEXTURE_2D, this->textures_id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, t1_data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glUniform1i( glGetUniformLocation(this->indirect_render_shader.m_state.programId, "DIFFUSE") , this->textures_id );
+
+	//glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(t1_data);
+	//unsigned char* t2_data = stbi_load(hw3_texture_file[1].c_str(), &w, &h, &c, 0);
+	//unsigned char* t3_data = stbi_load(hw3_texture_file[2].c_str(), &w, &h, &c, 0);
+
+	/*
+	for (int i = 0; i < T_WIDTH * T_HEIGHT * CHANNEL; i++) {
+		text_data[i * 3] = t1_data[i];
+		text_data[i * 3 + 1] = t2_data[i];
+		text_data[i * 3 + 2] = t3_data[i];
+	}
+	*/
+	/*
+	glGenTextures(1, &this->textures_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY , 11 , GL_RGBA8 , T_WIDTH , T_HEIGHT , NUM_TEXTURES);
+	for (int i = 0; i < 3; i++) {
+		glActiveTexture(GL_TEXTURE0+i);
+		unsigned char* t1_data = stbi_load(hw3_texture_file[i].c_str(), &w, &h, &c, 0);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY , 0,0,0,i, T_WIDTH , T_HEIGHT , NUM_TEXTURES , GL_RGBA8 , GL_UNSIGNED_BYTE , t1_data);
+		stbi_image_free(t1_data);
+	}
+	* /
+
+
+	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+
+	delete[] text_data;
+	/*
+	delete[] t1_data;
+	delete[] t2_data;
+	delete[] t3_data;	
+	*/
+	glBindVertexArray(0);
+}
+
+
 //void merge_entries(Mesh& targetMesh ,vector<vec4>& verteices , vector<unsigned int>& index ) {
 void merge_entries(Mesh& targetMesh, vector<Vertex>& verteices, vector<unsigned int>& index) {
 
@@ -211,7 +281,6 @@ IndirectInstancedMesh::IndirectInstancedMesh(vector<Mesh>& meshes)
 		this->add_draw_cmds( 
 			index.size(),  //vertex count
 			DRAW_COUNT[i], //instance count
-			//10,
 			start_index_counter , //first index
 			start_vertex_counter , //base vertex
 			base_idx
@@ -228,7 +297,7 @@ IndirectInstancedMesh::IndirectInstancedMesh(vector<Mesh>& meshes)
 
 	this->init_buffers();
 	this->init_compute_shader();
-
+	this->hw3_init_textures();
 	//test_init();
 }
 
@@ -249,14 +318,21 @@ void IndirectInstancedMesh::init_compute_shader()
 {
 	//static string src_path = string(EXPAND(_PRJ_SRC_PATH)) + string("\\assets\\shaders\\hw3_reset_cs.glsl");	
 	this->cs_reset_shader =  Shader(GET_SRC_FOLDER() + string("\\assets\\shaders\\hw3_reset_cs.glsl"));
-	glUniform1f(glGetUniformLocation(this->cs_reset_shader.m_state.programId, "MAX_COUNT"), this->m_all_offset.size());
+	//glUniform1f(glGetUniformLocation(this->cs_reset_shader.m_state.programId, "MAX_COUNT"), this->m_all_offset.size());
+	//glUniform1f(glGetUniformLocation(this->cs_view_culling_shader.m_state.programId, "MAX_COUNT"), this->m_all_offset.size());
+
 	this->cs_view_culling_shader = Shader(GET_SRC_FOLDER() + string("\\assets\\shaders\\hw3_view_culling.glsl"));
-	glUniform1f(glGetUniformLocation(this->cs_view_culling_shader.m_state.programId, "MAX_COUNT"), this->m_all_offset.size());
+	this->indirect_render_shader = Shader(GET_SRC_FOLDER() + string("\\assets\\shaders\\Indir_default_vert.glsl"),GET_SRC_FOLDER() + string("\\assets\\shaders\\Indir_default_frag.glsl"));
 
 }
 
 void IndirectInstancedMesh::Do()
 {
+	this->indirect_render_shader.activate();
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, this->textures_id);
+	//glUniform1i(glGetUniformLocation(this->indirect_render_shader.m_state.programId, "DIFFUSE"), this->textures_id);
+
 	this->Render();
 	//test_draw();
 }
@@ -273,9 +349,9 @@ void IndirectInstancedMesh::DO_Before_Frame()
 
 	debug_time += 0.001f;
 
-	/*
-	// collect	
-	*/
+	/*=====================
+	|       collect		  |	
+	=====================*/
 	glBindVertexArray(this->vao);
 	this->cs_view_culling_shader.activate();
 	glDispatchCompute(200, 1, 1);
@@ -286,11 +362,13 @@ void IndirectInstancedMesh::DO_Before_Frame()
 
 void IndirectInstancedMesh::Render()
 {	
-	
+
 	// basic render
 	//this->m_material.m_shader->activate();
 	//this->m_material.render();
 	glBindVertexArray(this->vao);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
 	//glBindBuffer(GL_ARRAY_BUFFER, this->ssbo_offset); // Bind the buffer
 #pragma region TEST 
 	//glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, this->m_all_index.size(), 0);

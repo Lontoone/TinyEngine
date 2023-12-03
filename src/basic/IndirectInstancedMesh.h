@@ -41,6 +41,7 @@ public :
 	Material m_material;
 	Shader cs_reset_shader;
 	Shader cs_view_culling_shader;
+	Shader indirect_render_shader;
 
 	IndirectInstancedMesh(vector<Mesh>& meshes);
 	void load_position();
@@ -60,6 +61,7 @@ private:
 	GLuint ssbo_offset;
 	GLuint ebo;
 	GLuint ibo; // indirect buffer object
+	GLuint textures_id;
 
 	//vector<vec4>			m_all_vertex;
 	vector<Vertex>			m_all_vertex;
@@ -70,6 +72,7 @@ private:
 
 	void init_buffers();
 	void init_compute_shader();
+	void hw3_init_textures();
 
 };
 
