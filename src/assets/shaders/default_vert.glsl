@@ -10,7 +10,8 @@ uniform mat4 model ;
 uniform mat4 view; 
 uniform mat4 projection; 
 uniform mat4 MATRIX_VP;
-uniform vec3 sun_postion;
+//uniform vec3 sun_postion;
+vec3 sun_postion = vec3(0,1,0);
 
 out vec2 texcoord;
 out vec3 world_normal;
@@ -27,8 +28,8 @@ void main(){
 	//color =vec4(aColor , 1.0f) ;
 	texcoord = aUv;
 
-	vec3 N = mat3(model) * aNormal;
-	vec3 T = mat3(model) * aTangent;
+	vec3 N = mat3(view) * aNormal;
+	vec3 T = mat3(view) * aTangent;
 	T = normalize(T - dot(T, N) * N);
 	vec3 B = cross(N, T);
 

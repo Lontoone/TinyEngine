@@ -32,6 +32,7 @@ void main(){
 
 	//color_tex = FragColor;
 	color_tex = FragColor;
+	//color_tex = vec4(light , 0,0,1);
 	//color_tex = vec4( normal_map_color , 1.0);
 	color_normal = vec4(world_normal, 1.0);
 	color_depth = vec4(vec3(gl_FragCoord.z), 1.0);

@@ -101,6 +101,7 @@ void test_point() {
 }
 
 
+vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 
 
 using namespace std;
@@ -153,7 +154,6 @@ int main(int argc , char** argv) {
 
 	//Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_object(&camera_obj);
-	vec3 sun_postion = normalize(vec3(0, 1, 1));
 	
 	vector<Shader> stacked_blits_shaders;
 
@@ -336,7 +336,8 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	render_grid(vp);
 	shader->activate();
 	//Render Game view
-	//glUniform3fv(glGetUniformLocation(s_default_shader.m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
+	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "CAMERA_WORLD_POSITION"), 1, value_ptr(camera->m_position));
+	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
 	//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
 
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));

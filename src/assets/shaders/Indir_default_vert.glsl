@@ -24,20 +24,44 @@ layout(std430, binding = 2)buffer In_cmd {
     DrawCommand draw_cmd[];
 };
 
+//vec3 slight_pos = vec3(0,1,0);
+uniform vec3 CAMERA_WORLD_POSITION;
+uniform vec3 sun_postion;
 uniform mat4 MATRIX_VP;
 uniform mat4 view;
 
 out vec4 texcoord;
+out vec3 light_pos;
+out vec3 eye_dir;
+out vec3 normal;
+
 out  int draw_id;
+out vec3 clip_pos;
+
 
 void main()
 {
-    
     uint idx = draw_cmd[gl_DrawID].baseInstance + gl_InstanceID;
     uint cmd_idx = 0;
+    vec4 obj_pos = (vertex + visiable_data[idx].offset);
+
+    /*
+    vec4 P = view * vec4(obj_pos);
+    vec3 T = aTangent.xyz; //normalize(mat3(view) * aTangent.xyz);
+    vec3 N = normal.xyz ;//normalize(mat3(view) * normal.xyz);
+    vec3 B = cross(N , T);
+    vec3 L = light_pos - P.xyz;
+    light_dir = normalize(vec3(dot(L,T) , dot(L,B) , dot(L,N) ));
+    vec3 V = -P.xyz;
+    eye_dir = normalize( vec3(dot(V, T ) , dot(V,B) , dot(V,N) ));
+    */
     
-    gl_Position = MATRIX_VP * (vertex + visiable_data[idx].offset );
+    gl_Position = MATRIX_VP * obj_pos;
+    clip_pos = gl_Position.xyz;
+    eye_dir = normalize(CAMERA_WORLD_POSITION - clip_pos);
     
+    light_pos = mat3(MATRIX_VP) * sun_postion;
     texcoord = aUv;
     draw_id = gl_DrawID;
+    normal = aNormal.xyz;
 }
