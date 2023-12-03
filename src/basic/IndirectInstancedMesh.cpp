@@ -143,8 +143,8 @@ vector<vec4> hw3_load_position() {
 		//offset.push_back(vec4(i *0.5, 0, i * 0.5, 1));
 	}
 	*/
-	float x_offset = 30;
-	float z_offset = 200;
+	float x_offset = 0;
+	float z_offset = 0;
 
 	SpatialSample* sp0 = SpatialSample::importBinaryFile(GET_SRC_FOLDER() + string("\\assets\\poissonPoints_155304s.ss2"));
 	SpatialSample* sp1 = SpatialSample::importBinaryFile(GET_SRC_FOLDER() + string("\\assets\\poissonPoints_1010s.ss2"));

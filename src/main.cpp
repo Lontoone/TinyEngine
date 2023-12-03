@@ -34,7 +34,19 @@
 #include <CameraFrustum.h>
 #include <IndirectInstancedMesh.h>
 
-//#include "basic/TransformObject.h"
+//===========
+// For HW3
+#include <Trajectory.h>
+using namespace INANOA::SCENE::EXPERIMENTAL;
+Trajectory t ;
+void hw3_move_slim(GameObject& obj) {
+	
+	t.update();
+	obj.m_transform->m_position = t.position();
+	obj.Do();
+}
+
+//===========
 
 GLFWwindow* init();
 void update();
@@ -136,7 +148,6 @@ int main(int argc , char** argv) {
 		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
 		src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 
-	//GameObject obj = GameObject("Building");
 	//GameObject dog_obj = GameObject("Dog");
 	GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
 	camera_obj.set_name("Camera");	
@@ -144,15 +155,19 @@ int main(int argc , char** argv) {
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_indirect_shader);			
+	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
 	Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
 	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
-	//obj.add_component(mesh_b1);
-	camera_obj.add_component((Component*)game_camera);
 
-	//Hierarchy::instance().add_object(&obj);	
+	GameObject obj = GameObject("Slime");
+	obj.add_component(dog_mesh);
+	obj.m_transform->m_scale = vec3(10);
+	Hierarchy::instance().add_object(&obj);	
+
+
+	camera_obj.add_component((Component*)game_camera);
 	Hierarchy::instance().add_object(&camera_obj);
 	
 	vector<Shader> stacked_blits_shaders;
@@ -247,6 +262,7 @@ int main(int argc , char** argv) {
 		End();
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
+		hw3_move_slim(obj);
 
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -603,6 +619,23 @@ void processInput(GLFWwindow* window, double dt) {
 	
 	///////////////////////////////////////////////////////////////////////////////
 
+	/////////////////////////// [ HW3 Move Scene Camera] ////////////////////////////
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		scene_camera->m_parent->m_position += vec3(vec4((WORLD_FORWARD) * vec3(dt), 1.0));
+	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		scene_camera->m_parent->m_position -= vec3(vec4((WORLD_FORWARD)*vec3(dt), 1.0));
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		scene_camera->m_parent->m_position -= vec3(vec4((WORLD_RIGHT)*vec3(dt), 1.0));
+	}
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		scene_camera->m_parent->m_position += vec3(vec4((WORLD_RIGHT)*vec3(dt), 1.0));
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+
+
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);
 		//prev_mouse = mouse_pos;
@@ -612,5 +645,6 @@ void processInput(GLFWwindow* window, double dt) {
 		//endPos = normalize(endPos - camera->view_target) * camera->zoom;
 	}
 }
+
 
 
