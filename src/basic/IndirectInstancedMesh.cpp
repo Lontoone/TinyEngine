@@ -178,7 +178,8 @@ vector<vec4> hw3_load_position() {
 
 void IndirectInstancedMesh::hw3_init_textures()
 {
-	//glEnable(GL_TEXTURE_2D_ARRAY);
+
+	glEnable(GL_TEXTURE_2D_ARRAY);
 	const int NUM_TEXTURES = 3;
 	const int T_WIDTH = 1024;
 	const int T_HEIGHT = 1024;
@@ -186,11 +187,27 @@ void IndirectInstancedMesh::hw3_init_textures()
 
 	//glBindVertexArray(this->vao);
 	const string hw3_texture_file[] = {
+		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\grassB_albedo.png"),
 		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\bush01.png"),
 		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\bush05.png"),
-		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\grassB_albedo.png"),
 	};
 	int w,h,c;
+	unsigned char* all_data =new unsigned char[T_WIDTH * T_WIDTH * CHANNEL*CHANNEL] ;
+	unsigned char* t1_data = stbi_load(hw3_texture_file[0].c_str(), &w, &h, &c, 0);
+	unsigned char* t2_data = stbi_load(hw3_texture_file[1].c_str(), &w, &h, &c, 0);
+	unsigned char* t3_data = stbi_load(hw3_texture_file[2].c_str(), &w, &h, &c, 0);
+	
+
+	for (int i = 0; i < T_WIDTH * T_WIDTH * CHANNEL;  ++i) {
+		all_data[i] = t1_data[i];
+		int lv2 = T_HEIGHT * T_WIDTH + i;
+
+		all_data[lv2] = t2_data[i];
+
+		int lv3 = T_HEIGHT * T_WIDTH *2 + i;
+		all_data[lv3] = t3_data[i];
+	}
+	/*
 	//unsigned char* text_data = new unsigned char[T_WIDTH * T_HEIGHT * CHANNEL * NUM_TEXTURES];
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* t1_data= stbi_load(hw3_texture_file[0].c_str(), &w, &h, &c, 0);
@@ -210,7 +227,7 @@ void IndirectInstancedMesh::hw3_init_textures()
 	stbi_image_free(t1_data);
 	//unsigned char* t2_data = stbi_load(hw3_texture_file[1].c_str(), &w, &h, &c, 0);
 	//unsigned char* t3_data = stbi_load(hw3_texture_file[2].c_str(), &w, &h, &c, 0);
-
+	*/
 	/*
 	for (int i = 0; i < T_WIDTH * T_HEIGHT * CHANNEL; i++) {
 		text_data[i * 3] = t1_data[i];
@@ -218,29 +235,62 @@ void IndirectInstancedMesh::hw3_init_textures()
 		text_data[i * 3 + 2] = t3_data[i];
 	}
 	*/
-	/*
+	//this->indirect_render_shader.activate();
+		
 	glGenTextures(1, &this->textures_id);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
+	//glUniform1i(glGetUniformLocation(this->indirect_render_shader.m_state.programId, "albedoTextureArray"),0);
+	//glTexSubImage3D(GL_TEXTURE_2D_ARRAY , 0,0,0,0, T_WIDTH , T_HEIGHT , NUM_TEXTURES, GL_RGBA , GL_UNSIGNED_BYTE , all_data);
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY , 11 , GL_RGBA8 , T_WIDTH , T_HEIGHT , NUM_TEXTURES);
-	for (int i = 0; i < 3; i++) {
-		glActiveTexture(GL_TEXTURE0+i);
-		unsigned char* t1_data = stbi_load(hw3_texture_file[i].c_str(), &w, &h, &c, 0);
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY , 0,0,0,i, T_WIDTH , T_HEIGHT , NUM_TEXTURES , GL_RGBA8 , GL_UNSIGNED_BYTE , t1_data);
-		stbi_image_free(t1_data);
-	}
-	* /
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, T_WIDTH, T_HEIGHT, 1, GL_RGBA, GL_UNSIGNED_BYTE, t1_data);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, T_WIDTH, T_HEIGHT, 1, GL_RGBA, GL_UNSIGNED_BYTE, t2_data);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 2, T_WIDTH, T_HEIGHT, 1, GL_RGBA, GL_UNSIGNED_BYTE, t3_data);
 
-
+	
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+	/*	* /
 
 
-	delete[] text_data;
 	/*
-	delete[] t1_data;
-	delete[] t2_data;
-	delete[] t3_data;	
+	// Read you texels here. In the current example, we have 2*2*2 = 8 texels, with each texel being 4 GLubytes.
+	GLubyte texels[32] =
+	{
+		// Texels for first image.
+		0,   0,   0,   255,
+		255, 0,   0,   255,
+		0,   255, 0,   255,
+		0,   0,   255, 255,
+		// Texels for second image.
+		255, 255, 255, 255,
+		255, 255,   0, 255,
+		0,   255, 255, 255,
+		255, 0,   255, 255,
+	};
+	GLsizei width = 2;
+	GLsizei height = 2;
+	GLsizei layerCount = 2;
+	GLsizei mipLevelCount = 1;
+	glGenTextures(1, &this->textures_id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
+	// Allocate the storage.
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGBA8, width, height, layerCount);
+	// Upload pixel data.
+	// The first 0 refers to the mipmap level (level 0, since there's only 1)
+	// The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
+	// The final 0 refers to the layer index offset (we start from index 0 and have 2 levels).
+	// Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time.
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, layerCount, GL_RGBA, GL_UNSIGNED_BYTE, texels);
+
+	// Always set reasonable texture parameters
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	*/
-	glBindVertexArray(0);
 }
 
 
@@ -329,9 +379,11 @@ void IndirectInstancedMesh::init_compute_shader()
 void IndirectInstancedMesh::Do()
 {
 	this->indirect_render_shader.activate();
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, this->textures_id);
+	glBindVertexArray(this->vao);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
 	//glUniform1i(glGetUniformLocation(this->indirect_render_shader.m_state.programId, "DIFFUSE"), this->textures_id);
+	glUniform1i(glGetUniformLocation(this->indirect_render_shader.m_state.programId, "albedoTextureArray"),0);//0 is the index of the texture unit (GL_TEXTURE0).
 
 	this->Render();
 	//test_draw();
