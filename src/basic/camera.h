@@ -24,15 +24,13 @@ public :
 	Camera(glm::vec3  position , float ratio ,float near, float far);
 	
 	
-	float yaw =-90.0f;  //x-axis
-	float pitch =0.0f;
 	float speed;
 	float m_aspect_ratio;
 	float m_near = 0.1f;
 	float m_far = 10.0f;
 
 	vec3 view_target = vec3(0.0f);
-	float zoom = -3;
+	float zoom = 3;
 	void updateCameraDirection(double dx, double dy);
 	//void updateCameraPos(CameraDirection dir , double dt);
 	void updateCameraZoom(double dy);
@@ -47,6 +45,7 @@ public :
 
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
+	glm::mat4 getInverseProjectionMatrix();
 
 private :
 	//void updateCameraVectors();

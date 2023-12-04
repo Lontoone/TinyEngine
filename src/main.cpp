@@ -65,9 +65,11 @@ MechainState state;
 
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
+unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
+unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH*0.5/ (float)SCR_HEIGHT ,5,150);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH * 0.5 /(float)SCR_HEIGHT ,10,500 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH  / (float)SCR_HEIGHT ,5,150);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,10,500 );
 
 
 float vertices[] = {
@@ -125,9 +127,9 @@ int main(int argc , char** argv) {
 	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
 	float time_scale = 1;
-	scene_camera->m_parent->m_position = vec3(0,150, 0);
-	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
-	game_camera->m_parent->m_position = vec3(0, 3, 0);
+	scene_camera->m_position = vec3(0,250, 0);
+	scene_camera->m_rotation = vec3(-60, 0, 0);
+	game_camera->m_position = vec3(0, 5, 0);
 
 	//test_point();
 	
@@ -179,8 +181,7 @@ int main(int argc , char** argv) {
 #pragma endregion
 
 	const int _test_camera_cast = 0;
-	RViewFrustum frustum(2 , game_camera);
-	frustum.init(game_camera);
+	RViewFrustum frustum(1 , game_camera);
 
 #pragma region SET_UP_MENU
 	////////////////// Add Load model opts: /////////////////
@@ -229,13 +230,13 @@ int main(int argc , char** argv) {
 		//GL_DEPTH_ATTACHMENT,
 	};
 	//FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, SCR_WIDTH , SCR_HEIGHT);
 	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	//FramebufferObject* fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_grid_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* playground_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&shaderEditor.shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	//FramebufferObject* playground_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&shaderEditor.shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
-	Texture rt_game = Texture(SCR_WIDTH/2 , SCR_HEIGHT);
-	Texture rt_scene = Texture(SCR_WIDTH / 2, SCR_HEIGHT);
+	//Texture rt_game = Texture(SCR_WIDTH/2 , SCR_HEIGHT);
+	//Texture rt_scene = Texture(SCR_WIDTH / 2, SCR_HEIGHT);
 	//Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
 	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
 
@@ -284,14 +285,12 @@ int main(int argc , char** argv) {
 
 		//========== Split View ===========
 		// For game view		
-		render_game_view(game_fbo ,game_camera, &s_default_shader);		
-		//s_indirect_shader.activate();
+		game_camera->Do();
+		render_game_view(game_fbo ,game_camera, &s_default_shader);				
+		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);				
 		id_mesh.DO_Before_Frame();
 		id_mesh.cs_view_culling_shader.activate();
-		game_camera->Do();
-		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
-				
-		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);
+		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);	
 		id_mesh.Do(); //TEST
 
 		// For scene view
@@ -302,9 +301,9 @@ int main(int argc , char** argv) {
 		id_mesh.Do(); //TEST
 
 		scene_fbo->activate();
-		gizmose_shader.activate();
 
 		// ========= Setting game camera for scene view =========
+		gizmose_shader.activate();
 		glm::mat4 view = scene_camera->getViewMatrix();
 		glm::mat4 projection = scene_camera->getProjectionMatrix();
 		glm::mat4 model = game_camera->m_model_matrix;
@@ -358,17 +357,7 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	//-------------- [ TEMP 暫時的MVP ] ------------------
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
-	/*
-	if (camera->m_gameobject != nullptr) {
-		//view = camera->m_parent->m_model_matrix * camera->m_gameobject->m_transform->m_model_matrix * camera->getViewMatrix();
-		//view = inverse( camera->m_parent->m_model_matrix * camera->m_gameobject->m_transform->m_model_matrix );
-		projection = camera->getProjectionMatrix();
-	}
-	else {
-		view = camera->getViewMatrix();
-		projection =  camera->getProjectionMatrix();
-	}
-	*/
+
 	view = camera->getViewMatrix();
 	projection = camera->getProjectionMatrix();
 	glm::mat4 vp = projection * view;
@@ -380,6 +369,7 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
 	//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
 
+	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(camera->m_model_matrix));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
@@ -536,21 +526,29 @@ static glm::vec2 screenCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2);
 void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
-	/*  TODO: 統一camera和object設計
+	/*  TODO: 統一camera和object設計	*/
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		game_camera->m_parent->m_position -= vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));
-		
-		game_camera->update_translate_matrix();
-		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
+		game_camera->m_position -= vec3( vec4(game_camera->m_forward * vec3(dt), 1.0));				
+		game_camera->Do();
+		game_camera->update_local();
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		game_camera->m_parent->m_position += vec3(game_camera->m_rot_matrix * vec4(game_camera->m_parent->m_forward * vec3(dt), 1.0));		
-			
-		//game_camera->Do();
-		game_camera->update_translate_matrix();
-		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
+		game_camera->m_position += vec3( vec4(game_camera->m_forward * vec3(dt), 1.0));							
+		game_camera->Do();
+		game_camera->update_local();
 	}
-	*/
+	/*  TODO: 統一camera和object設計	*/
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		game_camera->m_rotation-= vec3(0, dt, 0);
+		game_camera->Do();
+		game_camera->update_local();
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		game_camera->m_rotation += vec3(0, dt, 0);
+		game_camera->Do();
+		game_camera->update_local();		
+	}
+	/*
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
@@ -580,13 +578,7 @@ void processInput(GLFWwindow* window, double dt) {
 			current_camera_model = game_camera->m_model_matrix;
 		}
 
-		vec3 op1 = prev_mouse;
-		/*
-		vec2 diff = mouse_pos - prev_mouse;
-		camera->m_rotation.x += diff.y *20;
-		camera->m_rotation.y += diff.x *20;
-		prev_mouse = mouse_pos;
-		*/
+		vec3 op1 = prev_mouse;		
 
 		float angle = glm::acos(glm::min(1.0f, glm::dot(op1, mouse_pos)));
 		if(angle ==0 ){
@@ -618,18 +610,17 @@ void processInput(GLFWwindow* window, double dt) {
 		glm::mat3 rotation(view);
 		game_camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
 		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
-		
-		/*
-		*/
 	}
+	*/
 
 	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
-		game_camera->m_parent->m_position += vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
+		game_camera->m_position += vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
-		game_camera->m_parent->m_position -= vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
+		game_camera->m_position -= vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
 	}
+	/*
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
@@ -648,23 +639,25 @@ void processInput(GLFWwindow* window, double dt) {
 		vec3 local_move = game_camera->m_right * diff.x * scroll_speed - game_camera->m_up * diff.y * scroll_speed;
 		game_camera->m_parent->m_position += vec3( game_camera->m_rot_matrix * vec4(local_move,1.0));
 		prev_mouse = mouse_pos;
-	}
-	
+	}	
+	*/
 	///////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////// [ HW3 Move Scene Camera] ////////////////////////////
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		scene_camera->m_parent->m_position += vec3(vec4((WORLD_FORWARD) * vec3(dt), 1.0));
+		scene_camera->m_position += vec3(vec4((WORLD_FORWARD) * vec3(dt*2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		scene_camera->m_parent->m_position -= vec3(vec4((WORLD_FORWARD)*vec3(dt), 1.0));
+		scene_camera->m_position -= vec3(vec4((WORLD_FORWARD)*vec3(dt * 2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		scene_camera->m_parent->m_position -= vec3(vec4((WORLD_RIGHT)*vec3(dt), 1.0));
+		scene_camera->m_position -= vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		scene_camera->m_parent->m_position += vec3(vec4((WORLD_RIGHT)*vec3(dt), 1.0));
+		scene_camera->m_position += vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
 	}
+	scene_camera->Do();
+	scene_camera->update_local();
 
 	///////////////////////////////////////////////////////////////////////////////
 

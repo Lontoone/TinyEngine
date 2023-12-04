@@ -33,6 +33,7 @@ layout(std430, binding = 3)buffer In_State {
 //uint data_count[3] = uint[3](0, 1010,2797);
 uint data_count[3] = uint[3](0, 155304, 156314);
 //uint data_count[3] = uint[3](0, 10000, 1510);
+uniform mat4 MATRIX_M;
 uniform mat4 MATRIX_VP;
 uniform vec3 DOG_POS;
 //uniform uint MAX_COUNT=10000;
@@ -57,7 +58,7 @@ void main() {
 	}
 
 	// Culling
-	vec4 world_position = MATRIX_VP * all_pt[idx].position ;
+	vec4 world_position = MATRIX_VP  * all_pt[idx].position ;
 	float clip_range = world_position.w;
 	vec4 ndc_pos = world_position.xyzw / world_position.w;
 	//vec4 clip_space_dog = MATRIX_VP * vec4( DOG_POS,1.0);

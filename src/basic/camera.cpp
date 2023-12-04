@@ -1,12 +1,5 @@
 #include "camera.h"
 
-/*
-Camera::~Camera()
-{
-	//delete 	this->m_parent;
-
-}
-*/
 
 Camera::Camera(glm::vec3 position, float ratio, float near, float far):TransformObject(){
 	this->m_parent = new TransformObject();
@@ -27,28 +20,6 @@ Camera::Camera(glm::vec3 position, float ratio, float near, float far):Transform
 	this->m_near = near;
 	//delete this->m_gameobject->m_transform;
 	//this->m_gameobject->m_transform = this;
-}
-void Camera::updateCameraDirection(double dx, double dy) {
-	yaw += dx;
-	pitch += dy;
-	/*
-	if (pitch > 89.0f) {
-		pitch = 89.0f;
-	}
-	else if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
-	}*/
-	// 避免 yaw 因為 float 精度問題
-	if (yaw > 360.f || yaw < -360.f) {
-		yaw = glm::mod(yaw, 360.f);
-	}
-
-	glm::vec3 newCameraFront;
-	newCameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	newCameraFront.y = sin(glm::radians(pitch));
-	newCameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	this->m_forward = newCameraFront;
 }
 void Camera::updateCameraZoom(double dy) {
 	if (zoom >= 1.0f && zoom <= 45.0f) {
@@ -78,19 +49,22 @@ vec3 Camera::get_view_dir()
 
 void Camera::Do()
 {	
-	this->m_parent->Do();
+	//this->m_parent->Do();
 	//this->m_position = -this->m_forward * zoom + view_offset;
 	//this->m_translate_matrix = glm::translate(mat4(1.0f), this->m_position + this->view_target);
-	//this->update_rotation_matrix_eular();  // TODO: qutanion
 	
+	this->update_rotation_matrix_eular();  // TODO: qutanion
 	this->update_translate_matrix();
 	this->update_scale_matrix();
 	
-
+	/*
 	if (this->m_parent != nullptr)
-		this->m_model_matrix = this->m_parent->m_model_matrix * this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+		this->m_model_matrix = this->m_parent->m_model_matrix * (this->m_translate_matrix) * this->m_rot_matrix;
 	else
 		this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+	*/
+	this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+	this->update_local();
 
 }
 
@@ -101,7 +75,7 @@ void Camera::draw_frustum()
 void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners)
 {
 	// Get Depth in NDC, the depth in viewSpace is negative
-	const glm::vec4 v = glm::vec4(0, 0, -1 * depth, 1);
+	const glm::vec4 v = glm::vec4(0, 0, -1 * depth*0.5, 1);   //[TODO :TEMP ] 不知道為甚麼都差2倍
 	glm::vec4 vInNDC = this->getProjectionMatrix() * v;
 	vInNDC.z = vInNDC.z / vInNDC.w;
 
@@ -116,7 +90,8 @@ void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* co
 		glm::vec4 wcc = {
 			cornerXY[j * 2 + 0], cornerXY[j * 2 + 1], vInNDC.z, 1
 		};
-		wcc = inverse(this->getProjectionMatrix()) * wcc;
+		mat4 invproj_mat = this->getInverseProjectionMatrix();
+		wcc = invproj_mat * wcc;
 		wcc = wcc / wcc.w;
 
 		corners[j * 3 + 0] = wcc[0];
@@ -126,12 +101,30 @@ void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* co
 }
 
 glm::mat4 Camera::getViewMatrix() {	
-	return inverse( this->m_model_matrix);
+
+	this->Do();
+	//return lookAt(this->m_position, this->m_position +this->m_forward * this->zoom , this->m_up);
+	return inverse( this->m_model_matrix) ;
 }
 
 glm::mat4 Camera::getProjectionMatrix()
 {
-	return  glm::perspective(glm::radians(45.0f), this->m_aspect_ratio, this->m_near, this->m_far);
+	return  glm::perspective(glm::radians(45.0f), this->m_aspect_ratio, this->m_near, this->m_far );	
+	/*
+	float left = 0.0f;
+	float right = static_cast<float>(1500);
+	float bottom = 0.0f;
+	float top = static_cast<float>(720);
+	float near = -1.0f;
+	float far = 1.0f;
+
+	return glm::ortho(left, right, bottom, top, near, far);
+	*/
+}
+
+glm::mat4 Camera::getInverseProjectionMatrix()
+{
+	return inverse(this->getProjectionMatrix());
 }
 
 /*
