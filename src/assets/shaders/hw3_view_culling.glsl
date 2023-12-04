@@ -73,7 +73,7 @@ void main() {
 	}
 	*/
 	
-	if (ndc_pos.x >1.1 || ndc_pos.y> 1 || ndc_pos.z >1.1 || ndc_pos.x <-1.1 || ndc_pos.y < -1 || ndc_pos.z < -1.1) {
+	if (ndc_pos.x >1|| ndc_pos.y> 1 || ndc_pos.z >1 || ndc_pos.x <-1 || ndc_pos.y < -1 || ndc_pos.z < -1) {
 	//if (world_position.x > clip_range * 1.1 || world_position.y > clip_range || world_position.z > clip_range*2 || world_position.x < -clip_range * 1.1 || world_position.y < -clip_range || world_position.z < -clip_range) {
 		return;
 	}

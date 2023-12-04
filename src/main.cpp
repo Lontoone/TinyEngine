@@ -66,8 +66,8 @@ MechainState state;
 unsigned int SCR_WIDTH		= 1500;
 unsigned int SCR_HEIGHT	= 720;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH/ (float)SCR_HEIGHT ,5,50);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH/(float)SCR_HEIGHT ,10,500 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH*0.5/ (float)SCR_HEIGHT ,5,150);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH * 0.5 /(float)SCR_HEIGHT ,10,500 );
 
 
 float vertices[] = {
@@ -125,8 +125,9 @@ int main(int argc , char** argv) {
 	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
 	float time_scale = 1;
-	scene_camera->m_parent->m_position = vec3(150,150, 150);
+	scene_camera->m_parent->m_position = vec3(0,150, 0);
 	scene_camera->m_parent->m_rotation = vec3(-60, 0, 0);
+	game_camera->m_parent->m_position = vec3(0, 3, 0);
 
 	//test_point();
 	
@@ -178,7 +179,7 @@ int main(int argc , char** argv) {
 #pragma endregion
 
 	const int _test_camera_cast = 0;
-	RViewFrustum frustum(1 , game_camera);
+	RViewFrustum frustum(2 , game_camera);
 	frustum.init(game_camera);
 
 #pragma region SET_UP_MENU
