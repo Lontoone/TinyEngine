@@ -58,9 +58,9 @@ void main() {
 	}
 
 	// Culling
-	vec4 world_position = MATRIX_VP  * all_pt[idx].position ;
-	float clip_range = world_position.w;
-	vec4 ndc_pos = world_position.xyzw / world_position.w;
+	vec4 clip_pos = MATRIX_VP  * all_pt[idx].position*2 ;
+	float clip_range = clip_pos.w;
+	vec4 ndc_pos = clip_pos.xyzw / clip_pos.w;
 	//vec4 clip_space_dog = MATRIX_VP * vec4( DOG_POS,1.0);
 
 	if (distance(all_pt[idx].position.xyz, DOG_POS*2) <5) {   // I don't know why , but *2 works
@@ -68,22 +68,12 @@ void main() {
 		return;
 	}
 	
-	/*
-	if (idx > 3819) {
-		return;
-	}
-	*/
-	
-	if (ndc_pos.x >1|| ndc_pos.y> 1 || ndc_pos.z >1 || ndc_pos.x <-1 || ndc_pos.y < -1 || ndc_pos.z < -1) {
-	//if (world_position.x > clip_range * 1.1 || world_position.y > clip_range || world_position.z > clip_range*2 || world_position.x < -clip_range * 1.1 || world_position.y < -clip_range || world_position.z < -clip_range) {
+	if (ndc_pos.x >1|| ndc_pos.y> 1 || ndc_pos.z >1 || ndc_pos.x <-1 || ndc_pos.y < -1 || ndc_pos.z < -1) {	
 		return;
 	}
 
-	const uint unique_idx =  atomicAdd(draw_cmd[cmd_instance_idx].instanceCount, 1) + data_count[cmd_instance_idx];
-	//draw_pt[atomicAdd(draw_cmd[cmd_instance_idx].instanceCount, 1)] = all_pt[idx];   //draw cmd maybe bug
+	const uint unique_idx =  atomicAdd(draw_cmd[cmd_instance_idx].instanceCount, 1) + data_count[cmd_instance_idx];	
 	draw_pt[unique_idx ] = all_pt[idx];
 
-	//uint _pt_idx = unique_idx + draw_cmd[cmd_instance_idx].instanceCount;
-	//draw_pt[unique_idx].position = all_pt[idx].position;//+ sin(time);
 
 };
