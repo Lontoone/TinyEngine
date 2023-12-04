@@ -71,13 +71,8 @@ unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH  / (float)SCR_HEIGHT ,5,150);
 Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,10,500 );
 
-
-float vertices[] = {
-		-0.5f , 1.0f , 0.0f,
-		0.0f , 0.5f , 0.0f,
-		0.5f , 0.0f , 0.0f,
-};
-
+GameObject game_camera_obj = GameObject();
+GameObject scene_camera_obj = GameObject();
 //=====================================
 // |        Basice Set up             |
 //=====================================
@@ -85,38 +80,6 @@ const string src_path = GET_SRC_FOLDER();//EXPAND(_PRJ_SRC_PATH);  //TODO: move 
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
 DefaultEditorGrid* grid;
-
-
-GLfloat vertex[] = { 1.0, 1.0f, 1.0f };
-GLuint index = 0; // The index of the point
-GLuint vao,vbo;
-GLuint ebo;
-
-void test_point() {
-	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-	glPointSize(100) ;
-	glGenVertexArrays(1,&vao);
-	glBindVertexArray(vao);
-	glGenBuffers(1, &vbo); // Generate a buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind the buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
-	
-	glGenBuffers(1, &ebo); // Generate a buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); // Bind the buffer
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), &index, GL_STATIC_DRAW); // Load the index
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,        // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,        // size
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		0,        // stride
-		(void*)0 // array buffer offset
-	);
-	glDisableVertexAttribArray(0);
-}
-
-
 vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 
 
@@ -127,35 +90,17 @@ int main(int argc , char** argv) {
 	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
 	float time_scale = 1;
-	scene_camera->m_position = vec3(0,250, 0);
-	scene_camera->m_rotation = vec3(-60, 0, 0);
-	game_camera->m_position = vec3(0, 5, 0);
-
-	//test_point();
 	
+
 #pragma region DEBUG_PRE_LOAD_MODEL
 	Shader s_default_shader(
 		src_path + string("\\assets\\shaders\\default_vert.glsl"),
 		src_path + string("\\assets\\shaders\\default_frag.glsl"));
-	/*
-	Shader s_indirect_shader(
-		src_path + string("\\assets\\shaders\\Indir_default_vert.glsl"),
-		src_path + string("\\assets\\shaders\\Indir_default_frag.glsl"));
-	Shader cs_reset_shader(src_path + string("\\assets\\shaders\\hw3_reset_cs.glsl"));
-	*/
 	
-
-	s_default_shader.activate();
-	cout << "activate pg " << s_default_shader.m_state.programId << endl;
-
 	grid = new DefaultEditorGrid(
 		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
 		src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 
-	//GameObject dog_obj = GameObject("Dog");
-	GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
-	camera_obj.set_name("Camera");	
-	
 	
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
@@ -172,9 +117,20 @@ int main(int argc , char** argv) {
 	Hierarchy::instance().add_object(&obj);	
 
 
-	camera_obj.add_component((Component*)game_camera);
+	scene_camera_obj.m_transform->m_position = vec3(0, 250, 0);
+	scene_camera_obj.m_transform->m_rotation = vec3(-60, 0, 0);
+	game_camera_obj.m_transform->m_position = vec3(0, 5, 0);
+	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
+	
+	//GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
+	game_camera_obj.set_name("Camera");
+	scene_camera_obj.set_name("Scene Camera");
+	game_camera_obj.add_component((Component*)game_camera);
+	scene_camera_obj.add_component((Component*)scene_camera);
+	//camera_obj.m_transform = game_camera;
 	//game_camera->set_transform_parent(camera_obj.m_transform);
-	Hierarchy::instance().add_object(&camera_obj);
+	Hierarchy::instance().add_object(&game_camera_obj);
+	Hierarchy::instance().add_object(&scene_camera_obj);
 	
 	vector<Shader> stacked_blits_shaders;
 
@@ -284,8 +240,7 @@ int main(int argc , char** argv) {
 		glEnable(GL_MULTISAMPLE);
 
 		//========== Split View ===========
-		// For game view		
-		game_camera->Do();
+		// For game view				
 		render_game_view(game_fbo ,game_camera, &s_default_shader);				
 		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);				
 		id_mesh.DO_Before_Frame();
@@ -294,9 +249,8 @@ int main(int argc , char** argv) {
 		id_mesh.Do(); //TEST
 
 		// For scene view
-		scene_camera->Do();
-		render_game_view(scene_fbo,scene_camera, &s_default_shader);
-		//s_indirect_shader.activate(); // temp
+		//scene_camera->Do();
+		render_game_view(scene_fbo,scene_camera, &s_default_shader);		
 		set_shader_mvp(&id_mesh.indirect_render_shader, scene_camera);//TEST
 		id_mesh.Do(); //TEST
 
@@ -306,7 +260,7 @@ int main(int argc , char** argv) {
 		gizmose_shader.activate();
 		glm::mat4 view = scene_camera->getViewMatrix();
 		glm::mat4 projection = scene_camera->getProjectionMatrix();
-		glm::mat4 model = game_camera->m_model_matrix;
+		glm::mat4 model = game_camera_obj.m_transform->m_model_matrix;
 
 		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(model));
 		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_V"), 1, GL_FALSE, value_ptr(view));
@@ -316,25 +270,6 @@ int main(int argc , char** argv) {
 		frustum.render();
 		// =====================================================
 		
-		// [Test]
-		//glBindVertexArray(vao);				
-		//glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0); // Draw the point
-		//================================
-
-		//--------------------------------------------
-		// Default
-		// 
-		/*
-		frame_buffer_debugger.Init_Panel(0, 150);
-		frame_buffer_debugger.Begin_Panel();
-
-		shaderEditor.begin_panel();
-		game_fbo->blit(game_fbo->framebuffer_texture[0], 0);
-
-		frame_buffer_debugger.End_Panel();
-
-		*/
-		//game_fbo->blit(game_fbo->framebuffer_texture[0], 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//--------------------------------------------				
 		ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
@@ -365,11 +300,11 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	//render_grid(vp);
 	shader->activate();
 	//Render Game view
-	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "CAMERA_WORLD_POSITION"), 1, value_ptr(camera->m_position));
+	//glUniform3fv(glGetUniformLocation(shader->m_state.programId, "CAMERA_WORLD_POSITION"), 1, value_ptr(camera->m_position));
 	glUniform3fv(glGetUniformLocation(shader->m_state.programId, "sun_postion"), 1, value_ptr(sun_postion));
 	//glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(model));		
 
-	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(camera->m_model_matrix));
+	//glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(camera->m_model_matrix));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
@@ -467,10 +402,6 @@ void render_grid( mat4& vp ) {
 	grid->render();
 
 }
-void setup_menu(UiManager* uimanager)
-{
-
-}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	cout << "resizing is banned" << endl;
@@ -527,27 +458,20 @@ void processInput(GLFWwindow* window, double dt) {
 	//若按下esc key => 關掉window
 
 	/*  TODO: 統一camera和object設計	*/
+	/**/
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		game_camera->m_position -= vec3( vec4(game_camera->m_forward * vec3(dt), 1.0));				
-		game_camera->Do();
-		game_camera->update_local();
+		game_camera_obj.m_transform->m_position -= vec3( vec4(game_camera_obj.m_transform->m_forward * vec3(dt), 1.0));		
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		game_camera->m_position += vec3( vec4(game_camera->m_forward * vec3(dt), 1.0));							
-		game_camera->Do();
-		game_camera->update_local();
-	}
-	/*  TODO: 統一camera和object設計	*/
+		game_camera_obj.m_transform->m_position += vec3(vec4(game_camera_obj.m_transform->m_forward * vec3(dt), 1.0));		
+	}	
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		game_camera->m_rotation-= vec3(0, dt, 0);
-		game_camera->Do();
-		game_camera->update_local();
+		game_camera_obj.m_transform->m_rotation-= vec3(0, dt, 0);
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		game_camera->m_rotation += vec3(0, dt, 0);
-		game_camera->Do();
-		game_camera->update_local();		
+		game_camera_obj.m_transform->m_rotation += vec3(0, dt, 0);
 	}
+
 	/*
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		double xpos, ypos;
@@ -614,11 +538,12 @@ void processInput(GLFWwindow* window, double dt) {
 	*/
 
 	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
+	
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
-		game_camera->m_position += vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
+		game_camera_obj.m_transform->m_position += vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt ), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
-		game_camera->m_position -= vec3(vec4((game_camera->m_up) * vec3(dt ), 1.0));
+		game_camera_obj.m_transform->m_position -= vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt), 1.0));
 	}
 	/*
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
@@ -644,24 +569,25 @@ void processInput(GLFWwindow* window, double dt) {
 	///////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////// [ HW3 Move Scene Camera] ////////////////////////////
+	/*
+	*/
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-		scene_camera->m_position += vec3(vec4((WORLD_FORWARD) * vec3(dt*2), 1.0));
+		scene_camera_obj.m_transform->m_position += vec3(vec4((WORLD_FORWARD) * vec3(dt*2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-		scene_camera->m_position -= vec3(vec4((WORLD_FORWARD)*vec3(dt * 2), 1.0));
+		scene_camera_obj.m_transform->m_position -= vec3(vec4((WORLD_FORWARD)*vec3(dt * 2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		scene_camera->m_position -= vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
+		scene_camera_obj.m_transform->m_position -= vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		scene_camera->m_position += vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
+		scene_camera_obj.m_transform->m_position += vec3(vec4((WORLD_RIGHT)*vec3(dt * 2), 1.0));
 	}
-	scene_camera->Do();
-	scene_camera->update_local();
-
+	//scene_camera->Do();
+	//scene_camera->update_local();
 	///////////////////////////////////////////////////////////////////////////////
 
-
+	/*
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);
 		//prev_mouse = mouse_pos;
@@ -669,7 +595,7 @@ void processInput(GLFWwindow* window, double dt) {
 		endPos =  normalize( game_camera->m_forward) * -game_camera->zoom ;
 		//endPos = camera->m_position;
 		//endPos = normalize(endPos - camera->view_target) * camera->zoom;
-	}
+	}*/
 }
 
 

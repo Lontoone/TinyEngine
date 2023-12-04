@@ -18,7 +18,7 @@ enum class CameraDirection {
 };
 
 using namespace glm;
-class Camera : public TransformObject {
+class Camera : public Component {
 public :
 	Camera();	
 	Camera(glm::vec3  position , float ratio ,float near, float far);
@@ -30,19 +30,11 @@ public :
 	float m_far = 10.0f;
 
 	vec3 view_target = vec3(0.0f);
-	float zoom = 3;
-	void updateCameraDirection(double dx, double dy);
-	//void updateCameraPos(CameraDirection dir , double dt);
-	void updateCameraZoom(double dy);
-	
-
-	vec3 get_view_center_position();
-	vec3 get_view_dir();
+	float zoom = 3;	
 
 	void Do() override;	
-	void draw_frustum();
 	void viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners);
-
+	mat4 get_model_matrix() { return this->m_gameobject->get_gameobject()->m_transform->m_model_matrix; };
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::mat4 getInverseProjectionMatrix();

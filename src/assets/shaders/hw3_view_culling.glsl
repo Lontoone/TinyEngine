@@ -58,10 +58,9 @@ void main() {
 	}
 
 	// Culling
-	vec4 clip_pos = MATRIX_VP  * all_pt[idx].position*2 ;
+	vec4 clip_pos = MATRIX_VP  * all_pt[idx].position ;
 	float clip_range = clip_pos.w;
-	vec4 ndc_pos = clip_pos.xyzw / clip_pos.w;
-	//vec4 clip_space_dog = MATRIX_VP * vec4( DOG_POS,1.0);
+	vec4 ndc_pos = clip_pos.xyzw  / clip_pos.w;
 
 	if (distance(all_pt[idx].position.xyz, DOG_POS*2) <5) {   // I don't know why , but *2 works
 		additional_state[idx].state.w = 0;

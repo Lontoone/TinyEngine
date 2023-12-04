@@ -5,7 +5,8 @@
 #define COMPONENT
 
 #include <iostream>
-//class GameObject;
+//#include <GameObject.h>
+class GameObject;
 
 class Component
 {
@@ -23,6 +24,7 @@ public:
 	virtual void Do(){};
 	virtual void DO_Before_Frame() {};
 	virtual void Do_End_Frame() {};
+	GameObject* get_gameobject() { return (GameObject*)&this->m_gameobject; };
 		
 	virtual Component* copy() { return nullptr; };
 

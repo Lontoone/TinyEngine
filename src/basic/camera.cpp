@@ -1,54 +1,17 @@
 #include "camera.h"
 
 
-Camera::Camera(glm::vec3 position, float ratio, float near, float far):TransformObject(){
-	this->m_parent = new TransformObject();
-
-	this->m_position = position;
-	this->m_auto_update_matrix = false;
-
-	this->update_translate_matrix();
-	this->update_rotation_matrix_eular();  // TODO: qutanion
-	this->update_scale_matrix();
-
-	this->m_forward = this->get_view_dir();
-	this->m_right = glm::normalize(glm::cross(this->m_forward, WORLD_UP));
-	this->m_up = glm::normalize(glm::cross(this->m_right, this->m_forward));
+Camera::Camera(glm::vec3 position, float ratio, float near, float far):Component(){
 
 	this->m_aspect_ratio = ratio;
 	this->m_far = far;
 	this->m_near = near;
-	//delete this->m_gameobject->m_transform;
-	//this->m_gameobject->m_transform = this;
-}
-void Camera::updateCameraZoom(double dy) {
-	if (zoom >= 1.0f && zoom <= 45.0f) {
-		zoom -= dy;
-	}
-	else if (zoom < 1.0f) {
-		zoom = 1.0f;
-	}
-	else {
-		zoom = 45.0f;
-	}
 }
 
-vec3 Camera::get_view_center_position()
-{
-	vec3 center = this->m_position + this->m_forward * zoom;
-	return center;
-}
-
-vec3 Camera::get_view_dir()
-{
-	//vec3 dir =this->m_transform->m_position 
-	//return -this->m_transform->m_forward;
-	//return normalize(this->m_transform->m_position - this->get_view_center_position());
-	return  normalize(this->m_position - this->view_target);
-}
 
 void Camera::Do()
 {	
+	/*
 	//this->m_parent->Do();
 	//this->m_position = -this->m_forward * zoom + view_offset;
 	//this->m_translate_matrix = glm::translate(mat4(1.0f), this->m_position + this->view_target);
@@ -57,19 +20,16 @@ void Camera::Do()
 	this->update_translate_matrix();
 	this->update_scale_matrix();
 	
+	*/
 	/*
 	if (this->m_parent != nullptr)
 		this->m_model_matrix = this->m_parent->m_model_matrix * (this->m_translate_matrix) * this->m_rot_matrix;
 	else
 		this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
-	*/
-	this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
+	//this->m_model_matrix = this->m_translate_matrix * this->m_rot_matrix * this->m_scale_matrix;
 	this->update_local();
+	*/
 
-}
-
-void Camera::draw_frustum()
-{
 }
 
 void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners)
@@ -104,7 +64,7 @@ glm::mat4 Camera::getViewMatrix() {
 
 	this->Do();
 	//return lookAt(this->m_position, this->m_position +this->m_forward * this->zoom , this->m_up);
-	return inverse( this->m_model_matrix) ;
+	return inverse( ((GameObject*)this->m_gameobject)->m_transform->m_model_matrix) ;
 }
 
 glm::mat4 Camera::getProjectionMatrix()

@@ -102,7 +102,7 @@ void TransformObject::update_rotation_matrix_eular()
 
 void TransformObject::update_translate_matrix()
 {	
-	this->m_translate_matrix = glm::translate(mat4(1.0f) , this->m_position );
+	this->m_translate_matrix = glm::translate(mat4(1.0) , this->m_position );
 }
 
 void TransformObject::update_scale_matrix()
