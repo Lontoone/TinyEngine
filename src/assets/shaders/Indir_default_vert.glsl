@@ -35,6 +35,7 @@ uniform vec3 CAMERA_WORLD_POSITION;
 uniform vec3 sun_postion;
 uniform mat4 MATRIX_VP;
 uniform mat4 view;
+uniform mat4 projection;
 
 out vec4 texcoord;
 out vec3 light_pos;
@@ -50,6 +51,7 @@ void main()
     uint idx = draw_cmd[gl_DrawID].baseInstance + gl_InstanceID;
     uint cmd_idx = 0;
     vec4 obj_pos = (vertex + visiable_data[idx].offset);
+    obj_pos.w = 1;
 
     /*
     vec4 P = view * vec4(obj_pos);
@@ -61,8 +63,9 @@ void main()
     vec3 V = -P.xyz;
     eye_dir = normalize( vec3(dot(V, T ) , dot(V,B) , dot(V,N) ));
     */
-    
-    gl_Position = MATRIX_VP * obj_pos;
+    mat4 vp = projection * view;
+    gl_Position = vp * obj_pos;
+    //gl_Position = MATRIX_VP * obj_pos;
     clip_pos = gl_Position.xyz;
     eye_dir = normalize(CAMERA_WORLD_POSITION - clip_pos);
     

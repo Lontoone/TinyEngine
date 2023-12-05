@@ -33,6 +33,8 @@ layout(std430, binding = 3)buffer In_State {
 //uint data_count[3] = uint[3](0, 1010,2797);
 uint data_count[3] = uint[3](0, 155304, 156314);
 //uint data_count[3] = uint[3](0, 10000, 1510);
+uniform mat4 view;
+uniform mat4 projection;
 uniform mat4 MATRIX_M;
 uniform mat4 MATRIX_VP;
 uniform vec3 DOG_POS;
@@ -58,11 +60,13 @@ void main() {
 	}
 
 	// Culling
-	vec4 clip_pos = MATRIX_VP  * all_pt[idx].position ;
+	mat4 vp = projection * view  ;
+	//vec4 clip_pos = MATRIX_VP  * all_pt[idx].position ;
+	vec4 clip_pos = vp * all_pt[idx].position;
 	float clip_range = clip_pos.w;
-	vec4 ndc_pos = clip_pos.xyzw  / clip_pos.w;
+	vec3 ndc_pos = clip_pos.xyz / clip_pos.w;
 
-	if (distance(all_pt[idx].position.xyz, DOG_POS*2) <5) {   // I don't know why , but *2 works
+	if (distance(all_pt[idx].position.xyz, DOG_POS) <5) {   // I don't know why , but *2 works
 		additional_state[idx].state.w = 0;
 		return;
 	}

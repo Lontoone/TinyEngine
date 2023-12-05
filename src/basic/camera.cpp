@@ -35,7 +35,8 @@ void Camera::Do()
 void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners)
 {
 	// Get Depth in NDC, the depth in viewSpace is negative
-	const glm::vec4 v = glm::vec4(0, 0, -1 * depth*0.5, 1);   //[TODO :TEMP ] ぃ笵或常畉2
+	//const glm::vec4 v = glm::vec4(0, 0, -1 * depth*0.5, 1);   //[TODO :TEMP ] ぃ笵或常畉2
+	const glm::vec4 v = glm::vec4(0, 0, -1 * depth , 1);
 	glm::vec4 vInNDC = this->getProjectionMatrix() * v;
 	vInNDC.z = vInNDC.z / vInNDC.w;
 

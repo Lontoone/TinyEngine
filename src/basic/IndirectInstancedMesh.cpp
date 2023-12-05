@@ -372,6 +372,18 @@ void IndirectInstancedMesh::hw3_update_dog_position(vec3 pos)
 	this->cs_view_culling_shader.activate();
 	glUniform3fv(glGetUniformLocation(this->cs_view_culling_shader.m_state.programId, "DOG_POS"), 1, value_ptr(pos));
 }
+void IndirectInstancedMesh::dispatch_reset()
+{
+	glBindVertexArray(this->vao);		
+	glDispatchCompute(1, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
+void IndirectInstancedMesh::dispatch_culling()
+{
+	glBindVertexArray(this->vao);	
+	glDispatchCompute(200, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+}
 void IndirectInstancedMesh::add_draw_cmds(GLuint vertex_count, GLuint instance_count, GLuint first_index, GLuint base_vertex, GLuint base_instance)
 {
 	DrawElementCommand cmd ;
@@ -414,6 +426,7 @@ float debug_time = 0;
 void IndirectInstancedMesh::DO_Before_Frame()
 {
 	//Reset draw buffer
+	/**/
 	glBindVertexArray(this->vao);
 	this->cs_reset_shader.activate();
 	//glUniform1f(glGetUniformLocation(this->cs_reset_shader.m_state.programId, "time"), debug_time); // debug purpose	

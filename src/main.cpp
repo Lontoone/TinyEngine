@@ -54,7 +54,7 @@ void render();
 void input();
 void render_grid(mat4& vp);
 void setup_menu(UiManager * uimanager);
-void render_game_view(FramebufferObject* fbo , Camera* camera, Shader* shader);
+void render_game_view( Camera* camera, Shader* shader);
 
 using namespace std;
 void processInput(GLFWwindow* window, double dt);
@@ -63,13 +63,13 @@ void process_blit_stacks(vector<Shader>& blits_shaders , unsigned src_id );
 void set_shader_mvp(Shader* shader, Camera* camera);  //Debug...
 MechainState state;
 
-unsigned int SCR_WIDTH		= 1500;
-unsigned int SCR_HEIGHT	= 720;
+unsigned int SCR_WIDTH		= 1344;
+unsigned int SCR_HEIGHT	= 756;
 unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
 unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH  / (float)SCR_HEIGHT ,5,150);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,10,500 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH /2 / (float)SCR_HEIGHT ,1,150);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH /2 /(float)SCR_HEIGHT ,1,500 );
 
 GameObject game_camera_obj = GameObject();
 GameObject scene_camera_obj = GameObject();
@@ -117,8 +117,8 @@ int main(int argc , char** argv) {
 	Hierarchy::instance().add_object(&obj);	
 
 
-	scene_camera_obj.m_transform->m_position = vec3(0, 250, 0);
-	scene_camera_obj.m_transform->m_rotation = vec3(-60, 0, 0);
+	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
+	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
 	game_camera_obj.m_transform->m_position = vec3(0, 5, 0);
 	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
 	
@@ -186,10 +186,8 @@ int main(int argc , char** argv) {
 		//GL_DEPTH_ATTACHMENT,
 	};
 	//FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, SCR_WIDTH , SCR_HEIGHT);
-	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	//FramebufferObject* fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frame_grid_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	//FramebufferObject* playground_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&shaderEditor.shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, HALF_SCR_WIDTH , SCR_HEIGHT);
+	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, HALF_SCR_WIDTH, SCR_HEIGHT);
 	
 	//Texture rt_game = Texture(SCR_WIDTH/2 , SCR_HEIGHT);
 	//Texture rt_scene = Texture(SCR_WIDTH / 2, SCR_HEIGHT);
@@ -212,7 +210,6 @@ int main(int argc , char** argv) {
 
 		processInput(window , 0.1f);
 		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
-		game_fbo->activate();
 
 		//glUseProgram(state.programId);
 
@@ -239,22 +236,34 @@ int main(int argc , char** argv) {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 
-		//========== Split View ===========
-		// For game view				
-		render_game_view(game_fbo ,game_camera, &s_default_shader);				
-		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);				
-		id_mesh.DO_Before_Frame();
+		//========== Split View ===========			
+		/*=======================
+		//   For Game view
+		=========================*/
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(HALF_SCR_WIDTH, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
+		//Reseting
+		id_mesh.cs_reset_shader.activate();
+		id_mesh.dispatch_reset();
+
+		// Culling 
+		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
 		id_mesh.cs_view_culling_shader.activate();
+		id_mesh.dispatch_culling();	
+		
+		render_game_view(game_camera, &s_default_shader);
+		id_mesh.indirect_render_shader.activate();
 		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);	
 		id_mesh.Do(); //TEST
 
-		// For scene view
-		//scene_camera->Do();
-		render_game_view(scene_fbo,scene_camera, &s_default_shader);		
+		/*=======================		
+		//   For scene view
+		=========================*/		
+		glViewport(0, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
+		render_game_view( scene_camera, &s_default_shader);		
 		set_shader_mvp(&id_mesh.indirect_render_shader, scene_camera);//TEST
 		id_mesh.Do(); //TEST
 
-		scene_fbo->activate();
 
 		// ========= Setting game camera for scene view =========
 		gizmose_shader.activate();
@@ -270,9 +279,11 @@ int main(int argc , char** argv) {
 		frustum.render();
 		// =====================================================
 		
+		//--------------------------------------------			
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//--------------------------------------------				
-		ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 
@@ -310,11 +321,8 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
 }
 
-void render_game_view(FramebufferObject* fbo , Camera* camera , Shader* shader) {  //TODO: shader uniform... 
-	fbo->activate();
-	glClearColor(0.2, 0.2, 0.2, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
+void render_game_view( Camera* camera , Shader* shader) {  //TODO: shader uniform... 
+	
 	//-------------- [ TEMP ¼È®ÉªºMVP ] ------------------
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
@@ -330,6 +338,7 @@ void render_game_view(FramebufferObject* fbo , Camera* camera , Shader* shader) 
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "view"), 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "projection"), 1, GL_FALSE, value_ptr(projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
+
 	Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 	
 }

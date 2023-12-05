@@ -61,6 +61,8 @@ public :
 	void add_draw_cmds(GLuint vertex_count , GLuint instance_count , GLuint first_index , GLuint base_vertex , GLuint base_instance);
 	
 	void hw3_update_dog_position(vec3 pos);
+	void dispatch_reset();
+	void dispatch_culling();
 
 	// Component Function override
 	void Do() override;
@@ -68,8 +70,8 @@ public :
 	void Do_End_Frame() override {};
 	void Render();
 
-private:
 	GLuint vao;
+private:
 	GLuint vbo;
 	GLuint ssbo_draw;
 	GLuint ssbo_offset;
