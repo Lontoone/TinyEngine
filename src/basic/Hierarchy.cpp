@@ -21,6 +21,16 @@ void Hierarchy::add_object(GameObject* new_obj)
 	sInstance.m_gameobj_maps[new_obj->name ]= new_obj;
 	//this->add_ui_items(new_obj);
 }
+/*
+void Hierarchy::add_light(Light* light)
+{
+	this->m_ligths.push_back(light);
+}
+*/
+void Hierarchy::set_main_camera(Camera* camera)
+{
+	this->main_camera = camera;
+}
 //void Hierarchy::add_object(IndirectInstancedMesh* indirect_groups){}
 void Hierarchy::add_main_camera()
 {
@@ -38,3 +48,12 @@ GameObject* Hierarchy::get_gameobjs_by_name(string name)
 {	
 	return sInstance.m_gameobj_maps[name];
 }
+
+/*
+void Hierarchy::update_shadow_maps()
+{
+	for (int i = 0; i < this->m_ligths.size(); i++) {
+		this->m_ligths[i];
+	}
+}
+*/
