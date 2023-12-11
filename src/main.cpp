@@ -204,11 +204,6 @@ int main(int argc , char** argv) {
 	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, HALF_SCR_WIDTH , SCR_HEIGHT);
 	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, HALF_SCR_WIDTH, SCR_HEIGHT);
 	
-	//Texture rt_game = Texture(SCR_WIDTH/2 , SCR_HEIGHT);
-	//Texture rt_scene = Texture(SCR_WIDTH / 2, SCR_HEIGHT);
-	//Texture noise_texture = Texture(src_path + string("\\assets\\textures\\water_noise.png"));
-	//Texture noise_texture = Texture("C:\\Users\\User\\Downloads\\water_noise.png");
-
 
 #pragma endregion
 
