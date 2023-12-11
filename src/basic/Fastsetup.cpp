@@ -204,9 +204,12 @@ void Shader::init_variables()
 }
 void Shader::add_variables(const char* name)
 {
-	this->shader_variables.insert(std::pair<const char* , GLuint>( name, 0));
+	this->shader_variables.insert(std::pair<const char* , GLuint>( name, glGetUniformLocation(this->m_state.programId , name)));
 }
-
+void Shader::add_variables(const string name)
+{
+	this->shader_variables.insert(std::pair<const char*, GLuint>(name.c_str(), glGetUniformLocation(this->m_state.programId, name.c_str())));
+}
 void Shader::activate()
 {
 	glUseProgram(this->m_state.programId);

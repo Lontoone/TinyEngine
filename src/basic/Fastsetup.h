@@ -40,6 +40,7 @@ public:
 	MechainState m_state;
 	void init_variables();
 	void add_variables(const char* name);
+	void add_variables(const string name);
 	void activate();
 private:
 	

@@ -24,6 +24,12 @@ const enum class LIGHT_Type
 	SPOT_LIGHT
 };
 
+#define EXPAND(x) #x;
+#define u_LIGHT_VP_MATRIX "u_LIGHT_VP_MATRIX";
+#define u_VP_MATRIX "u_VP_MATRIX";
+#define u_M_MATRIX "u_M_MATRIX";
+
+
 /*
 static const GLenum COLOR_FRAME_BUFFERS[] = {
 	GL_COLOR_ATTACHMENT0,

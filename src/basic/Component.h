@@ -36,6 +36,12 @@ public:
 		//return static_cast<T*>(this);
 		return (T*)this;
 	}
+	/*
+	template<class T>
+	T* try_cast_component() {
+		return dynamic_cast<T*>(this);
+	}
+	*/
 
 	
 };

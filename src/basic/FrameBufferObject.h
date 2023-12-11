@@ -11,6 +11,7 @@ using namespace std;
 class FramebufferObject
 {
 public:
+	FramebufferObject() {};
 	FramebufferObject(Shader* shader, const GLenum* draw_buffers,  int buffer_cnt, unsigned int& width, unsigned int& height);
 	FramebufferObject(Shader* shader, const GLenum draw_target, const GLenum texture_target, const GLenum color_draw, const GLenum color_read, unsigned int& width, unsigned int& height);
 	Shader* shader;

@@ -102,6 +102,9 @@
     <ClCompile Include="src\basic\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\basic\LightingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\basic\TransformObject.h">
@@ -227,6 +230,9 @@
     <ClInclude Include="src\basic\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\basic\LightingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />
@@ -264,6 +270,8 @@
     <None Include="src\assets\poissonPoints_1010s.ss2" />
     <None Include="src\assets\poissonPoints_2797s.ss2" />
     <None Include="src\assets\poissonPoints_155304s.ss2" />
+    <None Include="src\assets\shaders\shadow_map_frag.glsl" />
+    <None Include="src\assets\shaders\shadow_map_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

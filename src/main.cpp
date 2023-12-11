@@ -24,7 +24,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
 #include "basic/Hierarchy.h"
-
+#include <Light.h>
 #include <GameObject.h>
 //#include "basic/GameObject.h"
 #include "FileDialog.h"
@@ -85,6 +85,7 @@ Hierarchy Hierarchy::sInstance;
 DefaultEditorGrid* grid;
 vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 
+
 #include <windows.h>
 #include <string>
 #include <iostream>
@@ -106,6 +107,7 @@ int main(int argc , char** argv) {
 	double _previous_time = 0;
 	float time_scale = 1;
 	
+	Hierarchy::instance().set_main_camera(game_camera);
 	cout << get_current_dir() << endl;
 #pragma region DEBUG_PRE_LOAD_MODEL
 	Shader s_default_shader(
@@ -131,7 +133,6 @@ int main(int argc , char** argv) {
 	obj.m_transform->m_scale = vec3(10);
 	Hierarchy::instance().add_object(&obj);	
 
-
 	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
 	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
 	game_camera_obj.m_transform->m_position = vec3(0, 0, 50);
@@ -147,11 +148,15 @@ int main(int argc , char** argv) {
 	Hierarchy::instance().add_object(&game_camera_obj);
 	Hierarchy::instance().add_object(&scene_camera_obj);
 	
-	vector<Shader> stacked_blits_shaders;
+
+	Light* sun = new Light();
+	GameObject sun_obj = GameObject("Sun");
+	sun_obj.add_component((Component*)sun);
+	Hierarchy::instance().add_object(&sun_obj);
 
 #pragma endregion
 
-	const int _test_camera_cast = 0;
+	
 	RViewFrustum frustum(1 , game_camera);
 
 #pragma region SET_UP_MENU

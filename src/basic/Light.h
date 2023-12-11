@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 /*
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
@@ -7,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 */
 #include <UiableComponent.h>
-
+#include <env_path.h>
 /*
 */
 #include <Camera.h>
@@ -29,16 +30,18 @@ public:
 	~Light();
 	static const unsigned int SHOWOW_CASCADE_LEVEL = 1;
 	unsigned int SHOWOW_RESOLUTION = 1024;
-	LIGHT_Type light_type;	
+	LIGHT_Type light_type = LIGHT_Type::DIRECTIONAL;	
 	void Do() override;
-	void update_shadow_map();
 	mat4 get_projection_matrix();
+	mat4 m_vp_matrix;
+	void shadow_pass();
+	void light_pass();
 
 
 private:
+	void bind_shadow_map();
 	void init_buffer();
-	void shadow_pass();
-	void light_pass();
+	void init_shader();
 	FramebufferObject* fbo; 
 	mat4 get_directional_light_mvp();
 	unsigned int shadow_fbo_cascaded[SHOWOW_CASCADE_LEVEL];

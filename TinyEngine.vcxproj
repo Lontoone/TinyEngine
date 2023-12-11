@@ -157,6 +157,7 @@
     <ClCompile Include="src\basic\Fastsetup.cpp" />
     <ClCompile Include="src\basic\IndirectInstancedMesh.cpp" />
     <ClCompile Include="src\basic\Light.cpp" />
+    <ClCompile Include="src\basic\LightingManager.cpp" />
     <ClCompile Include="src\basic\Material.cpp" />
     <ClCompile Include="src\basic\Mesh.cpp" />
     <ClCompile Include="src\basic\TransformObject.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\basic\Fastsetup.h" />
     <ClInclude Include="src\basic\IndirectInstancedMesh.h" />
     <ClInclude Include="src\basic\Light.h" />
+    <ClInclude Include="src\basic\LightingManager.h" />
     <ClInclude Include="src\basic\Material.h" />
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />
@@ -238,6 +240,8 @@
     <None Include="src\assets\shaders\hw3_view_culling.glsl" />
     <None Include="src\assets\shaders\Indir_default_frag.glsl" />
     <None Include="src\assets\shaders\Indir_default_vert.glsl" />
+    <None Include="src\assets\shaders\shadow_map_frag.glsl" />
+    <None Include="src\assets\shaders\shadow_map_vert.glsl" />
     <None Include="src\assets\shaders\unlit_vert.glsl" />
     <None Include="src\assets\shaders\vert.glsl" />
     <None Include="src\assets\shaders\vertexShader_ogl_450.glsl" />
