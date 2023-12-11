@@ -1,5 +1,8 @@
 #include "FrameBufferObject.h"
 #include <vector>
+//
+// buffer_cnt : GL_COLOR_ATTACHMENTi  array , define color to draw
+//
 FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers, int buffer_cnt, unsigned int& width, unsigned int& height)
 {
 	this->shader = shader;

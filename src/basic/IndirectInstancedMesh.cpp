@@ -195,7 +195,6 @@ void hw3_set_additional_state(vector<vec4>& state) {
 
 void IndirectInstancedMesh::hw3_init_textures()
 {
-
 	glEnable(GL_TEXTURE_2D_ARRAY);
 	const int NUM_TEXTURES = 3;
 	const int T_WIDTH = 1024;
@@ -209,12 +208,13 @@ void IndirectInstancedMesh::hw3_init_textures()
 		GET_SRC_FOLDER() + string("\\assets\\models\\bush\\bush05.png"),
 	};
 	int w,h,c;
-	unsigned char* all_data =new unsigned char[T_WIDTH * T_WIDTH * CHANNEL*CHANNEL] ;
+	//unsigned char* all_data =new unsigned char[T_WIDTH * T_WIDTH * CHANNEL*CHANNEL] ;
 	unsigned char* t1_data = stbi_load(hw3_texture_file[0].c_str(), &w, &h, &c, 0);
 	unsigned char* t2_data = stbi_load(hw3_texture_file[1].c_str(), &w, &h, &c, 0);
 	unsigned char* t3_data = stbi_load(hw3_texture_file[2].c_str(), &w, &h, &c, 0);
 	
-
+	// Stack images into 1 array.
+	/*
 	for (int i = 0; i < T_WIDTH * T_WIDTH * CHANNEL;  ++i) {
 		all_data[i] = t1_data[i];
 		int lv2 = T_HEIGHT * T_WIDTH + i;
@@ -223,41 +223,11 @@ void IndirectInstancedMesh::hw3_init_textures()
 
 		int lv3 = T_HEIGHT * T_WIDTH *2 + i;
 		all_data[lv3] = t3_data[i];
-	}
-	/*
-	//unsigned char* text_data = new unsigned char[T_WIDTH * T_HEIGHT * CHANNEL * NUM_TEXTURES];
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* t1_data= stbi_load(hw3_texture_file[0].c_str(), &w, &h, &c, 0);
-	glActiveTexture(GL_TEXTURE0 );
-	glGenTextures(1, &this->textures_id);
-	glBindTexture(GL_TEXTURE_2D, this->textures_id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, t1_data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	//glUniform1i( glGetUniformLocation(this->indirect_render_shader.m_state.programId, "DIFFUSE") , this->textures_id );
-
-	//glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(t1_data);
-	//unsigned char* t2_data = stbi_load(hw3_texture_file[1].c_str(), &w, &h, &c, 0);
-	//unsigned char* t3_data = stbi_load(hw3_texture_file[2].c_str(), &w, &h, &c, 0);
-	*/
-	/*
-	for (int i = 0; i < T_WIDTH * T_HEIGHT * CHANNEL; i++) {
-		text_data[i * 3] = t1_data[i];
-		text_data[i * 3 + 1] = t2_data[i];
-		text_data[i * 3 + 2] = t3_data[i];
-	}
-	*/
-	//this->indirect_render_shader.activate();
+	}*/
 		
 	glGenTextures(1, &this->textures_id);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, this->textures_id);
-	//glUniform1i(glGetUniformLocation(this->indirect_render_shader.m_state.programId, "albedoTextureArray"),0);
-	//glTexSubImage3D(GL_TEXTURE_2D_ARRAY , 0,0,0,0, T_WIDTH , T_HEIGHT , NUM_TEXTURES, GL_RGBA , GL_UNSIGNED_BYTE , all_data);
+	
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY , 11 , GL_RGBA8 , T_WIDTH , T_HEIGHT , NUM_TEXTURES);
 	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, T_WIDTH, T_HEIGHT, 1, GL_RGBA, GL_UNSIGNED_BYTE, t1_data);
 	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, T_WIDTH, T_HEIGHT, 1, GL_RGBA, GL_UNSIGNED_BYTE, t2_data);

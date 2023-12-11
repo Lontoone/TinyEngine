@@ -77,11 +77,24 @@ GameObject scene_camera_obj = GameObject();
 // |        Basice Set up             |
 //=====================================
 const string src_path = GET_SRC_FOLDER();//EXPAND(_PRJ_SRC_PATH);  //TODO: move to manager script
+//const string src_path = ".\\src";
 UiManager ui_manager = UiManager();
 Hierarchy Hierarchy::sInstance;
 DefaultEditorGrid* grid;
 vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 
+#include <windows.h>
+#include <string>
+#include <iostream>
+
+using namespace std;
+#include <direct.h>
+std::string get_current_dir() {
+	char buff[FILENAME_MAX]; //create string buffer to hold path
+	_getcwd(buff, FILENAME_MAX);
+	string current_working_dir(buff);
+	return current_working_dir;
+}
 
 using namespace std;
 int main(int argc , char** argv) {
@@ -91,7 +104,7 @@ int main(int argc , char** argv) {
 	double _previous_time = 0;
 	float time_scale = 1;
 	
-
+	cout << get_current_dir() << endl;
 #pragma region DEBUG_PRE_LOAD_MODEL
 	Shader s_default_shader(
 		src_path + string("\\assets\\shaders\\default_vert.glsl"),
@@ -459,7 +472,7 @@ vec3 mouse_pos = vec3(0);
 vec3 endPos = vec3(0,0,-game_camera->zoom);
 mat4 current_camera_model = mat4(0);
 mat4 previouseRot = mat4(1);
-float scroll_speed = 5;
+float scroll_speed = 50.;
 //vec2 prev_mouse = vec2(0);
 static glm::vec2 screenCenter(SCR_WIDTH / 2, SCR_HEIGHT / 2);
 
@@ -481,6 +494,7 @@ void processInput(GLFWwindow* window, double dt) {
 		game_camera_obj.m_transform->m_rotation += vec3(0, dt, 0);
 	}
 
+
 	/*
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		double xpos, ypos;
@@ -488,6 +502,7 @@ void processInput(GLFWwindow* window, double dt) {
 
 		float move_x = -(xpos / SCR_WIDTH * 2 - 1);
 		float move_y = -(ypos / SCR_HEIGHT * 2 - 1);
+		TransformObject& scene_trans = *scene_camera->get_gameobject()->m_transform;
 
 		mouse_pos = vec3(move_x, move_y, 0);
 
@@ -501,14 +516,13 @@ void processInput(GLFWwindow* window, double dt) {
 			return;
 			mouse_pos = glm::normalize(mouse_pos);
 		}
-		//cout << "mouse pos " << "leng " << glm::length(mouse_pos) << endl;
 
 		if (glm::length(prev_mouse) == 0) {
 			prev_mouse = mouse_pos;			
 			return;
 		}
 		if (current_camera_model == mat4(0)) {
-			current_camera_model = game_camera->m_model_matrix;
+			current_camera_model = scene_trans.m_model_matrix;
 		}
 
 		vec3 op1 = prev_mouse;		
@@ -522,27 +536,27 @@ void processInput(GLFWwindow* window, double dt) {
 
 
 		//		Get the rotation axis in 3D	
-		vec3 _startPos		= normalize(endPos - game_camera->view_target) * game_camera->zoom;
+		vec3 _startPos		= normalize(endPos - scene_camera->view_target) * scene_camera->zoom;
 		vec4 zoom_off		= vec4(_startPos, 1); // start from vec4(0, 0, -camera->zoom, 0);		
 		//vec4 zoom_off = vec4(0,0, -camera->zoom ,0); // start from vec4(0, 0, -camera->zoom, 0);		
 		mat4 rotate_offset	=  glm::rotate(mat4(1.0), angle, rotation_axis); // rotate camera around orbit
 
-		game_camera->m_position =rotate_offset * zoom_off;
+		//scene_trans.m_position =rotate_offset * zoom_off;
 		//game_camera->update_translate_matrix();
 
-		game_camera->m_forward = -game_camera->get_view_dir();
-		game_camera->m_right= glm::normalize(glm::cross(game_camera->m_forward, WORLD_UP));
-		game_camera->m_up = glm::normalize(glm::cross(game_camera->m_right, game_camera->m_forward));
+		scene_trans.m_forward = -scene_trans.m_forward;
+		scene_trans.m_right= glm::normalize(glm::cross(scene_trans.m_forward, WORLD_UP));
+		scene_trans.m_up = glm::normalize(glm::cross(scene_trans.m_right, scene_trans.m_forward));
 		previouseRot *= rotate_offset;
 		glm::mat4 view = glm::lookAt(
-								game_camera->m_position,
+								scene_trans.m_position,
 								//camera->m_position + camera->m_forward * camera->zoom,
 								//camera->get_view_center_position(),
-								game_camera->view_target,
-								game_camera->m_up);
+								scene_camera->view_target,
+								scene_trans.m_up);
 		glm::mat3 rotation(view);
-		game_camera->m_rot_matrix =  mat4( transpose( rotation));  //rotation need to convert from world to camera space
-		game_camera->m_model_matrix = game_camera->m_parent->m_model_matrix * game_camera->m_translate_matrix * game_camera->m_rot_matrix * game_camera->m_scale_matrix;
+		scene_trans.m_rot_matrix *=  mat4( transpose( rotation));  //rotation need to convert from world to camera space
+		//scene_trans.m_model_matrix =  scene_trans.m_translate_matrix * scene_trans.m_rot_matrix * scene_trans.m_scale_matrix;
 	}
 	*/
 
@@ -554,7 +568,7 @@ void processInput(GLFWwindow* window, double dt) {
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
 		game_camera_obj.m_transform->m_position -= vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt), 1.0));
 	}
-	/*
+
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
@@ -568,12 +582,27 @@ void processInput(GLFWwindow* window, double dt) {
 			prev_mouse = mouse_pos;
 			return;
 		}
-
-		vec2 diff = mouse_pos - prev_mouse;
-		vec3 local_move = game_camera->m_right * diff.x * scroll_speed - game_camera->m_up * diff.y * scroll_speed;
-		game_camera->m_parent->m_position += vec3( game_camera->m_rot_matrix * vec4(local_move,1.0));
+		vec2 diff = (mouse_pos - prev_mouse );
+		vec3 local_move = scene_camera->get_gameobject()->m_transform->m_right * diff.x * scroll_speed - scene_camera->get_gameobject()->m_transform->m_up * diff.y * scroll_speed;
+		vec3 world_move = vec3(scene_camera->get_gameobject()->m_transform->m_rot_matrix * vec4(local_move, 1.0));
+		
+		scene_camera->get_gameobject()->m_transform->m_position += world_move;
+		/*
 		prev_mouse = mouse_pos;
+		//scene_camera->get_gameobject()->m_transform->m_rotation += vec3(0, diff.x * scroll_speed,0);
+
+		glm::mat4 view = glm::lookAt(
+			scene_camera->get_gameobject()->m_transform->m_position,
+			scene_camera->get_gameobject()->m_transform->m_position + scene_camera->get_gameobject()->m_transform->m_forward * scene_camera->zoom,
+			//camera->get_view_center_position(),
+			//scene_camera->view_target,
+			scene_camera->get_gameobject()->m_transform->m_up);
+		glm::mat3 rotation(view);
+		scene_camera->get_gameobject()->m_transform->m_rot_matrix *= mat4(transpose(rotation));
+
+		*/
 	}	
+	/*
 	*/
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -596,15 +625,16 @@ void processInput(GLFWwindow* window, double dt) {
 	//scene_camera->update_local();
 	///////////////////////////////////////////////////////////////////////////////
 
-	/*
+	/*  [ERROR !]
+	*/
 	if (glfwGetMouseButton(window, 0) == GLFW_RELEASE) {
 		prev_mouse = vec3(0);
 		//prev_mouse = mouse_pos;
-		current_camera_model = game_camera->m_model_matrix;
-		endPos =  normalize( game_camera->m_forward) * -game_camera->zoom ;
+		current_camera_model = scene_camera->get_gameobject()->m_transform->m_model_matrix;
+		endPos =  normalize(scene_camera->get_gameobject()->m_transform->m_forward) * -scene_camera->zoom ;
 		//endPos = camera->m_position;
 		//endPos = normalize(endPos - camera->view_target) * camera->zoom;
-	}*/
+	}
 }
 
 

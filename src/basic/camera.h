@@ -34,7 +34,7 @@ public :
 
 	void Do() override;	
 	void viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners);
-	mat4 get_model_matrix() { return this->m_gameobject->get_gameobject()->m_transform->m_model_matrix; };
+	mat4 get_model_matrix() { return this->get_gameobject()->m_transform->m_model_matrix; };
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::mat4 getInverseProjectionMatrix();

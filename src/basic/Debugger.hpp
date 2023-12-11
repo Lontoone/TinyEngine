@@ -25,6 +25,9 @@ public:
 		cout << "]" << endl;
 	};
 
+	static const void Log(double& m) {
+		cout << m << endl;
+	};
 private:
 
 };
