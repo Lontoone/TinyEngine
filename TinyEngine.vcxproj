@@ -156,6 +156,7 @@
     <ClCompile Include="src\basic\camera.cpp" />
     <ClCompile Include="src\basic\Fastsetup.cpp" />
     <ClCompile Include="src\basic\IndirectInstancedMesh.cpp" />
+    <ClCompile Include="src\basic\Light.cpp" />
     <ClCompile Include="src\basic\Material.cpp" />
     <ClCompile Include="src\basic\Mesh.cpp" />
     <ClCompile Include="src\basic\TransformObject.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="src\basic\camera.h" />
     <ClInclude Include="src\basic\Fastsetup.h" />
     <ClInclude Include="src\basic\IndirectInstancedMesh.h" />
+    <ClInclude Include="src\basic\Light.h" />
     <ClInclude Include="src\basic\Material.h" />
     <ClInclude Include="src\basic\Mesh.h" />
     <ClInclude Include="src\basic\TransformObject.h" />

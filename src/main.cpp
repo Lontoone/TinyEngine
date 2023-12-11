@@ -68,8 +68,8 @@ unsigned int SCR_HEIGHT	= 756;
 unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
 unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH /2 / (float)SCR_HEIGHT ,1,150);
-Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH /2 /(float)SCR_HEIGHT ,1,500 );
+Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH  / (float)SCR_HEIGHT ,1,150);
+Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,1,500 );
 
 GameObject game_camera_obj = GameObject();
 GameObject scene_camera_obj = GameObject();
@@ -132,7 +132,7 @@ int main(int argc , char** argv) {
 
 	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
 	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
-	game_camera_obj.m_transform->m_position = vec3(0, 5, 0);
+	game_camera_obj.m_transform->m_position = vec3(0, 0, 50);
 	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
 	
 	//GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
@@ -226,33 +226,39 @@ int main(int argc , char** argv) {
 
 		//glUseProgram(state.programId);
 
-		/*=====================
-		*		CLEAR UP
-		=======================*/
+		//=====================
+		//		CLEAR UP
+		//=======================
 		ui_manager.new_frame();
 		ui_manager.create_fps_window();
 		ui_manager.update_fps();
 
-		/*============================
-		*		BEFORE FRAME SETTING
-		=============================*/
+		//============================
+		//		BEFORE FRAME SETTING
+		//=============================
 		Begin("Sun positon");
 		SliderFloat3("sun position", &sun_postion[0], -10, 10);
 		End();
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
-		hw3_move_slim(obj);
+		//hw3_move_slim(obj);
 		id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		set_shader_mvp(&s_default_shader, game_camera);
+		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+
+		/*   [ HW3 ]
 		//========== Split View ===========			
-		/*=======================
+		//=======================
 		//   For Game view
-		=========================*/
+		//=========================
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(HALF_SCR_WIDTH, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
 		//Reseting
@@ -269,9 +275,9 @@ int main(int argc , char** argv) {
 		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);	
 		id_mesh.Do(); //TEST
 
-		/*=======================		
+		//=======================		
 		//   For scene view
-		=========================*/		
+		//=========================
 		glViewport(0, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
 		render_game_view( scene_camera, &s_default_shader);		
 		set_shader_mvp(&id_mesh.indirect_render_shader, scene_camera);//TEST
@@ -291,7 +297,7 @@ int main(int argc , char** argv) {
 		frustum.update(game_camera);
 		frustum.render();
 		// =====================================================
-		
+		*/
 		//--------------------------------------------			
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
