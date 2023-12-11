@@ -24,7 +24,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "basic/camera.h"
 #include "basic/Hierarchy.h"
-#include "basic/GameObject.h"
+
+#include <GameObject.h>
+//#include "basic/GameObject.h"
 #include "FileDialog.h"
 #include <Debugger.hpp>
 #include <FrameBufferObject.h>

@@ -14,10 +14,14 @@ void Light::update_shadow_map()
 {
 	for (int i = 0; i < this->SHOWOW_CASCADE_LEVEL; i++) {
 		this->fbo->activate();
-		//mat4 proj_matrix = this-> get_projection_matrix();
-		//mat4 model_matrix = this->get_gameobject()->m_transform->m_model_matrix;
+		mat4 proj_matrix = this-> get_projection_matrix();
+		mat4 model_matrix = this->get_gameobject()->m_transform->m_model_matrix;
 		//mat4 WVP =  ;
 	}
+}
+mat4 Light::get_projection_matrix()
+{
+	return mat4();
 }
 /*
 mat4 Light::get_projection_matrix()

@@ -16,9 +16,12 @@ class TransformObject;
 //#include "../utlis/uuid_helper.h"
 //#include "Hierarchy.h"
 
+/*
 #ifndef COMPONENT
 #include "Component.h"
 #endif // !COMPONENT
+*/
+class Component;
 
 /*
 struct ExecuteList
