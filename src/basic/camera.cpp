@@ -8,6 +8,11 @@ Camera::Camera(glm::vec3 position, float ratio, float near, float far):Component
 	this->m_near = near;
 }
 
+Camera::Camera(glm::vec3 position, float near, float far, float width, float height):Camera(position , width/height , near,far )
+{
+}
+
+
 
 void Camera::Do()
 {	

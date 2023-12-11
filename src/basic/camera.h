@@ -20,14 +20,18 @@ enum class CameraDirection {
 using namespace glm;
 class Camera : public Component {
 public :
+	
 	Camera();	
 	Camera(glm::vec3  position , float ratio ,float near, float far);
+	Camera(glm::vec3  position, float near, float far , float width , float height);
 	
 	
 	float speed;
 	float m_aspect_ratio;
 	float m_near = 0.1f;
 	float m_far = 10.0f;
+	float m_width = 0;  //ToDo:....
+	float m_heigth = 0;
 
 	vec3 view_target = vec3(0.0f);
 	float zoom = 3;	
@@ -41,8 +45,6 @@ public :
 
 private :
 	//void updateCameraVectors();
-
-
 
 };
 

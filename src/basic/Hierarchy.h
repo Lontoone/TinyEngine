@@ -8,13 +8,19 @@
 #include <string>
 #include <map>
 //#include "camera->h"
-//#include "Component.h"
-//#include <Light.h>
+#include "Component.h"
 #include "GameObject.h"
-class GameObject;
-//#include "TransformObject.h"
-#include "UiPanel.h"
 //#include <camera.h>
+#include "UiPanel.h"
+//#include <Light.h>
+//class GameObject;
+//#include "TransformObject.h"
+
+//================================
+//    Forward Declearation
+// Use forward declearation as more as posiable to avoid include error
+//================================
+class Light;
 class Camera;
 
 using namespace std;
@@ -41,12 +47,13 @@ public:
 
 	vector<GameObject*> m_game_objects;
 	Camera* main_camera;
+	//float get_main_camera_near() { return main_camera->m_near; };
 
 private:	
 	//vector<ExecuteList*> m_execute_layers;
 	map<string, GameObject*> m_gameobj_maps;
 	vector<string> m_gameobject_names;
-	//vector<Light*> m_ligths;
+	vector<Light*> m_ligths;
 	Hierarchy() {};
 	static Hierarchy sInstance ;
 	

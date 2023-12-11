@@ -57,6 +57,60 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 	glUniform1i(glGetUniformLocation(this->shader->m_state.programId, "screenTexture"), 0);
 }
 
+FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, const GLenum texture_target , const GLenum color_draw , const GLenum color_read, unsigned int& width, unsigned int& height)
+{
+	// Create Only 1 Textures.
+	this->shader = shader;
+	this->width = &width;
+	this->height = &height;
+	glGenFramebuffers(1, &this->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+
+	
+	glGenTextures(1, &framebuffer_texture[0]);
+
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[0]);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, texture_target, width, height, 0, texture_target, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
+	glFramebufferTexture(GL_FRAMEBUFFER, draw_target, this->framebuffer_texture[0], 0);
+	
+	glDrawBuffer(color_draw);
+	glReadBuffer(color_read);
+
+	if (this->rbo == NULL) {
+		glGenRenderbuffers(1, &this->rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
+	}
+
+	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "frame buffer error " << fbo_status << endl;
+	}
+
+	// Prepare framebuffer rectangle VBO and VAO	
+	if (this->rectVAO == NULL) {
+		glGenVertexArrays(1, &this->rectVAO);
+		glGenBuffers(1, &this->rectVBO);
+		glBindVertexArray(this->rectVAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, this->rectVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	}
+
+	glUniform1i(glGetUniformLocation(this->shader->m_state.programId, "screenTexture"), 0);
+}
+
 
 
 void FramebufferObject::activate()

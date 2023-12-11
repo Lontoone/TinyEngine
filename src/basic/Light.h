@@ -6,10 +6,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 */
-#include <Component.h>
+#include <UiableComponent.h>
 
 /*
 */
+#include <Camera.h>
 #ifndef GAMEOBJECT
 #include <GameObject.h>
 #endif // !GAMEOBJECT
@@ -21,7 +22,7 @@ using namespace glm;
 using namespace std;
 
 
-class Light:public Component
+class Light:public UiableComponent
 {
 public:
 	Light();
@@ -29,7 +30,7 @@ public:
 	static const unsigned int SHOWOW_CASCADE_LEVEL = 1;
 	unsigned int SHOWOW_RESOLUTION = 1024;
 	LIGHT_Type light_type;	
-	void Do() override {};
+	void Do() override;
 	void update_shadow_map();
 	mat4 get_projection_matrix();
 
