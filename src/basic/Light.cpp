@@ -22,7 +22,7 @@ void Light::Do()
 
 void Light::bind_shadow_map()
 {
-	this->fbo->activate();
+	//this->fbo->activate();
 	mat4 proj_matrix = this-> get_projection_matrix();
 	//mat4 model_matrix = this->get_gameobject()->m_transform->m_model_matrix;
 	mat4 light_view_matrix = this->get_gameobject()->m_transform->m_translate_matrix * mat4(-1) ;// inverse translation 
@@ -40,11 +40,32 @@ void Light::bind_shadow_map()
 mat4 Light::get_projection_matrix()
 {
 	if (this->light_type == LIGHT_Type::DIRECTIONAL) {		
-		return this->get_directional_light_mvp();
+		//return this->get_directional_light_mvp();
+		Camera* main_camera = Hierarchy::instance().get_main_camera();
+		float near_plane = main_camera->m_near;
+		float far_plane = main_camera->m_far;
+		//return glm::ortho(0.0f, float(this->SHOWOW_RESOLUTION), float(this->SHOWOW_RESOLUTION), 0.0f, main_camera->m_near, main_camera->m_far);
+		//return mat4(1);
+		return glm::ortho(-35.0f,35.0f ,-35.0f , 35.0f, 0.1f,75.0f);
 	}
 	//TODO:
 
 	return mat4();
+}
+mat4 Light::get_light_view_matrix()
+{
+	if (this->light_type == LIGHT_Type::DIRECTIONAL) {
+		// Directional light no translation
+		//return transpose( this->get_gameobject()->m_transform->m_rot_matrix) * this->get_gameobject()->m_transform->m_translate_matrix *-1.0f;  // inverse rot mat 		
+		//return transpose(this->get_gameobject()->m_transform->m_rot_matrix) ;  // inverse rot mat 		
+
+		return glm::lookAt(20.0f * this->get_gameobject()->m_transform->m_position  , vec3(0) , WORLD_UP);
+	}
+	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {
+		// Point light no rotation
+		return this->get_gameobject()->m_transform->m_translate_matrix* mat4(-1);// inverse translation 
+	
+	}
 }
 /*
 */
@@ -85,11 +106,13 @@ void Light::init_shader()
 
 mat4 Light::get_directional_light_mvp()
 {
+	//ToDo: Broken???
 	// return otho proj matrix
 	Camera* main_camera = Hierarchy::instance().get_main_camera();
 	float near_plane = main_camera->m_near;
 	float far_plane = main_camera->m_far;
 	return glm::ortho(0.0f , main_camera->m_width , main_camera->m_heigth ,0.0f , main_camera->m_near , main_camera->m_far );
+	//return mat4(1);
 }
 /*
 */

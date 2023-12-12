@@ -29,6 +29,12 @@ const enum class LIGHT_Type
 #define u_VP_MATRIX "u_VP_MATRIX";
 #define u_M_MATRIX "u_M_MATRIX";
 
+#define u_TEX_SHADOW_MAP "u_TEX_SHADOW_MAP";
+#define u_TEX_SHADOW_MAP0 "u_TEX_SHADOW_MAP0";
+#define u_TEX_SHADOW_MAP1 "u_TEX_SHADOW_MAP1";
+#define u_TEX_SHADOW_MAP2 "u_TEX_SHADOW_MAP2";
+#define u_TEX_SHADOW_MAP3 "u_TEX_SHADOW_MAP3";
+
 
 /*
 static const GLenum COLOR_FRAME_BUFFERS[] = {

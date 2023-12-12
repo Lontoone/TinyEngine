@@ -33,19 +33,20 @@ public:
 	LIGHT_Type light_type = LIGHT_Type::DIRECTIONAL;	
 	void Do() override;
 	mat4 get_projection_matrix();
+	mat4 get_light_view_matrix();
 	mat4 m_vp_matrix;
 	void shadow_pass();
 	void light_pass();
 
+	FramebufferObject* fbo; 
+	Shader shadow_shader;
 
 private:
 	void bind_shadow_map();
 	void init_buffer();
 	void init_shader();
-	FramebufferObject* fbo; 
 	mat4 get_directional_light_mvp();
 	unsigned int shadow_fbo_cascaded[SHOWOW_CASCADE_LEVEL];
-	Shader shadow_shader;
 
 };
 

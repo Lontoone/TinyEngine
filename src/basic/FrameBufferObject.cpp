@@ -32,7 +32,7 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -71,13 +71,16 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 
 	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[0]);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, texture_target, width, height, 0, texture_target, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, texture_target, width, height, 0, texture_target, GL_FLOAT, NULL);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+	glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
-	glFramebufferTexture(GL_FRAMEBUFFER, draw_target, this->framebuffer_texture[0], 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, draw_target, GL_TEXTURE_2D,this->framebuffer_texture[0], 0);
 	
 	glDrawBuffer(color_draw);
 	glReadBuffer(color_read);
@@ -86,7 +89,7 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -127,17 +130,20 @@ void FramebufferObject::blit(unsigned int src_id, FramebufferObject& fbo )
 }
 void FramebufferObject::blit(unsigned int src_id, unsigned int dst_fbo_id)
 {
+	this->blit(src_id, dst_fbo_id, *this->shader);
+}
+void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo, Shader& shader) {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo_id);
-	this->shader->activate();
+	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo);
+	shader.activate();
 	this->set_frame_uniform();
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(this->rectVAO);
-	glDisable(GL_DEPTH_TEST);
-	glBindTexture(GL_TEXTURE_2D, src_id);
+	//glDisable(GL_DEPTH_TEST);
+	glBindTexture(GL_TEXTURE_2D, src_texture_id);
+	glUniform1i(glGetUniformLocation(shader.m_state.programId, "screenTexture"), src_texture_id);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-
 void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo, unsigned int additional_texture)
 {
 	
@@ -145,7 +151,7 @@ void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo, 
 	this->shader->activate();
 	this->set_frame_uniform();
 	glBindVertexArray(this->rectVAO);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, src_texture_id);
@@ -172,7 +178,7 @@ void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo
 	this->shader->activate();
 	this->set_frame_uniform();
 	glBindVertexArray(this->rectVAO);
-	glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_DEPTH_TEST);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, src_texture_id);

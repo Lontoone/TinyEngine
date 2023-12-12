@@ -1,8 +1,7 @@
 #include "camera.h"
 
 
-Camera::Camera(glm::vec3 position, float ratio, float near, float far):Component(){
-
+Camera::Camera(glm::vec3 position, float ratio, float near, float far):Component(){	
 	this->m_aspect_ratio = ratio;
 	this->m_far = far;
 	this->m_near = near;
@@ -10,6 +9,8 @@ Camera::Camera(glm::vec3 position, float ratio, float near, float far):Component
 
 Camera::Camera(glm::vec3 position, float near, float far, float width, float height):Camera(position , width/height , near,far )
 {
+	this->m_width = width;
+	this->m_heigth = height;
 }
 
 

@@ -9,6 +9,7 @@
 #include <vector>
 #include <GL/glew.h>
 //#include <GL/glew.h>
+#include "LightingManager.h"
 #include "GameObject.h"
 #include "Component.h"
 #include "Material.h"
@@ -77,6 +78,8 @@ public:
 	
     void flash_entity_data(); // TODO....
     void Render();
+    void Render(map<const char*, mat4> uniform_pairs);
+    void Render(map<const char*, mat4> uniform_pairs , Shader &shader);
 	void Do() ; 
     
     // Override for UI

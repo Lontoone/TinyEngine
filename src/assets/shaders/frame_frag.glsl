@@ -13,6 +13,7 @@ out vec4 color;
 
 void main() {
 
-	color = texture(screenTexture, texcoord) ;
+	//color = texture(screenTexture, texcoord) ;
 	//color = texture(screenTexture, vec2(texcoord.x /2 , texcoord.y));
+	color = vec4(texcoord,0,1);
 }

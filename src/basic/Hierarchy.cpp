@@ -1,8 +1,21 @@
 #include "Hierarchy.h"
 
 void Hierarchy::execute(EXECUTE_TIMING timimg ) {
-	for (int i = 0; i < sInstance.m_game_objects.size(); i++) {
-		//this->m_game_objects[i]->execute(timimg);
+	// Execute self
+	if (timimg == EXECUTE_TIMING::BEFORE_FRAME) {
+		this->do_before_frame();
+	}
+	else if(timimg == EXECUTE_TIMING::AFTER_FRAME)
+	{
+		this->do_after_frame();
+	}
+	else if (timimg == EXECUTE_TIMING::MAIN_LOGIC)
+	{
+		this->do_frame();
+	}
+
+	// Execute Others 
+	for (int i = 0; i < sInstance.m_game_objects.size(); i++) {		
 		sInstance.m_game_objects[i]->execute(timimg);
 	}
 }
@@ -25,6 +38,11 @@ void Hierarchy::add_object(GameObject* new_obj)
 void Hierarchy::add_light(Light* light)
 {
 	this->m_ligths.push_back(light);
+}
+
+void Hierarchy::add_renderer(Mesh* mesh)
+{
+	this->m_meshes.push_back(mesh);
 }
 
 void Hierarchy::set_main_camera(Camera* camera)
@@ -50,6 +68,23 @@ GameObject* Hierarchy::get_gameobjs_by_name(string name)
 }
 
 void Hierarchy::update_shadow_maps()
+{
+}
+
+
+//===============================
+//   Do Not Refference Other Scripts...
+//===============================
+void Hierarchy::do_before_frame()
+{
+	
+}
+
+void Hierarchy::do_after_frame()
+{
+}
+
+void Hierarchy::do_frame()
 {
 }
 

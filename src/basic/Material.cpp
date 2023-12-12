@@ -48,6 +48,13 @@ void Material::set_model_matrix(mat4 _mode_matrix)
 	glUniformMatrix4fv(glGetUniformLocation(this->m_shader->m_state.programId, "model"), 1, GL_FALSE, value_ptr(_mode_matrix));
 }
 
+void Material::set_uniform_matrix(map<const char*, mat4> uniform_pairs)
+{
+	for (const auto &pair : uniform_pairs) {
+		glUniformMatrix4fv(glGetUniformLocation(this->m_shader->m_state.programId, pair.first), 1, GL_FALSE, value_ptr(pair.second));
+	}
+}
+
 void Material::render()
 {
 	this->bind_texture_uniform();

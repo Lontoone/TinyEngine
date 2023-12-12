@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 //#include "camera->h"
+//#include <LightingManager.h>
 #include "Component.h"
 #include "GameObject.h"
 //#include <camera.h>
@@ -22,6 +23,7 @@
 //================================
 class Light;
 class Camera;
+class Mesh;
 
 using namespace std;
 
@@ -39,6 +41,7 @@ public:
 	void set_main_camera(Camera* camera);
 	void add_object(GameObject* new_obj);
 	void add_light(Light* light);
+	void add_renderer(Mesh* mesh);
 	//void add_indirect_object(GameObject* indirec_groups); // ToDo...
 	void add_main_camera();
 
@@ -50,6 +53,7 @@ public:
 	//float get_main_camera_near() { return main_camera->m_near; };
 
 	vector<Light*> m_ligths;
+	vector<Mesh*> m_meshes;
 
 private:	
 	static Hierarchy sInstance ;
@@ -59,6 +63,11 @@ private:
 	vector<string> m_gameobject_names;
 	Hierarchy() {};
 	void update_shadow_maps();
+	void do_before_frame();
+	void do_after_frame();
+	void do_frame();
+
+
 	
 	
 };

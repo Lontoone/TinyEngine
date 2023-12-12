@@ -35,6 +35,7 @@
 #include <DefaultGrid.h>
 #include <CameraFrustum.h>
 #include <IndirectInstancedMesh.h>
+#include <LightingManager.h>
 
 //===========
 // For HW3
@@ -70,7 +71,7 @@ unsigned int SCR_HEIGHT	= 756;
 unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
 unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.001f) , (float)SCR_WIDTH  / (float)SCR_HEIGHT ,1,150);
+Camera* game_camera = new Camera(glm::vec3(1.0f, 10.0f, -5.0f) ,1,50, SCR_WIDTH  ,SCR_HEIGHT );
 Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,1,500 );
 
 GameObject game_camera_obj = GameObject();
@@ -121,8 +122,8 @@ int main(int argc , char** argv) {
 	
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
-	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);		
-	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
+	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
+	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
 	Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
@@ -132,6 +133,8 @@ int main(int argc , char** argv) {
 	obj.add_component(dog_mesh);
 	obj.m_transform->m_scale = vec3(10);
 	Hierarchy::instance().add_object(&obj);	
+	Hierarchy::instance().add_renderer(dog_mesh);
+	
 
 	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
 	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
@@ -151,8 +154,10 @@ int main(int argc , char** argv) {
 
 	Light* sun = new Light();
 	GameObject sun_obj = GameObject("Sun");
+	sun_obj.m_transform->m_position = vec3(1, 10, -5);
 	sun_obj.add_component((Component*)sun);
 	Hierarchy::instance().add_object(&sun_obj);
+	Hierarchy::instance().add_light(sun);
 
 #pragma endregion
 
@@ -225,7 +230,6 @@ int main(int argc , char** argv) {
 
 		processInput(window , 0.1f);
 		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
-
 		//glUseProgram(state.programId);
 
 		//=====================
@@ -242,17 +246,31 @@ int main(int argc , char** argv) {
 		SliderFloat3("sun position", &sun_postion[0], -10, 10);
 		End();
 
-		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);		
+		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);				
+
 		//hw3_move_slim(obj);
 		id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
+		/*
+		*/
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		sun->fbo->activate(); //Test sun fbo		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//set_shader_mvp(&s_default_shader, game_camera);		
+		glViewport(0, 0, 1024, 1024);
+		//glClear(GL_DEPTH_BUFFER_BIT);
+		LightingManager::render_to_shadowmap();
 
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		sun->fbo->blit(sun->fbo->framebuffer_texture[0] , 0 , frameBuffer_shader);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		set_shader_mvp(&s_default_shader, game_camera);
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 
@@ -302,9 +320,12 @@ int main(int argc , char** argv) {
 		*/
 		//--------------------------------------------			
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.Draw_Frames_on_Panel();
+		frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 
@@ -342,7 +363,7 @@ void set_shader_mvp(Shader * shader , Camera * camera) {
 	glUniformMatrix4fv(glGetUniformLocation(shader->m_state.programId, "MATRIX_VP"), 1, GL_FALSE, value_ptr(vp));
 }
 
-void render_game_view( Camera* camera , Shader* shader) {  //TODO: shader uniform... 
+void render_game_view( Camera* camera , Shader* shader) { 
 	
 	//-------------- [ TEMP ¼È®ÉªºMVP ] ------------------
 	glm::mat4 view = glm::mat4(1.0f);

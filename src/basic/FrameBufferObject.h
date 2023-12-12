@@ -20,7 +20,7 @@ public:
 	unsigned int* height;
 	
 	unsigned int fbo = NULL;
-	bool is_enabled = false;
+	bool is_enabled = true; //ToDo:  more usage?
 
 	const float rectangleVertices[24] =
 	{
@@ -37,6 +37,7 @@ public:
 	void activate();	
 	void blit(unsigned int src_id, FramebufferObject& fbo);
 	void blit(unsigned int src_texture_id  , unsigned int dst_fbo);
+	void blit(unsigned int src_texture_id, unsigned int dst_fbo , Shader& shader);
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo, unsigned int additional_texture);
 	void blit(unsigned int src_texture_id, FramebufferObject& fbo, unsigned int additional_texture);
 	void blit(unsigned int src_texture_id, FramebufferObject& fbo, const unsigned int additional_textures[]);
