@@ -255,22 +255,31 @@ int main(int argc , char** argv) {
 		*/
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		sun->fbo->activate(); //Test sun fbo		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
+		glViewport(0, 0, 1024, 1024);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_MULTISAMPLE);
 		//set_shader_mvp(&s_default_shader, game_camera);		
-		glViewport(0, 0, 1024, 1024);
 		//glClear(GL_DEPTH_BUFFER_BIT);
-		LightingManager::render_to_shadowmap();
+		LightingManager::render_to_shadowmap();		
+
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		sun->fbo->blit(sun->fbo->framebuffer_texture[0] , 0 , frameBuffer_shader);
+		//frameBuffer_shader.activate();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
+		// Set our "renderedTexture" sampler to use Texture Unit 0
+		glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId, "screenTexture"), 0);
 
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-		sun->fbo->blit(sun->fbo->framebuffer_texture[0] , 0 , frameBuffer_shader);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		set_shader_mvp(&s_default_shader, game_camera);
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 

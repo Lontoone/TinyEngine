@@ -37,7 +37,9 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "=================================================" << endl;
 		cout << "frame buffer error " << fbo_status << endl;
+		cout << "=================================================" << endl;
 	}
 
 	// Prepare framebuffer rectangle VBO and VAO	
@@ -73,10 +75,10 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 
 	glTexImage2D(GL_TEXTURE_2D, 0, texture_target, width, height, 0, texture_target, GL_FLOAT, NULL);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
@@ -84,17 +86,20 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 	
 	glDrawBuffer(color_draw);
 	glReadBuffer(color_read);
-
+	/*
 	if (this->rbo == NULL) {
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
-	}
+	}*/
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
+
+		cout << "=================================================" << endl;
 		cout << "frame buffer error " << fbo_status << endl;
+		cout << "=================================================" << endl;
 	}
 
 	// Prepare framebuffer rectangle VBO and VAO	
