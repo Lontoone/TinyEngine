@@ -11,12 +11,19 @@ uniform mat4 view;
 uniform mat4 projection; 
 uniform mat4 MATRIX_VP;
 //uniform vec3 sun_postion;
+// 
 vec3 sun_postion = vec3(0,1,0);
 
+// Imports the light matrix
+uniform mat4 u_LIGHT_VP_MATRIX;
+
+out vec3 crntPos;
 out vec2 texcoord;
 out vec3 world_normal;
 out mat3 TBN;
 out vec3 light_dir;
+// Outputs the fragment position of the light
+out vec4 fragPosLight;
 //out vec3 view_dir;
 
 //out vec4 color;
@@ -36,5 +43,6 @@ void main(){
 	TBN = mat3(T, B, N);
 
 	light_dir = TBN * sun_postion;
-
+	fragPosLight = u_LIGHT_VP_MATRIX * model * vec4(aPos, 1.0f);
+	crntPos = gl_Position.xyz;
 }

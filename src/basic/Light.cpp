@@ -19,7 +19,7 @@ void Light::Do()
 	//
 	this->light_pass();
 }
-
+// Not Using
 void Light::bind_shadow_map()
 {
 	//this->fbo->activate();
@@ -72,12 +72,9 @@ mat4 Light::get_light_view_matrix()
 
 void Light::init_buffer()
 {		
-	this->fbo = new FramebufferObject(
-			&this->shadow_shader ,
-			GL_DEPTH_ATTACHMENT,
-			GL_DEPTH_COMPONENT,
-			GL_NONE,
-			GL_NONE,
+	this->fbo = new FramebufferObject();
+	this->fbo->create_shadow_buffer(
+			&this->shadow_shader ,			
 			SHOWOW_RESOLUTION , SHOWOW_RESOLUTION);
 	// ToDo: cascade shadow
 	//for (int i = 0; i < this->SHOWOW_CASCADE_LEVEL; i++) {	}

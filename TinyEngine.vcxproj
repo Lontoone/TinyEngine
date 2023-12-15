@@ -212,6 +212,7 @@
     <ClInclude Include="src\ui\UiManager.h" />
     <ClInclude Include="src\ui\UiPanel.h" />
     <ClInclude Include="src\utlis\SpatialSample.h" />
+    <ClInclude Include="src\utlis\UniformBinder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\poissonPoints_1010s.ss2" />

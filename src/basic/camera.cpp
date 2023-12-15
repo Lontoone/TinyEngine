@@ -37,6 +37,27 @@ void Camera::Do()
 	*/
 
 }
+// ToDo: [Bug not working...]
+void Camera::bind_uniform(unsigned int shader_pid)
+{	
+	glm::mat4 view			= glm::mat4(1.0f);
+	glm::mat4 projection	= glm::mat4(1.0f);
+	view					= this->getViewMatrix();
+	projection				= this->getProjectionMatrix();
+	glm::mat4 vp			= projection * view;
+	vec3 cam_pos = this->get_gameobject()->m_transform->m_position;
+	// Bind Camera Properties
+	/*
+	*/
+	//glUniformMatrix4fv(glGetUniformLocation(shader_pid, EXPAND(u_VIEW_MATRIX)), 1, GL_FALSE, value_ptr(view));
+	//glUniformMatrix4fv(glGetUniformLocation(shader_pid, EXPAND(u_PROJ_MATRIX)), 1, GL_FALSE, value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader_pid, "view"), 1, GL_FALSE, value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shader_pid, "projection"), 1, GL_FALSE, value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader_pid, CODE_TO_STR( EXPAND(u_VP_MATRIX))), 1, GL_FALSE, value_ptr(vp));
+	glUniform3fv(glGetUniformLocation(shader_pid, CODE_TO_STR(EXPAND(u_CAM_POS))), 1,  value_ptr(cam_pos));
+	//glUniformMatrix4fv();
+	
+}
 
 void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners)
 {

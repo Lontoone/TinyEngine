@@ -95,5 +95,6 @@ private:
 	bool InitFromScene(const aiScene* pScene, const std::string& Filename);
 	bool InitMaterials(const aiScene* pScene);//, const std::string& Filename);
     void InitMesh(unsigned int Index, const aiMesh* paiMesh);
+    
 	void Clear();
 };

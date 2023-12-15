@@ -33,7 +33,7 @@ Mesh::~Mesh()
 void Mesh::Render()
 {
     // Set up 
-    LightingManager::request_shadowmap_uniform(this->m_default_shader);
+    //LightingManager::request_shadowmap_uniform(this->m_default_shader);
 
     // Render self
     for (unsigned int i = 0; i < this->m_Entries.size(); i++) {
@@ -327,6 +327,7 @@ void Mesh::InitMesh(unsigned int Index, const aiMesh* paiMesh)
     cout << Index <<" mesh obj contains " << Vertices.size() << " verts " << Indices.size() << " index" << endl;
 
 }
+
 
 void Mesh::Clear()
 {

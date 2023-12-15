@@ -2,10 +2,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "Component.h"
 #include "GameObject.h"
+#include <UniformBinder.h>
 
 enum class CameraDirection {
 	NONE = 0,
@@ -18,7 +17,7 @@ enum class CameraDirection {
 };
 
 using namespace glm;
-class Camera : public Component {
+class Camera : public Component , public UniformBinder {
 public :
 	
 	Camera();	
@@ -37,6 +36,7 @@ public :
 	float zoom = 3;	
 
 	void Do() override;	
+	void bind_uniform(unsigned int shader_pid) override;
 	void viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners);
 	mat4 get_model_matrix() { return this->get_gameobject()->m_transform->m_model_matrix; };
 	glm::mat4 getViewMatrix();

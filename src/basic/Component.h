@@ -5,8 +5,10 @@
 #define COMPONENT
 
 #include <iostream>
+
 //#include <GameObject.h>
 class GameObject;
+class Shader;
 
 class Component
 {
@@ -27,6 +29,7 @@ public:
 	GameObject* get_gameobject() { return (GameObject*)this->m_gameobject; };
 		
 	virtual Component* copy() { return nullptr; };
+	virtual void bind_uniform(unsigned int shader_pid) {};
 
 	void attatch_to(Component* ptr);
 

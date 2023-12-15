@@ -71,7 +71,7 @@ unsigned int SCR_HEIGHT	= 756;
 unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
 unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(1.0f, 10.0f, -5.0f) ,1,50, SCR_WIDTH  ,SCR_HEIGHT );
+Camera* game_camera = new Camera(glm::vec3(1.0f, 10.0f, -5.0f) ,1,150, SCR_WIDTH  ,SCR_HEIGHT );
 Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,1,500 );
 
 GameObject game_camera_obj = GameObject();
@@ -210,9 +210,9 @@ int main(int argc , char** argv) {
 		GL_COLOR_ATTACHMENT2
 		//GL_DEPTH_ATTACHMENT,
 	};
-	//FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, HALF_SCR_WIDTH , SCR_HEIGHT);
-	FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, HALF_SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT );
+	//FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, HALF_SCR_WIDTH , SCR_HEIGHT);
+	//FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, HALF_SCR_WIDTH, SCR_HEIGHT);
 	
 
 #pragma endregion
@@ -251,28 +251,48 @@ int main(int argc , char** argv) {
 		//hw3_move_slim(obj);
 		id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
-		/*
-		*/
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		sun->fbo->activate(); //Test sun fbo		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		// [ Set up FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
+		// Depth testing needed for Shadow Map
+		glEnable(GL_DEPTH_TEST);
+		glViewport(0, 0, 1024, 1024);
+		sun->fbo->activate();
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// Render all object
+		LightingManager::render_to_shadowmap();
+		sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);
+
+		//---------------------------
+		// [ Set up FBO]
+		glClearColor(0.2, 0.2, 0.2, 1.0f);		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_MULTISAMPLE);
-		//set_shader_mvp(&s_default_shader, game_camera);		
-		glViewport(0, 0, 1024, 1024);
-		//glClear(GL_DEPTH_BUFFER_BIT);
-		LightingManager::render_to_shadowmap();
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
+		//s_default_shader.activate();
+		set_shader_mvp(&s_default_shader, game_camera);		
+		
+		// Draw all items
+		s_default_shader.activate();
+		game_camera->bind_uniform(s_default_shader.m_state.programId);
 
-		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-		sun->fbo->blit(sun->fbo->framebuffer_texture[0] , 0 , frameBuffer_shader);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		set_shader_mvp(&s_default_shader, game_camera);
+		// Bind the Shadow Map
+		glActiveTexture(GL_TEXTURE0 + 2);
+		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
+		glUniform1i(glGetUniformLocation(s_default_shader.m_state.programId, "u_TEX_SHADOW_MAP"), 2);
+
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+
+		//  Blit to main screen
+		//main_fbo->blit(main_fbo->framebuffer_texture[0] , 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		frameBuffer_shader.activate();
+		glActiveTexture(GL_TEXTURE0);
+		glBindVertexArray(main_fbo->rectVAO);
+		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
+		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[0]);
+		glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId, "screenTexture"), 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		/*   [ HW3 ]
 		//========== Split View ===========			
@@ -324,8 +344,8 @@ int main(int argc , char** argv) {
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
-		frame_buffer_debugger.Draw_Frames_on_Panel();
-		frame_buffer_debugger.End_Panel();
+		//frame_buffer_debugger.Draw_Frames_on_Panel();
+		//frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 

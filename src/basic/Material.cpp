@@ -57,7 +57,7 @@ void Material::set_uniform_matrix(map<const char*, mat4> uniform_pairs)
 
 void Material::render()
 {
-	this->bind_texture_uniform();
+	//this->bind_texture_uniform();
 	/*
 	for (int i = 0; i < this->m_textures.size();i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -67,7 +67,9 @@ void Material::render()
 	int i = 0;
 	for (auto tex_ptr :this->m_textures) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D , tex_ptr.second->m_texture_id);
+		glBindTexture(GL_TEXTURE_2D , tex_ptr.second->m_texture_id);		
+		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, s_bind_types[tex_ptr.first]), i);
+		//cout << "BIND " << s_bind_types[tex_ptr.first] <<" at "<<i;
 		i++;
 	}
 }
@@ -78,6 +80,7 @@ void Material::load_shader()
 
 void Material::bind_texture_uniform()
 {
+	/*
 	if (this->m_shader != nullptr) {
 		this->m_shader->activate();
 		int i = 0;
@@ -88,5 +91,12 @@ void Material::bind_texture_uniform()
 
 			//cout<< "allocate shader: "<< this->m_shader->m_state.programId <<" texture :"<< s_bind_types[_tex_map.first] << endl;
 		}
+	}
+	*/
+	int i = 0;
+	for (const auto& _tex_map : this->m_textures) {
+		//glActivateTexture(GL_TEXTURE0);
+		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, s_bind_types[_tex_map.first]), i);
+		i++;
 	}
 }
