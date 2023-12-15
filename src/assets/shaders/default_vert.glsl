@@ -23,7 +23,8 @@ out vec3 world_normal;
 out mat3 TBN;
 out vec3 light_dir;
 // Outputs the fragment position of the light
-out vec4 fragPosLight;
+out vec4 world_clip_pos;
+out vec4 light_clip_pos;
 //out vec3 view_dir;
 
 //out vec4 color;
@@ -43,6 +44,6 @@ void main(){
 	TBN = mat3(T, B, N);
 
 	light_dir = TBN * sun_postion;
-	fragPosLight = u_LIGHT_VP_MATRIX * model * vec4(aPos, 1.0f);
-	crntPos = gl_Position.xyz;
+	light_clip_pos = u_LIGHT_VP_MATRIX * model * vec4(aPos, 1.0f);
+	world_clip_pos = gl_Position;
 }

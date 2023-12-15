@@ -67,6 +67,10 @@ mat4 Light::get_light_view_matrix()
 	
 	}
 }
+mat4 Light::get_light_vp_matrix()
+{
+	return this->get_projection_matrix() * this->get_light_view_matrix();
+}
 /*
 */
 

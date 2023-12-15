@@ -131,7 +131,7 @@ int main(int argc , char** argv) {
 
 	GameObject obj = GameObject("Slime");
 	obj.add_component(dog_mesh);
-	obj.m_transform->m_scale = vec3(10);
+	obj.m_transform->m_scale = vec3(5);
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_renderer(dog_mesh);
 	
@@ -154,7 +154,7 @@ int main(int argc , char** argv) {
 
 	Light* sun = new Light();
 	GameObject sun_obj = GameObject("Sun");
-	sun_obj.m_transform->m_position = vec3(1, 10, -5);
+	sun_obj.m_transform->m_position = vec3(1, 1, -3);
 	sun_obj.add_component((Component*)sun);
 	Hierarchy::instance().add_object(&sun_obj);
 	Hierarchy::instance().add_light(sun);
@@ -197,6 +197,7 @@ int main(int argc , char** argv) {
 
 	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
 	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 	Shader gizmose_shader = Shader(src_path + string("\\assets\\shaders\\vertexShader_ogl_450.glsl"), src_path + string("\\assets\\shaders\\fragmentShader_ogl_450.glsl"));
@@ -260,7 +261,16 @@ int main(int argc , char** argv) {
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		// Render all object
-		LightingManager::render_to_shadowmap();
+		shadow_shader.activate();
+		mat4 sun_vp = sun->get_light_vp_matrix();
+		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(obj.m_transform->m_model_matrix));
+		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
+		for (auto renderer : Hierarchy::instance().m_meshes) {
+			renderer->get_gameobject()->m_transform->Do();
+			renderer->Render_without_material(shadow_shader);
+		}
+		//Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+		//LightingManager::render_to_shadowmap();
 		sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);
 
 		//---------------------------
@@ -275,7 +285,7 @@ int main(int argc , char** argv) {
 		// Draw all items
 		s_default_shader.activate();
 		game_camera->bind_uniform(s_default_shader.m_state.programId);
-
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
 		// Bind the Shadow Map
 		glActiveTexture(GL_TEXTURE0 + 2);
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
@@ -344,8 +354,9 @@ int main(int argc , char** argv) {
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
-		//frame_buffer_debugger.Draw_Frames_on_Panel();
-		//frame_buffer_debugger.End_Panel();
+		frame_buffer_debugger.Draw_Frames_on_Panel();
+		frame_buffer_debugger.attach_texture(sun->fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
 		ui_manager.render_ui(); 

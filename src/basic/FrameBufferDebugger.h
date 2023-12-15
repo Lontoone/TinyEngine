@@ -18,8 +18,9 @@ public:
 	void Init_Panel(int window_width, int window_height);
 	void Begin_Panel();
 	void End_Panel();
-	void Draw_Single_Frame(GLuint& texture_id);
-
+	void Draw_Single_Frame(GLuint& texture_id);  //Todo: Should Delete
+	void attach_texture(unsigned int texture_id);
+	
 	//================= hw 2 ======================
 	void create_hw2_panel(int& setting);
 private:

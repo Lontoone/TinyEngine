@@ -79,6 +79,7 @@ public:
     void flash_entity_data(); // TODO....
     void Render();
     void Render(map<const char*, mat4> uniform_pairs);
+    void Render_without_material (Shader& shader);
     void Render(map<const char*, mat4> uniform_pairs , Shader &shader);
 	void Do() ; 
     

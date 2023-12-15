@@ -50,6 +50,12 @@ void FrameBufferDebugger::Draw_Single_Frame(GLuint& texture_id)
 	}
 }
 
+void FrameBufferDebugger::attach_texture(unsigned int texture_id)
+{
+	ImGui::Image((void*)texture_id, ImVec2(100, 100));
+	ImGui::SameLine();
+}
+
 void FrameBufferDebugger::create_hw2_panel(int& setting)
 {
 	ImGui::Begin("Hw2 Select Effect");

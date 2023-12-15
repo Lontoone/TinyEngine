@@ -3,11 +3,12 @@ out vec4 FragColor;
 in vec2 texcoord;
 
 //in vec4 color;
-in vec3 crntPos;
+
 in vec3 world_normal;
 in mat3 TBN;
 in vec3 light_dir;
-in vec4 fragPosLight;
+in vec4 world_clip_pos;
+in vec4 light_clip_pos;
 
 layout(location = 0) out vec4 color_tex;
 layout(location = 1) out vec4 color_normal;
@@ -38,9 +39,11 @@ vec4 direcLight()
 	// diffuse lighting
 	vec3 normal = normalize(world_normal);
 	vec3 lightDirection = normalize(lightPos);
-	float diffuse = max(dot(world_normal, lightDirection), 0.0f);
+	//float diffuse = max(dot(world_normal, lightDirection), 0.0f);
+	float diffuse = 1;
 
 	// specular lighting
+	/*
 	float specular = 0.0f;
 	if (diffuse != 0.0f)
 	{
@@ -49,16 +52,16 @@ vec4 direcLight()
 		vec3 halfwayVec = normalize(viewDirection + lightDirection);
 		float specAmount = pow(max(dot(normal, halfwayVec), 0.0f), 16);
 		specular = specAmount * specularLight;
-	};
+	};*/
 
 
 	// Shadow value
 	float shadow = 0.0f;
 	// Sets lightCoords to cull space
-	vec3 lightCoords = fragPosLight.xyz / fragPosLight.w;
-	float currentDepth = lightCoords.z;
-	float closestDepth = texture(u_TEX_SHADOW_MAP, lightCoords.xy).r;
-	if (currentDepth < crntPos.z)
+	vec3 light_ndc_pos = light_clip_pos.xyz / light_clip_pos.w;
+	float currentDepth = light_clip_pos.z;
+	float closestDepth = texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r;
+	if (currentDepth > closestDepth)
 		shadow = 1;
 	/*
 	if (lightCoords.z <= 1.0f)
@@ -86,12 +89,18 @@ vec4 direcLight()
 
 	}*/
 
-	float lin_d = linear_depth(texture(u_TEX_SHADOW_MAP, lightCoords.xy).r);
+
+	float lin_shadow = linear_depth(texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r);
+	float lin_dep = linear_depth(currentDepth);
+	
 	//float lin_current = linear_depth(currentDepth);
 	//return ( texture(u_TEX_SHADOW_MAP, lightCoords.xy));
 	//return vec4(crntPos.z - closestDepth, 0, 0, 1);
-	return vec4(crntPos.xyz,1);
-	//return (texture(DIFFUSE, texcoord) * (diffuse * (1.0f - shadow) + ambient));
+	//return vec4(light_clip_pos.xyz,1);
+	//return vec4(shadow,0,0,1);
+	//return vec4(shadow, 0, 0, 1);
+	//return (texture(DIFFUSE, texcoord) )* (1.0f- shadow);
+	return (texture(DIFFUSE, texcoord) * (diffuse * (1.0f - shadow) + ambient));
 		//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
 }
 

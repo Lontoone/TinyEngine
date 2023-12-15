@@ -34,6 +34,7 @@ public:
 	void Do() override;
 	mat4 get_projection_matrix();
 	mat4 get_light_view_matrix();
+	mat4 get_light_vp_matrix();
 	mat4 m_vp_matrix;
 	void shadow_pass();
 	void light_pass();

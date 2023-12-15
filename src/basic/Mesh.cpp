@@ -67,10 +67,42 @@ void Mesh::Render()
     //glDisableVertexAttribArray(0);
     //glDisableVertexAttribArray(1);
     //glDisableVertexAttribArray(2);
+    //glEnableVertexAttribArray(3);
 }
 
 void Mesh::Render(map<const char*, mat4> uniform_pairs){
     this->Render(uniform_pairs , this->m_default_shader);
+}
+
+void Mesh::Render_without_material(Shader& shader)
+{
+    for (unsigned int i = 0; i < this->m_Entries.size(); i++) {
+
+        glBindVertexArray(this->m_Entries[i].VA);
+        /*
+        */
+        glBindBuffer(GL_ARRAY_BUFFER, this->m_Entries[i].VB);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->m_Entries[i].IB);
+
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);  //vertex
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)16); //uv
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)32); //normal
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)48); //tangent
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
+        const unsigned int MaterialIndex = this->m_Entries[i].MaterialIndex;
+
+
+        GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform        
+        //this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);
+        //this->materials[MaterialIndex]->render();
+
+        glDrawElements(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0);        
+    }
+
 }
 
 void Mesh::Render(map<const char*, mat4> uniform_pairs , Shader& shader)

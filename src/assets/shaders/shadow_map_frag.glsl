@@ -4,4 +4,5 @@ void main()
 {
 	// Keep it empty
 	//color = vec4(0.5);
+	// Opengl Depth = gl_FragCoord.z
 }
