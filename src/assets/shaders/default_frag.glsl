@@ -10,6 +10,10 @@ in vec3 light_dir;
 in vec4 world_clip_pos;
 in vec4 light_clip_pos;
 
+in vec3 world_light_dir;
+in vec3 world_view_dir;
+in vec3 world_half_dir;
+
 layout(location = 0) out vec4 color_tex;
 layout(location = 1) out vec4 color_normal;
 layout(location = 2) out vec4 color_depth;
@@ -35,24 +39,26 @@ vec4 direcLight()
 {
 	// ambient lighting
 	float ambient = 0.20f;
-
-	// diffuse lighting
+	// =====================================
+	//			Diffuse lighting
+	// =====================================
 	vec3 normal = normalize(world_normal);
 	vec3 lightDirection = normalize(lightPos);
-	//float diffuse = max(dot(world_normal, lightDirection), 0.0f);
-	float diffuse = 1;
+	// Diffuse light
+	float diffuse = max(dot(world_normal, world_light_dir), 0.0f);	
+	//float diffuse = 1;  // Some model have no normal vector
 
-	// specular lighting
-	/*
-	float specular = 0.0f;
-	if (diffuse != 0.0f)
-	{
-		float specularLight = 0.50f;
-		vec3 viewDirection = normalize(u_CAM_POS - crntPos);
-		vec3 halfwayVec = normalize(viewDirection + lightDirection);
-		float specAmount = pow(max(dot(normal, halfwayVec), 0.0f), 16);
-		specular = specAmount * specularLight;
-	};*/
+
+	// =====================================
+	//			Specular lighting
+	// =====================================	
+	float specular = 0.0f;	
+	float specularLight = 0.50f;	
+	
+	float specAmount = pow(max(dot(normal, world_view_dir), 0.0f), 16);
+	specular = specAmount * specularLight;
+	//return vec4(specular,0,0, 1);
+	//return vec4(world_view_dir, 1);
 
 
 	// Shadow value
@@ -92,35 +98,14 @@ vec4 direcLight()
 
 	float lin_shadow = linear_depth(texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r);
 	float lin_dep = linear_depth(currentDepth);
-	
-	//float lin_current = linear_depth(currentDepth);
-	//return ( texture(u_TEX_SHADOW_MAP, lightCoords.xy));
-	//return vec4(crntPos.z - closestDepth, 0, 0, 1);
-	//return vec4(light_clip_pos.xyz,1);
-	//return vec4(shadow,0,0,1);
-	//return vec4(shadow, 0, 0, 1);
-	//return (texture(DIFFUSE, texcoord) )* (1.0f- shadow);
-	return (texture(DIFFUSE, texcoord) * (diffuse * (1.0f - shadow) + ambient));
-		//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
+	//return vec4(world_normal,1.0);
+	return texture(DIFFUSE, texcoord) * (diffuse * (1.0f - shadow) + ambient)
+			+  specular * (1.0f - shadow);
+			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
 }
 
 
 void main(){
-	//FragColor = texture(NORMAL, texcoord);
-	/*
-	vec3 normal_map_color = texture(NORMAL, texcoord).rgb;
-	vec3 tangentNormal = normalize(normal_map_color * 2.0 - 1.0);
-	tangentNormal = normalize(TBN * tangentNormal);
-
-	vec3 tangentLightDir = normalize(light_dir);
-	float light =max( dot(tangentNormal, tangentLightDir) , 0) *0.5 +0.5; 
-	
-	float depth = texture(u_TEX_SHADOW_MAP, texcoord).r ;
-	FragColor =  texture(DIFFUSE , texcoord ) * light * depth;
-	*/
-
-
-
 
 	FragColor = direcLight();
 	//color_tex = FragColor;

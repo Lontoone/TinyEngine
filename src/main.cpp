@@ -67,11 +67,11 @@ void set_shader_mvp(Shader* shader, Camera* camera);  //Debug...
 MechainState state;
 
 unsigned int SCR_WIDTH		= 1344;
-unsigned int SCR_HEIGHT	= 756;
+unsigned int SCR_HEIGHT		= 756;
 unsigned int HALF_SCR_WIDTH = SCR_WIDTH / 2;
 unsigned int HALF_SCR_HEIGHT = SCR_HEIGHT / 2;
 
-Camera* game_camera = new Camera(glm::vec3(1.0f, 10.0f, -5.0f) ,1,150, SCR_WIDTH  ,SCR_HEIGHT );
+Camera* game_camera = new Camera(glm::vec3(21.77f, 5.58f, -17.39f) ,1,150, SCR_WIDTH  ,SCR_HEIGHT );
 Camera* scene_camera = new Camera(glm::vec3(0.0f, 0.0f, 0.10f) , (float)SCR_WIDTH  /(float)SCR_HEIGHT ,1,500 );
 
 GameObject game_camera_obj = GameObject();
@@ -122,23 +122,25 @@ int main(int argc , char** argv) {
 	
 	//Mesh* mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);		
 	//obj.m_transform->m_scale = vec3(0.05);
-	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
+	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
+	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
-	Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
-	Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
-	Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
+	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
+	//Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
+	//Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
 	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
 
 	GameObject obj = GameObject("Slime");
 	obj.add_component(dog_mesh);
-	obj.m_transform->m_scale = vec3(5);
+	obj.m_transform->m_scale = vec3(1);
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_renderer(dog_mesh);
 	
 
 	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
 	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
-	game_camera_obj.m_transform->m_position = vec3(0, 0, 50);
+	game_camera_obj.m_transform->m_position = glm::vec3(3.42,0.7,-3);
+	game_camera_obj.m_transform->m_rotation = glm::vec3(0, -600, 0);
 	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
 	
 	//GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
@@ -218,9 +220,9 @@ int main(int argc , char** argv) {
 
 #pragma endregion
 
-	vector<Mesh> ind_mesh_list = {*mesh_b1  , *mesh_b2 , *mesh_b3 };	
+	//vector<Mesh> ind_mesh_list = {*mesh_b1  , *mesh_b2 , *mesh_b3 };	
 	//vector<Mesh> ind_mesh_list = { *mesh_b1 , *mesh_b3 };
-	IndirectInstancedMesh id_mesh(ind_mesh_list);
+	//IndirectInstancedMesh id_mesh(ind_mesh_list);
 
 	double delta_time = 0.025 ;
 	while (!glfwWindowShouldClose(window)) { // µ¥¨ìconsole °e¥Xkill flag
@@ -244,18 +246,19 @@ int main(int argc , char** argv) {
 		//		BEFORE FRAME SETTING
 		//=============================
 		Begin("Sun positon");
-		SliderFloat3("sun position", &sun_postion[0], -10, 10);
+		SliderFloat3("sun position", &sun_obj.m_transform->m_position[0], -10, 10);
 		End();
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);				
 
 		//hw3_move_slim(obj);
-		id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
+		//id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
 		// [ Set up FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		// Depth testing needed for Shadow Map
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BACK);
 		glViewport(0, 0, 1024, 1024);
 		sun->fbo->activate();
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -263,14 +266,15 @@ int main(int argc , char** argv) {
 		// Render all object
 		shadow_shader.activate();
 		mat4 sun_vp = sun->get_light_vp_matrix();
+		/**/
 		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(obj.m_transform->m_model_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
 		for (auto renderer : Hierarchy::instance().m_meshes) {
 			renderer->get_gameobject()->m_transform->Do();
 			renderer->Render_without_material(shadow_shader);
 		}
-		//Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
-		//LightingManager::render_to_shadowmap();
+		
+		//LightingManager::render_to_shadowmap();   // [ BUG : writing to wrong mvp? ]
 		sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);
 
 		//---------------------------
@@ -279,17 +283,17 @@ int main(int argc , char** argv) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
-		//s_default_shader.activate();
-		set_shader_mvp(&s_default_shader, game_camera);		
 		
 		// Draw all items
 		s_default_shader.activate();
 		game_camera->bind_uniform(s_default_shader.m_state.programId);
-		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
+		// Set uniform
+		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_CAM_POS) , 1 , value_ptr(game_camera_obj.m_transform->m_position));
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(sun_vp));
 		// Bind the Shadow Map
 		glActiveTexture(GL_TEXTURE0 + 2);
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(s_default_shader.m_state.programId, "u_TEX_SHADOW_MAP"), 2);
+		glUniform1i(glGetUniformLocation(s_default_shader.m_state.programId, u_TEX_SHADOW_MAP), 2);
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 

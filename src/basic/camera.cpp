@@ -53,8 +53,8 @@ void Camera::bind_uniform(unsigned int shader_pid)
 	//glUniformMatrix4fv(glGetUniformLocation(shader_pid, EXPAND(u_PROJ_MATRIX)), 1, GL_FALSE, value_ptr(projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader_pid, "view"), 1, GL_FALSE, value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shader_pid, "projection"), 1, GL_FALSE, value_ptr(projection));
-	glUniformMatrix4fv(glGetUniformLocation(shader_pid, CODE_TO_STR( EXPAND(u_VP_MATRIX))), 1, GL_FALSE, value_ptr(vp));
-	glUniform3fv(glGetUniformLocation(shader_pid, CODE_TO_STR(EXPAND(u_CAM_POS))), 1,  value_ptr(cam_pos));
+	glUniformMatrix4fv(glGetUniformLocation(shader_pid, u_VP_MATRIX), 1, GL_FALSE, value_ptr(vp));
+	glUniform3fv(glGetUniformLocation(shader_pid, u_CAM_POS), 1,  value_ptr(cam_pos));
 	//glUniformMatrix4fv();
 	
 }

@@ -30,25 +30,29 @@ const enum class LIGHT_Type
 #define STRINGIFY(x) #x
 #define EXPAND(x) STRINGIFY(x)
 
-#define u_LIGHT_VP_MATRIX "u_LIGHT_VP_MATRIX";
-#define u_PROJ_MATRIX "u_PROJ_MATRIX";
-#define u_VIEW_MATRIX "u_VIEW_MATRIX";
-#define u_VP_MATRIX "u_VP_MATRIX";
-#define u_M_MATRIX "u_M_MATRIX";
-#define u_CAM_POS "u_CAM_POS";
+const static char* u_LIGHT_VP_MATRIX  = "u_LIGHT_VP_MATRIX";
+const static char* u_PROJ_MATRIX  = "u_PROJ_MATRIX";
+const static char* u_VIEW_MATRIX  = "u_VIEW_MATRIX";
+const static char* u_VP_MATRIX  = "u_VP_MATRIX";
+const static char* u_M_MATRIX  = "u_M_MATRIX";
+const static char* u_CAM_POS  = "u_CAM_POS";
 
-#define u_TEX_SHADOW_MAP "u_TEX_SHADOW_MAP";
-#define u_TEX_SHADOW_MAP0 "u_TEX_SHADOW_MAP0";
-#define u_TEX_SHADOW_MAP1 "u_TEX_SHADOW_MAP1";
-#define u_TEX_SHADOW_MAP2 "u_TEX_SHADOW_MAP2";
-#define u_TEX_SHADOW_MAP3 "u_TEX_SHADOW_MAP3";
+//#define u_TEX_SHADOW_MAP "u_TEX_SHADOW_MAP";
+const static char* u_TEX_SHADOW_MAP = "u_TEX_SHADOW_MAP";
+const static char* u_TEX_SHADOW_MAP0 = "u_TEX_SHADOW_MAP0";
+const static char* u_TEX_SHADOW_MAP1 = "u_TEX_SHADOW_MAP1";
+const static char* u_TEX_SHADOW_MAP2 = "u_TEX_SHADOW_MAP2";
+const static char* u_TEX_SHADOW_MAP3 = "u_TEX_SHADOW_MAP3";
 
+const static char* u_LIGHT_WORLD_POS0 = "u_LIGHT_WORLD_POS0";
+
+/*
 static const char* CODE_TO_STR( const char* str) {
 	std::string st = std::string(str);
 	st.erase(0, 1); // erase the first quote
 	st.erase(st.size() - 1); // erase the last quote and the dot	
 	return st.c_str();
-}
+}*/
 
 /*
 static const GLenum COLOR_FRAME_BUFFERS[] = {
