@@ -64,6 +64,10 @@ void Material::render()
 		glBindTexture(GL_TEXTURE_2D , this->m_textures[i].value);	
 	}
 	*/
+
+	//============================
+	// [ToDo] : §ï¦¨loop through all texture enum name...
+	//============================
 	int i = 0;
 	for (auto tex_ptr :this->m_textures) {
 		glActiveTexture(GL_TEXTURE0 + i);

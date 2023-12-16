@@ -124,7 +124,7 @@ int main(int argc , char** argv) {
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
 	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
-	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.fbx", s_default_shader);
+	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	//Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
@@ -133,7 +133,7 @@ int main(int argc , char** argv) {
 
 	GameObject obj = GameObject("Slime");
 	obj.add_component(dog_mesh);
-	obj.m_transform->m_scale = vec3(1);
+	obj.m_transform->m_scale = vec3(0.1);
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_renderer(dog_mesh);
 	
@@ -290,6 +290,7 @@ int main(int argc , char** argv) {
 		game_camera->bind_uniform(s_default_shader.m_state.programId);
 		// Set uniform
 		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_CAM_POS) , 1 , value_ptr(game_camera_obj.m_transform->m_position));
+		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(sun_vp));
 		// Bind the Shadow Map
 		glActiveTexture(GL_TEXTURE0 + 2);

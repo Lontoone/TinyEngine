@@ -9,10 +9,13 @@ in mat3 TBN;
 in vec3 light_dir;
 in vec4 world_clip_pos;
 in vec4 light_clip_pos;
+in vec3 tng_light_dir;
+in vec3 tng_view_dir; 
 
 in vec3 world_light_dir;
 in vec3 world_view_dir;
 in vec3 world_half_dir;
+
 
 layout(location = 0) out vec4 color_tex;
 layout(location = 1) out vec4 color_normal;
@@ -42,20 +45,28 @@ vec4 direcLight()
 	// =====================================
 	//			Diffuse lighting
 	// =====================================
-	vec3 normal = normalize(world_normal);
-	vec3 lightDirection = normalize(lightPos);
+	//vec3 normal = normalize(world_normal);
+	vec3 normal = texture(NORMAL, texcoord).xyz *2.0 - vec3(1.0);
+	//vec3 lightDirection = normalize(lightPos);
 	// Diffuse light
-	float diffuse = max(dot(world_normal, world_light_dir), 0.0f);	
-	//float diffuse = 1;  // Some model have no normal vector
+	vec4 diffuse_color = vec4(1);
 
+	if (textureSize(DIFFUSE,0).x > 0) {
+		diffuse_color = texture(NORMAL, texcoord);
+	}
+	float diffuse = max(dot(normal, tng_light_dir), 0.0f);  // ToDo : albedo
+	//float diffuse = 1;  // Some model have no normal vector
+	//return vec4(diffuse,0,0, 1.0);
+	//return vec4(normal, 1.0);
+	return vec4(diffuse_color);
 
 	// =====================================
 	//			Specular lighting
 	// =====================================	
 	float specular = 0.0f;	
 	float specularLight = 0.50f;	
-	
-	float specAmount = pow(max(dot(normal, world_view_dir), 0.0f), 16);
+	vec3 R = reflect(-tng_light_dir , normal);
+	float specAmount = pow(max(dot(R, tng_view_dir), 0.0f), 16);
 	specular = specAmount * specularLight;
 	//return vec4(specular,0,0, 1);
 	//return vec4(world_view_dir, 1);
@@ -94,14 +105,15 @@ vec4 direcLight()
 		shadow /= pow((sampleRadius * 2 + 1), 2);
 
 	}*/
-
-
+		
 	float lin_shadow = linear_depth(texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r);
 	float lin_dep = linear_depth(currentDepth);
-	//return vec4(world_normal,1.0);
-	return texture(DIFFUSE, texcoord) * (diffuse * (1.0f - shadow) + ambient)
+	
+	return diffuse_color * (diffuse * (1.0f - shadow) + ambient)
 			+  specular * (1.0f - shadow);
+	/*
 			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
+	*/
 }
 
 

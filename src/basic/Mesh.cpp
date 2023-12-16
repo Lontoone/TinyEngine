@@ -170,16 +170,18 @@ void Mesh::init_ui_content()
 
     auto title_text = [&]() {Text("========= [ Mesh Render] ============");return true;};
     this->add_draw_item(title_text);
-
+    // ToDo:  Display Mesh data on panel
+    /*
     for (auto _mat : this->materials) {
         //auto m_path_text = [&]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->get_file_path_char()); return true; };
         if (_mat->m_textures.size() > 0) {
-            cout << _mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str() << endl;
+            //cout << _mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str() << endl;
             //TODO: Material UI
             //auto m_path_text = [=]() {Text(_mat->m_textures[Bind_Type::DIFFUSE]->m_file_path.c_str()); return true; };
             //this->add_draw_item(m_path_text);
         }
     }
+    */
 
     
 }
@@ -252,6 +254,35 @@ bool Mesh::InitMaterials(const aiScene* pScene)
 			aiString materialName;//The name of the material found in mesh file
 			aiReturn ret;//Code which says whether loading something has been successful of not
 
+
+            //===========================
+            //        DEBUG PRINT ALL
+            //===========================
+            // Iterate over all texture types
+            for (int t = 0; t < aiTextureType_UNKNOWN; ++t)
+            {
+                aiTextureType textureType = static_cast<aiTextureType>(t);
+
+                // Get the count of textures for this type
+                unsigned int textureCount = material->GetTextureCount(textureType);
+                cout << textureType  << " Contains Textures " << textureCount << endl;
+
+                // Iterate over all textures of this type
+                for (unsigned int i = 0; i < textureCount; ++i)
+                {
+                    aiString path;  // Will hold the texture's file path
+
+                    // Get the texture's file path
+                    if (material->GetTexture(textureType, i, &path) == AI_SUCCESS)
+                    {
+                        // Print the texture's file path
+                        std::cout << "Texture path: " << path.C_Str() << std::endl;
+                    }
+                }
+            }
+
+
+            // Load into texture
 			ret = material->Get(AI_MATKEY_NAME, materialName);//Get the material name (pass by reference)
 			if (ret != AI_SUCCESS) materialName = "";//Failed to find material name so makes var empty
 						
