@@ -57,17 +57,34 @@ void Material::set_uniform_matrix(map<const char*, mat4> uniform_pairs)
 
 void Material::render()
 {
-	//this->bind_texture_uniform();
-	/*
-	for (int i = 0; i < this->m_textures.size();i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D , this->m_textures[i].value);	
-	}
-	*/
 
 	//============================
 	// [ToDo] : §ï¦¨loop through all texture enum name...
 	//============================
+	int cnt = 0;
+	for (int i = Bind_Type::DIFFUSE; i != Bind_Type::NONE; ++i) {
+		// Bind Texture
+		Bind_Type tex_type = static_cast<Bind_Type>(i);
+
+		unsigned int tex = 99;
+		glActiveTexture(GL_TEXTURE0 + cnt);
+		if (this->m_textures.count(tex_type)) {
+			tex = this->m_textures[tex_type]->m_texture_id;
+		}				
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, s_bind_types[tex_type]), cnt);
+
+		// Bind Material para
+		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_IA),1, value_ptr( this->m_mat_para_ia));
+		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_IS), 1, value_ptr(this->m_mat_para_is));
+		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_ID), 1, value_ptr(this->m_mat_para_id));
+		glUniform1f(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_SN), this->m_mat_para_sn);
+
+
+
+		cnt++;
+	}
+	/*
 	int i = 0;
 	for (auto tex_ptr :this->m_textures) {
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -76,6 +93,7 @@ void Material::render()
 		//cout << "BIND " << s_bind_types[tex_ptr.first] <<" at "<<i;
 		i++;
 	}
+	*/
 }
 
 void Material::load_shader()

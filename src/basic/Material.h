@@ -27,19 +27,18 @@ public:
 	string m_material_name;
 	map<Bind_Type, Texture*> m_textures;
 	
-	//vector<Texture*> m_textures;
-	/*
-	Texture* m_diffuse_map;
-	Texture* m_normal_map;
-	*/
 	Shader* m_shader = nullptr;
 	void add_texture(Bind_Type _type , string _tex_path);
 
 	void set_model_matrix(mat4 _mode_matrix);
 	void set_uniform_matrix(map< const char* , mat4 > uniform_pairs);
-	//void set_proj_matrix(mat4 _proj_matrix);
-	//void set_view_matrix(mat4 _view_matrix);
+	
 	virtual void render();
+
+	vec3 m_mat_para_ia;
+	vec3 m_mat_para_id;  
+	vec3 m_mat_para_is;
+	float m_mat_para_sn;
 
 
 

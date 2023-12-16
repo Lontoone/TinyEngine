@@ -31,8 +31,8 @@ out vec3 world_half_dir;
 // Outputs the fragment position of the light
 out vec4 world_clip_pos;
 out vec4 light_clip_pos;
-out vec3 tng_light_dir;  // light direction in tangent space
-out vec3 tng_view_dir;  // light direction in tangent space
+//out vec3 tng_light_dir;  // light direction in tangent space
+//out vec3 tng_view_dir;  // light direction in tangent space
 //out vec3 view_dir;
 
 //out vec4 color;
@@ -55,19 +55,22 @@ void main(){
 
 	TBN = mat3(T, B, N);
 
+
 	// ========================
 	//      World Light Info
 	// ========================
+	/*
+	*/
 	world_light_dir = normalize(u_LIGHT_WORLD_POS0.xyz - world_pos.xyz) ;
 	world_view_dir =  normalize(u_CAM_POS.xyz - world_pos.xyz);
 	world_half_dir =  normalize(world_light_dir.xyz + world_view_dir.xyz);
-	
 	light_clip_pos = u_LIGHT_VP_MATRIX * model * vec4(aPos, 1.0f);
 	world_clip_pos = gl_Position;
 
 	// ========================
 	//      Light space
 	// ========================
+	/*
 	tng_light_dir = normalize(
 		vec3(
 			dot(world_light_dir, T),
@@ -81,6 +84,6 @@ void main(){
 			dot(world_view_dir, B),
 			dot(world_view_dir, N)
 		));
-
+	*/
 
 }

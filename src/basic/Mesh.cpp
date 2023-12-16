@@ -96,7 +96,7 @@ void Mesh::Render_without_material(Shader& shader)
         const unsigned int MaterialIndex = this->m_Entries[i].MaterialIndex;
 
 
-        GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform        
+        //GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform        
         //this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);
         //this->materials[MaterialIndex]->render();
 
@@ -256,7 +256,7 @@ bool Mesh::InitMaterials(const aiScene* pScene)
 
 
             //===========================
-            //        DEBUG PRINT ALL
+            //        DEBUG PRINT ALL TEXTURES
             //===========================
             // Iterate over all texture types
             for (int t = 0; t < aiTextureType_UNKNOWN; ++t)
@@ -324,6 +324,22 @@ bool Mesh::InitMaterials(const aiScene* pScene)
 
                 mat->add_texture(Bind_Type::NORMAL , this->m_srcDirecotory + '\\' + textureFileName);
             }
+
+            // Set Parameter
+            aiColor3D color;            
+            float ai_float;
+            if (!material->Get(AI_MATKEY_COLOR_DIFFUSE, color)) {
+                mat->m_mat_para_id = vec3( color.r,color.g,color.b);
+            };
+            if (!material->Get(AI_MATKEY_COLOR_AMBIENT, color)) {
+                mat->m_mat_para_ia = vec3(color.r, color.g, color.b);
+            };
+            if (!material->Get(AI_MATKEY_COLOR_SPECULAR, color)) {
+                mat->m_mat_para_is = vec3(color.r, color.g, color.b);
+            };
+            if (!material->Get(AI_MATKEY_SHININESS, ai_float)) {
+                mat->m_mat_para_sn = ai_float;
+            };
 
 
             // Fininsh Loading this material

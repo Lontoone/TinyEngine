@@ -13,10 +13,11 @@ const enum class EXECUTE_TIMING
 
 };
 
-const enum class Bind_Type 
+const enum Bind_Type 
 {
 	DIFFUSE,
 	NORMAL,
+	NONE,
 };
 
 const enum class LIGHT_Type
@@ -29,6 +30,10 @@ const enum class LIGHT_Type
 
 #define STRINGIFY(x) #x
 #define EXPAND(x) STRINGIFY(x)
+const static char* u_MAT_PARA_ID = "u_MAT_PARA_ID"; // diffuse
+const static char* u_MAT_PARA_IS = "u_MAT_PARA_IS"; // Specular
+const static char* u_MAT_PARA_IA = "u_MAT_PARA_IA"; // ambient
+const static char* u_MAT_PARA_SN = "u_MAT_PARA_SN"; // Shinese
 
 const static char* u_LIGHT_VP_MATRIX  = "u_LIGHT_VP_MATRIX";
 const static char* u_PROJ_MATRIX  = "u_PROJ_MATRIX";

@@ -3,15 +3,18 @@ out vec4 FragColor;
 in vec2 texcoord;
 
 //in vec4 color;
+uniform mat4 model;
+uniform mat4 u_LIGHT_VP_MATRIX;
+uniform vec4 u_LIGHT_WORLD_POS0;
 
+in vec3 world_pos;
 in vec3 world_normal;
 in mat3 TBN;
 in vec3 light_dir;
 in vec4 world_clip_pos;
 in vec4 light_clip_pos;
-in vec3 tng_light_dir;
-in vec3 tng_view_dir; 
-
+vec3 tng_light_dir;
+vec3 tng_view_dir; 
 in vec3 world_light_dir;
 in vec3 world_view_dir;
 in vec3 world_half_dir;
@@ -24,7 +27,13 @@ layout(location = 2) out vec4 color_depth;
 
 uniform sampler2D DIFFUSE;
 uniform sampler2D NORMAL;
-uniform sampler2D u_TEX_SHADOW_MAP;
+uniform vec3 u_MAT_PARA_ID;
+uniform vec3 u_MAT_PARA_IS;
+uniform vec3 u_MAT_PARA_IA;
+uniform float u_MAT_PARA_SN;
+
+//uniform sampler2D u_TEX_SHADOW_MAP;
+uniform sampler2DShadow u_TEX_SHADOW_MAP;
 // Gets the position of the camera from the main function
 uniform vec3 u_CAM_POS;
 
@@ -32,14 +41,36 @@ vec3 lightPos = vec3(0, 1, 0);
 float specAmount = 0.5;
 vec4 specularLight = vec4(1,1,1,1);
 
+vec4 ia = vec4(u_MAT_PARA_IA ,1);
+vec4 id = vec4(u_MAT_PARA_ID, 1);
+vec4 is = vec4(u_MAT_PARA_IS, 1);
+
 float near = 1;
-float far = 50;
+float far = 100.0f;
 float linear_depth(float d) {
 	d = (2 * near * far) / (far + near - (d * 2.0 - 1.0) * (far - near));
 	return d / far;
 }
 vec4 direcLight()
 {
+
+	// ========================
+	//      Light space
+	// ========================	
+	tng_light_dir = normalize(
+		vec3(
+			dot(world_light_dir, TBN[0]),
+			dot(world_light_dir, TBN[1]),
+			dot(world_light_dir, TBN[2])
+		));
+
+	tng_view_dir = normalize(
+		vec3(
+			dot(world_view_dir, TBN[0]),
+			dot(world_view_dir, TBN[1]),
+			dot(world_view_dir, TBN[2])
+		));
+
 	// ambient lighting
 	float ambient = 0.20f;
 	// =====================================
@@ -47,70 +78,33 @@ vec4 direcLight()
 	// =====================================
 	//vec3 normal = normalize(world_normal);
 	vec3 normal = texture(NORMAL, texcoord).xyz *2.0 - vec3(1.0);
-	//vec3 lightDirection = normalize(lightPos);
+	
 	// Diffuse light
-	vec4 diffuse_color = vec4(1);
-
-	if (textureSize(DIFFUSE,0).x > 0) {
-		diffuse_color = texture(NORMAL, texcoord);
-	}
-	float diffuse = max(dot(normal, tng_light_dir), 0.0f);  // ToDo : albedo
-	//float diffuse = 1;  // Some model have no normal vector
-	//return vec4(diffuse,0,0, 1.0);
-	//return vec4(normal, 1.0);
-	return vec4(diffuse_color);
-
+	float diffuse = max(dot(normal, tng_light_dir), 0.0f) ; 
+	vec4 diffuse_color = texture(DIFFUSE, texcoord);
+	
+	
 	// =====================================
 	//			Specular lighting
-	// =====================================	
-	float specular = 0.0f;	
-	float specularLight = 0.50f;	
+	// =====================================		
 	vec3 R = reflect(-tng_light_dir , normal);
-	float specAmount = pow(max(dot(R, tng_view_dir), 0.0f), 16);
-	specular = specAmount * specularLight;
-	//return vec4(specular,0,0, 1);
-	//return vec4(world_view_dir, 1);
-
-
+	float specular = pow(max(dot(R, tng_view_dir), 0.0f), u_MAT_PARA_SN);
+	
+	
 	// Shadow value
 	float shadow = 0.0f;
-	// Sets lightCoords to cull space
-	vec3 light_ndc_pos = light_clip_pos.xyz / light_clip_pos.w;
-	float currentDepth = light_clip_pos.z;
-	float closestDepth = texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r;
-	if (currentDepth > closestDepth)
-		shadow = 1;
-	/*
-	if (lightCoords.z <= 1.0f)
-	{
-		// Get from [-1, 1] range to [0, 1] range just like the shadow map
-		lightCoords = (lightCoords + 1.0f) / 2.0f;
-		float currentDepth = lightCoords.z;
-		// Prevents shadow acne
-		float bias = max(0.025f * (1.0f - dot(normal, lightDirection)), 0.0005f);
-
-		// Smoothens out the shadows
-		int sampleRadius = 2;
-		vec2 pixelSize = 1.0 / textureSize(u_TEX_SHADOW_MAP, 0);
-		for (int y = -sampleRadius; y <= sampleRadius; y++)
-		{
-			for (int x = -sampleRadius; x <= sampleRadius; x++)
-			{
-				float closestDepth = texture(u_TEX_SHADOW_MAP, lightCoords.xy + vec2(x, y) * pixelSize).r;				
-				if (currentDepth > closestDepth + bias)
-					shadow += 1.0f;
-			}
-		}
-		// Get average shadow
-		shadow /= pow((sampleRadius * 2 + 1), 2);
-
-	}*/
-		
-	float lin_shadow = linear_depth(texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy).r);
-	float lin_dep = linear_depth(currentDepth);
 	
-	return diffuse_color * (diffuse * (1.0f - shadow) + ambient)
-			+  specular * (1.0f - shadow);
+	vec3 light_ndc_pos = light_clip_pos.xyz / light_clip_pos.w; //Direction don't need to /w
+
+	// Directional Light
+	//vec3 light_ndc_pos = light_clip_pos.xyz; //Direction don't need to /w
+	
+	float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); ;	
+	//return vec4((shadow_factor) , 0, 0, 1.0);
+		
+	return diffuse_color * (diffuse * (1.0f - shadow)) * id +
+			ambient * ia +
+			specular * is * (1.0f - shadow);
 	/*
 			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
 	*/
