@@ -27,6 +27,7 @@ layout(location = 2) out vec4 color_depth;
 
 uniform sampler2D DIFFUSE;
 uniform sampler2D NORMAL;
+uniform bool NO_DIFFUSE = false;
 uniform vec3 u_MAT_PARA_ID;
 uniform vec3 u_MAT_PARA_IS;
 uniform vec3 u_MAT_PARA_IA;
@@ -82,6 +83,9 @@ vec4 direcLight()
 	// Diffuse light
 	float diffuse = max(dot(normal, tng_light_dir), 0.0f) ; 
 	vec4 diffuse_color = texture(DIFFUSE, texcoord);
+	if (NO_DIFFUSE) {
+		diffuse_color = vec4(1);
+	}
 	
 	
 	// =====================================
@@ -100,9 +104,8 @@ vec4 direcLight()
 	//vec3 light_ndc_pos = light_clip_pos.xyz; //Direction don't need to /w
 	
 	float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); ;	
-	//return vec4((shadow_factor) , 0, 0, 1.0);
-		
-	return diffuse_color * (diffuse * (1.0f - shadow)) * id +
+	//return vec4((shadow_factor) , 0, 0, 1.0);	
+	return  diffuse_color * (diffuse * (1.0f - shadow)) * id +
 			ambient * ia +
 			specular * is * (1.0f - shadow);
 	/*

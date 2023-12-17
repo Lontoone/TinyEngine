@@ -65,12 +65,19 @@ void Material::render()
 	for (int i = Bind_Type::DIFFUSE; i != Bind_Type::NONE; ++i) {
 		// Bind Texture
 		Bind_Type tex_type = static_cast<Bind_Type>(i);
+		char* uniform_name = new char[ strlen(s_bind_types[tex_type])+4];			
+		strcpy(uniform_name, "NO_");
+		strcat(uniform_name, s_bind_types[tex_type]);
 
 		unsigned int tex = 99;
 		glActiveTexture(GL_TEXTURE0 + cnt);
 		if (this->m_textures.count(tex_type)) {
 			tex = this->m_textures[tex_type]->m_texture_id;
-		}				
+			glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, uniform_name), false);
+		}	
+		else {				
+			glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, uniform_name), true);
+		}
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, s_bind_types[tex_type]), cnt);
 
