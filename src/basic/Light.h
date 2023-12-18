@@ -47,7 +47,7 @@ private:
 	void bind_shadow_map();
 	void init_buffer();
 	void init_shader();
-	mat4 get_directional_light_mvp();
+	
 	unsigned int shadow_fbo_cascaded[SHOWOW_CASCADE_LEVEL];
 
 };

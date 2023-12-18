@@ -273,7 +273,7 @@ int main(int argc , char** argv) {
 		//hw3_move_slim(obj);
 		//id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
-		// [ Set up FBO]
+		// [ Set up Shadow FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		// Depth testing needed for Shadow Map
 		glEnable(GL_DEPTH_TEST);		
@@ -297,7 +297,7 @@ int main(int argc , char** argv) {
 		//sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);		
 		//---------------------------
 		
-		// [ Set up FBO]
+		// [ Set up G-buffer FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);		
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
@@ -353,11 +353,8 @@ int main(int argc , char** argv) {
 		main_fbo->blit(main_fbo->framebuffer_texture[0], deffered_fbo->fbo, main_fbo->framebuffer_texture, 6 , frameBuffer_deffer_shader) ;
 		deffered_fbo->blit(deffered_fbo->framebuffer_texture[0] , 0 );
 		*/
-		/*
-		*/
-		/*
-		
-		*/
+
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);		
 		glBindVertexArray(deffered_fbo->rectVAO);
 		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
