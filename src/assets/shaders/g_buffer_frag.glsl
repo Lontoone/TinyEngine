@@ -20,7 +20,7 @@ in vec3 world_view_dir;
 in vec3 world_half_dir;
 
 
-layout(location = 0) out vec4 color_tex;
+//layout(location = 0) out vec4 color_tex;
 layout(location = 1) out vec4 color_ws_normal;
 layout(location = 2) out vec4 color_ws_pos;
 layout(location = 3) out vec4 color_ambient;
@@ -107,11 +107,11 @@ vec4 direcLight()
 	//vec3 light_ndc_pos = light_clip_pos.xyz; //Direction don't need to /w
 	
 	float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); ;	
-	//return vec4((shadow_factor) , 0, 0, 1.0);	
+	return vec4((shadow_factor) , 0, 0, 1.0);	
+	/*
 	return  diffuse_color * (diffuse * (1.0f - shadow)) * id +
 			ambient * ia +
 			specular * is * (1.0f - shadow);
-	/*
 			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
 	*/
 }
@@ -119,19 +119,23 @@ vec4 direcLight()
 
 void main(){
 
-	FragColor = direcLight();
+	//FragColor = direcLight();
 	//color_tex = FragColor;
 
 	//===================================
 	//			Deffered Shading
 	//===================================
-
-	color_tex = FragColor;
-	//color_tex = vec4(light , 0,0,1);
-	//color_tex = vec4( normal_map_color , 1.0);
+	//color_tex = FragColor;
+	color_ws_pos = vec4(world_pos.xyz, 1.0);
+	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
+	/*
+	color_ws_normal = vec4(world_normal, 1.0);
+	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
+	color_ambient	= vec4(0.5);
+	color_diffuse	= texture(DIFFUSE, texcoord);
+	color_speculr	= vec4(1); // TODO:....read from texture or setting
 	
-	color_normal = vec4(world_normal, 1.0);
-	color_depth = vec4(vec3(gl_FragCoord.z), 1.0);
-
-
+	// For Debuf
+	*/
+	FragColor = color_ws_pos;
 }

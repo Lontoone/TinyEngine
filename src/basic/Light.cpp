@@ -1,9 +1,18 @@
 #include "Light.h"
 
 Light::Light()
-{
+{	
+	this->light_type = LIGHT_Type::DIRECTIONAL;
 	this->init_shader();
 	this->init_buffer();
+}
+
+Light::Light(LIGHT_Type type)
+{
+	this->light_type = type;
+	this->init_shader();
+	this->init_buffer();
+
 }
 
 Light::~Light()
@@ -52,7 +61,7 @@ mat4 Light::get_projection_matrix()
 		//return mat4(1);
 
 		//return glm::ortho(-35.0f,35.0f ,-35.0f , 35.0f,0.0f,100.0f);
-		return glm::ortho(-width, width, -height, height, 0.01f, 250.0f);
+		return glm::ortho(-width, width, -height, height, 0.01f, 50.0f);
 		//return glm::ortho(0.0f, main_camera->m_width, main_camera->m_heigth, 0.0f, main_camera->m_near, main_camera->m_far * 10);
 	}
 	//TODO:
@@ -91,10 +100,18 @@ mat4 Light::get_light_vp_matrix()
 
 void Light::init_buffer()
 {		
-	this->fbo = new FramebufferObject();
-	this->fbo->create_shadow_buffer(
-			&this->shadow_shader ,			
-			SHOWOW_RESOLUTION , SHOWOW_RESOLUTION);
+
+	if (this->light_type==LIGHT_Type::DIRECTIONAL) {
+		this->fbo = new FramebufferObject();
+		this->fbo->create_shadow_buffer(
+				&this->shadow_shader ,			
+				SHOWOW_RESOLUTION , SHOWOW_RESOLUTION);
+	}
+	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {
+		
+	}
+
+
 	// ToDo: cascade shadow
 	//for (int i = 0; i < this->SHOWOW_CASCADE_LEVEL; i++) {	}
 

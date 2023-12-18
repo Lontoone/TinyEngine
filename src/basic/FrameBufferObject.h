@@ -19,8 +19,9 @@ public:
 
 	Shader* shader;
 	unsigned int framebuffer_texture[10];
-	unsigned int* width;
-	unsigned int* height;
+	unsigned int*	width;
+	unsigned int*	height;
+	unsigned int	m_texture_count;
 	
 	unsigned int fbo = NULL;
 	bool is_enabled = true; //ToDo:  more usage?
@@ -43,7 +44,7 @@ public:
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo , Shader& shader);
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo, unsigned int additional_texture);
 	void blit(unsigned int src_texture_id, FramebufferObject& fbo, unsigned int additional_texture);
-	void blit(unsigned int src_texture_id, FramebufferObject& fbo, const unsigned int additional_textures[]);
+	void blit(unsigned int src_texture_id, unsigned int dst_fbo_id, unsigned int additional_textures[], int count , Shader& shaer);
 	void set_frame_uniform();
 	void update_debugger(unsigned int& texture_idx);
 	

@@ -52,7 +52,7 @@ void FrameBufferDebugger::Draw_Single_Frame(GLuint& texture_id)
 
 void FrameBufferDebugger::attach_texture(unsigned int texture_id)
 {
-	ImGui::Image((void*)texture_id, ImVec2(100, 100));
+	ImGui::Image((void*)texture_id, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::SameLine();
 }
 

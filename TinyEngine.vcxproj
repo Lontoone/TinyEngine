@@ -221,6 +221,7 @@
     <None Include="src\assets\shaders\cs_grass.glsl" />
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />
+    <None Include="src\assets\shaders\deffered_rd_frag.glsl" />
     <None Include="src\assets\shaders\frag.glsl" />
     <None Include="src\assets\shaders\fragmentShader_ogl_450.glsl" />
     <None Include="src\assets\shaders\frame_abstraction_frag.glsl" />
@@ -237,6 +238,8 @@
     <None Include="src\assets\shaders\frame_sin_wave_frag.glsl" />
     <None Include="src\assets\shaders\frame_vert.glsl" />
     <None Include="src\assets\shaders\frame_water_frag.glsl" />
+    <None Include="src\assets\shaders\g_buffer_frag.glsl" />
+    <None Include="src\assets\shaders\g_buffer_vert.glsl" />
     <None Include="src\assets\shaders\hw3_reset_cs.glsl" />
     <None Include="src\assets\shaders\hw3_view_culling.glsl" />
     <None Include="src\assets\shaders\Indir_default_frag.glsl" />

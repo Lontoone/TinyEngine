@@ -111,9 +111,13 @@ int main(int argc , char** argv) {
 	Hierarchy::instance().set_main_camera(game_camera);
 	cout << get_current_dir() << endl;
 #pragma region DEBUG_PRE_LOAD_MODEL
+
 	Shader s_default_shader(
+		src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
+	/*
 		src_path + string("\\assets\\shaders\\default_vert.glsl"),
 		src_path + string("\\assets\\shaders\\default_frag.glsl"));
+	*/
 	
 	grid = new DefaultEditorGrid(
 		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
@@ -122,9 +126,9 @@ int main(int argc , char** argv) {
 	
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);
 	//obj.m_transform->m_scale = vec3(0.05);
-	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
+	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
+	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
 	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
@@ -201,6 +205,8 @@ int main(int argc , char** argv) {
 
 	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader frameBuffer_deffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\deffered_rd_frag.glsl"));
+	//Shader gBuffer_shader = Shader(src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
 	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
 	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
@@ -211,20 +217,21 @@ int main(int argc , char** argv) {
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
 		GL_COLOR_ATTACHMENT0,
+		/*
 		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2
+		GL_COLOR_ATTACHMENT2,
+		GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4,
+		GL_COLOR_ATTACHMENT5,
+		GL_COLOR_ATTACHMENT6,
+		*/
 		//GL_DEPTH_ATTACHMENT,
 	};
-	FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 3, SCR_WIDTH, SCR_HEIGHT );
-	//FramebufferObject* game_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader , &draw_buffers[0], 1, HALF_SCR_WIDTH , SCR_HEIGHT);
-	//FramebufferObject* scene_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_scene_shader, &draw_buffers[0], 1, HALF_SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
+	FramebufferObject* deffered_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
-
 #pragma endregion
 
-	//vector<Mesh> ind_mesh_list = {*mesh_b1  , *mesh_b2 , *mesh_b3 };	
-	//vector<Mesh> ind_mesh_list = { *mesh_b1 , *mesh_b3 };
-	//IndirectInstancedMesh id_mesh(ind_mesh_list);
 	mat4 scale_bias_matrix =
 		translate(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f)) *
 		scale(mat4(1.0f), vec3(0.5f, 0.5f, 0.5f));
@@ -237,9 +244,7 @@ int main(int argc , char** argv) {
 		
 
 		processInput(window , 0.1f);
-		//glBindFramebuffer(GL_FRAMEBUFFER , FBO);
-		//glUseProgram(state.programId);
-
+	
 		//=====================
 		//		CLEAR UP
 		//=======================
@@ -272,97 +277,67 @@ int main(int argc , char** argv) {
 		// Render all object
 		shadow_shader.activate();
 		mat4 sun_vp = sun->get_light_vp_matrix();
-		/**/
 		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
 		for (auto renderer : Hierarchy::instance().m_meshes) {
 			renderer->get_gameobject()->m_transform->Do();
 			glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
 			renderer->Render_without_material(shadow_shader);
 		}
-		
 		//LightingManager::render_to_shadowmap();   // [ BUG : writing to wrong mvp? ]
-		sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);
-	
+		
+		//sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);		
 		//---------------------------
+		
 		// [ Set up FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(4.0f,4.0f);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
+		main_fbo->activate();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Draw all items
+		mat4 biased_sun_vp = scale_bias_matrix * sun->get_light_vp_matrix();
 		s_default_shader.activate();
 		game_camera->bind_uniform(s_default_shader.m_state.programId);
 		// Set uniform
 		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_CAM_POS) , 1 , value_ptr(game_camera_obj.m_transform->m_position));
 		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
-		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr( scale_bias_matrix * sun_vp));
-		// Bind the Shadow Map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(s_default_shader.m_state.programId, u_TEX_SHADOW_MAP), 2);
-
+		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 
 		//  Blit to main screen
-		//main_fbo->blit(main_fbo->framebuffer_texture[0] , 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		frameBuffer_shader.activate();
-		glActiveTexture(GL_TEXTURE0);
-		glBindVertexArray(main_fbo->rectVAO);
-		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
+		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
+		frameBuffer_deffer_shader.activate();
+		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
+
+		// Bind the Shadow Map
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
 		
+		// Bind World position
+		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(frameBuffer_shader.m_state.programId, "screenTexture"), 0);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		/*   [ HW3 ]
-		//========== Split View ===========			
-		//=======================
-		//   For Game view
-		//=========================
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(HALF_SCR_WIDTH, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
-		//Reseting
-		id_mesh.cs_reset_shader.activate();
-		id_mesh.dispatch_reset();
-
-		// Culling 
-		set_shader_mvp(&id_mesh.cs_view_culling_shader, game_camera);
-		id_mesh.cs_view_culling_shader.activate();
-		id_mesh.dispatch_culling();	
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture1"), 2);
 		
-		render_game_view(game_camera, &s_default_shader);
-		id_mesh.indirect_render_shader.activate();
-		set_shader_mvp(&id_mesh.indirect_render_shader, game_camera);	
-		id_mesh.Do(); //TEST
-
-		//=======================		
-		//   For scene view
-		//=========================
-		glViewport(0, 0, HALF_SCR_WIDTH, SCR_HEIGHT);
-		render_game_view( scene_camera, &s_default_shader);		
-		set_shader_mvp(&id_mesh.indirect_render_shader, scene_camera);//TEST
-		id_mesh.Do(); //TEST
-
-
-		// ========= Setting game camera for scene view =========
-		gizmose_shader.activate();
-		glm::mat4 view = scene_camera->getViewMatrix();
-		glm::mat4 projection = scene_camera->getProjectionMatrix();
-		glm::mat4 model = game_camera_obj.m_transform->m_model_matrix;
-
-		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_M"), 1, GL_FALSE, value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_V"), 1, GL_FALSE, value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(gizmose_shader.m_state.programId, "MATRIX_P"), 1, GL_FALSE, value_ptr(projection));
-		
-		frustum.update(game_camera);
-		frustum.render();
-		// =====================================================
+		/*
+		main_fbo->blit(main_fbo->framebuffer_texture[0], deffered_fbo->fbo, main_fbo->framebuffer_texture, 6 , frameBuffer_deffer_shader) ;
+		deffered_fbo->blit(deffered_fbo->framebuffer_texture[0] , 0 );
 		*/
-		//--------------------------------------------			
+		/*
+		*/
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//frameBuffer_deffer_shader.activate();
+		glBindVertexArray(deffered_fbo->rectVAO);
+		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
+			
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, deffered_fbo->framebuffer_texture[0]);
+		//glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "screenTexture"), 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -370,6 +345,8 @@ int main(int argc , char** argv) {
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		frame_buffer_debugger.Draw_Frames_on_Panel();
 		frame_buffer_debugger.attach_texture(sun->fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.attach_texture(main_fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.attach_texture(main_fbo->framebuffer_texture[1]);
 		frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();

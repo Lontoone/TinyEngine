@@ -27,6 +27,7 @@ class Light:public UiableComponent
 {
 public:
 	Light();
+	Light(LIGHT_Type type);
 	~Light();
 	static const unsigned int SHOWOW_CASCADE_LEVEL = 1;
 	unsigned int SHOWOW_RESOLUTION = 1024;

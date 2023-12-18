@@ -1,0 +1,82 @@
+#version 420 core
+layout(binding = 2)  uniform sampler2D texture1;//world pos;
+layout(binding = 9)  uniform sampler2D u_TEX_SHADOW_MAP;
+/*
+uniform sampler2D screenTexture;
+
+uniform sampler2D texture1;//screenTexture;
+uniform sampler2D texture3;//color_ws_pos;
+uniform sampler2D texture2;//color_ws_normal;
+uniform sampler2D texture4;//color_ambient;
+uniform sampler2D texture5;//color_diffuse;
+uniform sampler2D texture6;//color_speculr;
+//uniform sampler2DShadow u_TEX_SHADOW_MAP;
+uniform sampler2D u_TEX_SHADOW_MAP;
+*/
+uniform mat4 u_LIGHT_VP_MATRIX;
+
+//===================================
+//			Deffered Shading
+//===================================
+/*
+layout(location = 1) out vec4 color_tex;
+layout(location = 2) out vec4 color_normal;
+layout(location = 3) out vec4 color_depth;
+layout(location = 4) out vec4 color_depth;
+*/
+
+//out vec4 fragColor;
+in vec2 texcoord;
+out vec4 color;
+
+void main() {
+	//vec4 world_pos = texture(texture1, texcoord);
+	vec2 scr_pix = vec2(texcoord.x * 1344 , texcoord.y * 756 );
+	vec4 world_pos = texelFetch(texture1,ivec2(scr_pix.xy) ,0); // model * aPos
+
+	vec4 light_clip_pos = u_LIGHT_VP_MATRIX * world_pos;
+	vec3 light_ndc_pos = light_clip_pos.xyz / light_clip_pos.w;
+
+	vec4 shadow_color = texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy);
+	if (light_ndc_pos.z < shadow_color.r) {
+		color = vec4(1);
+	}
+	else {
+		//color = shaow_color;
+		color = vec4(0);
+	}
+
+	/*
+	//vec4 diffuse_color = texture(texture5, texcoord);
+	//vec4 world_normal = texture(texture2, texcoord);
+	//vec4 world_pos = texture(screenTexture, texcoord);
+	//world_pos.w = 1;
+
+
+	//float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); 
+	vec4 shaow_color = texture(u_TEX_SHADOW_MAP , light_ndc_pos.xy +0.5*0.5);
+	//color = shaow_color;
+	//color = vec4(light_ndc_pos.xyz+0.5*0.5, 1.0);
+	//color = vec4(light_ndc_pos.z,0,0,1.0);
+	//color = light_clip_pos;
+	if (light_ndc_pos.z < shaow_color.r) {
+		color = vec4(0);
+	}
+	else {
+		//color = shaow_color;
+		color = vec4(1);
+	}*/
+	/*
+	*/
+
+	//color = vec4(shadow_factor,0,0,1);
+	//color = normalize( world_pos)*0.5+0.5;
+	//color = diffuse_color* (1-shadow_factor);
+	//color = light_clip_pos;
+
+	//color = texture(screenTexture, texcoord);
+	//color = texture(screenTexture, vec2(texcoord.x /2 , texcoord.y));
+	//color = vec4(texcoord,0,1);
+	//color = vec4(1,0,0,1);
+	//color = texture(screenTexture, texcoord);
+}

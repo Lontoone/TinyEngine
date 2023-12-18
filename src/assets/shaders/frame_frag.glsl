@@ -2,9 +2,6 @@
 uniform sampler2D screenTexture;
 //uniform sampler2D u_TEX_SHADOW_MAP;
 /*
-layout(location = 0) out vec4 color_tex;
-layout(location = 1) out vec4 color_normal;
-layout(location = 2) out vec4 color_depth;
 */
 
 //out vec4 fragColor;

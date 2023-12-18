@@ -9,17 +9,17 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 	this->height = &height;
 	glGenFramebuffers(1, &this->fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
-		
+	this->m_texture_count = buffer_cnt;
 	
 	glGenTextures(buffer_cnt, &framebuffer_texture[0]);
 
 	for (int i = 0; i < buffer_cnt; i++) {
 		glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[i]);
 		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);	
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);	
 		glFramebufferTexture(GL_FRAMEBUFFER, draw_buffers[i], this->framebuffer_texture[i], 0);
@@ -223,28 +223,32 @@ void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo, 
 
 }
 
-void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo,const unsigned int additional_textures[])
+void FramebufferObject::blit(unsigned int src_texture_id, unsigned int dst_fbo_id, unsigned int additional_textures[], int count , Shader& shader)
 {	
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
-	this->shader->activate();
-	this->set_frame_uniform();
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, dst_fbo_id);
+	shader.activate();
 	glBindVertexArray(this->rectVAO);
 	glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, src_texture_id);
 
-	int length = sizeof(additional_textures) / sizeof(additional_textures[0]);
-	for (int i = 1; i <= length; i++) {
+	for (int i = 1; i <= count; i++) {
 		glActiveTexture(GL_TEXTURE0+i);
+		//cout << "Bind texture " << additional_textures[i - 1] << endl;
 		glBindTexture(GL_TEXTURE_2D, additional_textures[i-1]);		
-		GLint texture2Location = glGetUniformLocation(this->shader->m_state.programId, "texture"+(i));
+
+		string bind_name_full =  (string("texture") + to_string(i));
+		const char* b = bind_name_full.c_str();
+
+		GLint texture2Location = glGetUniformLocation(shader.m_state.programId, b);
 		glUniform1i(texture2Location, i); 
 	}
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	this->update_debugger(fbo.framebuffer_texture[0]);
+	//this->update_debugger(fbo.framebuffer_texture[0]);
 
 }
 

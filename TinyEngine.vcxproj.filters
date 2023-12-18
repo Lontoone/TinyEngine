@@ -275,6 +275,9 @@
     <None Include="src\assets\poissonPoints_155304s.ss2" />
     <None Include="src\assets\shaders\shadow_map_frag.glsl" />
     <None Include="src\assets\shaders\shadow_map_vert.glsl" />
+    <None Include="src\assets\shaders\g_buffer_vert.glsl" />
+    <None Include="src\assets\shaders\g_buffer_frag.glsl" />
+    <None Include="src\assets\shaders\deffered_rd_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
