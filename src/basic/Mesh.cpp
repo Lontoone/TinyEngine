@@ -170,6 +170,16 @@ void Mesh::init_ui_content()
 
     auto title_text = [&]() {Text("========= [ Mesh Render] ============");return true;};
     this->add_draw_item(title_text);
+
+    // [For Final Demo]    
+    auto use_normal_checkbox = [&]() {
+        ImGui::Checkbox("Use Texture", &this->m_useTexture);
+        for (int i = 0; i < this->materials.size(); i++) {
+            this->materials[i]->m_use_texture = this->m_useTexture;
+        }
+        return &this->m_useTexture;
+    };
+    this->add_draw_item(use_normal_checkbox);
     // ToDo:  Display Mesh data on panel
     /*
     for (auto _mat : this->materials) {

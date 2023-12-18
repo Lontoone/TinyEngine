@@ -55,13 +55,13 @@ mat4 Light::get_projection_matrix()
 		float far_plane = main_camera->m_far;
 		//float width = main_camera->m_width *0.1;
 		//float height = main_camera->m_heigth *0.1;
-		float width = 20;
-		float height = 20;
+		float width = 5;
+		float height = 5;
 		//return glm::ortho(0.0f, float(this->SHOWOW_RESOLUTION), float(this->SHOWOW_RESOLUTION), 0.0f, main_camera->m_near, main_camera->m_far);
 		//return mat4(1);
 
 		//return glm::ortho(-35.0f,35.0f ,-35.0f , 35.0f,0.0f,100.0f);
-		return glm::ortho(-width, width, -height, height, 0.01f, 50.0f);
+		return glm::ortho(-width, width, -height, height, 0.1f, 10.0f);
 		//return glm::ortho(0.0f, main_camera->m_width, main_camera->m_heigth, 0.0f, main_camera->m_near, main_camera->m_far * 10);
 	}
 	//TODO:
@@ -73,14 +73,12 @@ mat4 Light::get_light_view_matrix()
 	if (this->light_type == LIGHT_Type::DIRECTIONAL) {
 		// Directional light no translation
 		vec3 light_pos = this->get_gameobject()->m_transform->m_position ;
-		//return transpose( this->get_gameobject()->m_transform->m_rot_matrix) * this->get_gameobject()->m_transform->m_translate_matrix *-1.0f;  // inverse rot mat 		
-		//return transpose(this->get_gameobject()->m_transform->m_rot_matrix) ;  // inverse rot mat 		
-
-		//return glm::lookAt(25.0f *normalize(this->get_gameobject()->m_transform->m_position)  , vec3(0) , WORLD_UP);
+		
 		return glm::lookAt(
-			light_pos ,
+			light_pos,
 			//light_pos + this->get_gameobject()->m_transform->m_forward * 5.0f,
-			vec3(0),
+			//vec3(0),
+			vec3(0.542, -0.141, -0.422) ,
 			WORLD_UP);
 		/*
 		*/
