@@ -128,12 +128,12 @@ void main(){
 	//color_tex = FragColor;
 	color_ws_pos = vec4(world_pos.xyz, 1.0);
 	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
-	/*
 	color_ws_normal = vec4(world_normal, 1.0);
 	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ambient	= vec4(0.5);
 	color_diffuse	= texture(DIFFUSE, texcoord);
 	color_speculr	= vec4(1); // TODO:....read from texture or setting
+	/*
 	
 	// For Debuf
 	*/

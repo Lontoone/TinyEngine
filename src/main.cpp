@@ -126,9 +126,9 @@ int main(int argc , char** argv) {
 	
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);
 	//obj.m_transform->m_scale = vec3(0.05);
-	Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
+	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
+	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
 	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
@@ -217,18 +217,18 @@ int main(int argc , char** argv) {
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
 		GL_COLOR_ATTACHMENT0,
-		/*
 		GL_COLOR_ATTACHMENT1,
 		GL_COLOR_ATTACHMENT2,
 		GL_COLOR_ATTACHMENT3,
 		GL_COLOR_ATTACHMENT4,
 		GL_COLOR_ATTACHMENT5,
 		GL_COLOR_ATTACHMENT6,
+		/*
 		*/
 		//GL_DEPTH_ATTACHMENT,
 	};
-	FramebufferObject* main_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
-	FramebufferObject* deffered_fbo = frame_buffer_debugger.gen_frame_object_and_registor(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
+	FramebufferObject* deffered_fbo = new FramebufferObject(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
 #pragma endregion
 
@@ -294,7 +294,7 @@ int main(int argc , char** argv) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(4.0f,4.0f);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
-		main_fbo->activate();
+		gbuffer_fbo->activate();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Draw all items
@@ -317,26 +317,38 @@ int main(int argc , char** argv) {
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
 		
+		for (int i = 1; i <= 6; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);			
+			glBindTexture(GL_TEXTURE_2D, gbuffer_fbo->framebuffer_texture[i - 1]);
+
+			string bind_name_full = (string("texture") + to_string(i));
+			const char* b = bind_name_full.c_str();
+
+			GLint texture2Location = glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, b);
+			glUniform1i(texture2Location, i);
+		}
+		/*
+		// Bind World position
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[1]);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture1"), 1);
 		// Bind World position
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture1"), 2);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture2"), 2);
 		
-		/*
 		main_fbo->blit(main_fbo->framebuffer_texture[0], deffered_fbo->fbo, main_fbo->framebuffer_texture, 6 , frameBuffer_deffer_shader) ;
 		deffered_fbo->blit(deffered_fbo->framebuffer_texture[0] , 0 );
 		*/
 		/*
 		*/
+		/*
 		
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//frameBuffer_deffer_shader.activate();
+		*/
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);		
 		glBindVertexArray(deffered_fbo->rectVAO);
 		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
 			
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, deffered_fbo->framebuffer_texture[0]);
-		//glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "screenTexture"), 0);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		
@@ -345,8 +357,12 @@ int main(int argc , char** argv) {
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		frame_buffer_debugger.Draw_Frames_on_Panel();
 		frame_buffer_debugger.attach_texture(sun->fbo->framebuffer_texture[0]);
-		frame_buffer_debugger.attach_texture(main_fbo->framebuffer_texture[0]);
-		frame_buffer_debugger.attach_texture(main_fbo->framebuffer_texture[1]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[1]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[2]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[3]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[4]);
+		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[5]);
 		frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
