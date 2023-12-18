@@ -49,9 +49,6 @@ void main(){
 	tng_normal = aNormal;
 	texcoord = aUv;
 
-
-
-
 	//mat4 mv = view * model;
 	vec3 N = mat3(model) * aNormal;
 	vec3 T = mat3(model) * aTangent;

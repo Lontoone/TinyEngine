@@ -128,25 +128,34 @@ int main(int argc , char** argv) {
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
-	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
+	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
+	Mesh* tri_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	//Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
 	//Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
 	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
 
-	GameObject obj = GameObject("Slime");
+	/*
+	*/
+	GameObject obj = GameObject("House");
 	obj.add_component(dog_mesh);
 	obj.m_transform->m_scale = vec3(1);
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_renderer(dog_mesh);
 	
+	GameObject tri_obj = GameObject("Tri");
+	tri_obj.add_component(tri_mesh);
+	tri_obj.m_transform->set_transform_parent(obj.m_transform);
+	tri_obj.m_transform->m_scale = vec3(0.001);
+	tri_obj.m_transform->m_position= vec3(2.05, 0.628725, -1.9);
+	Hierarchy::instance().add_object(&tri_obj);
+	Hierarchy::instance().add_renderer(tri_mesh);
 
-	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
-	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
-	game_camera_obj.m_transform->m_position = glm::vec3(3.42,0.7,-3);
-	game_camera_obj.m_transform->m_rotation = glm::vec3(0, -600, 0);
+	//scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
+	//scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
+	game_camera_obj.m_transform->m_position = glm::vec3(4.0, 1.0,-1.5);
+	game_camera_obj.m_transform->m_rotation = glm::vec3(0, 0, 0);
 	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
 	
 	//GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
@@ -162,7 +171,7 @@ int main(int argc , char** argv) {
 
 	Light* sun = new Light();
 	GameObject sun_obj = GameObject("Sun");
-	sun_obj.m_transform->m_position = vec3(1, 1, -3);
+	sun_obj.m_transform->m_position = vec3(-2.845, 2.028, -1.293);
 	sun_obj.add_component((Component*)sun);
 	Hierarchy::instance().add_object(&sun_obj);
 	Hierarchy::instance().add_light(sun);
@@ -311,6 +320,9 @@ int main(int argc , char** argv) {
 		//  Blit to main screen
 		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
 		frameBuffer_deffer_shader.activate();
+		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
+		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));
+		//glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_VIEW_MATRIX), 1, value_ptr(game_camera->getViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		// Bind the Shadow Map
