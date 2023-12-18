@@ -21,7 +21,8 @@ uniform vec4 u_CAM_POS;
 
 
 out vec2 texcoord;
-out vec3 world_normal;
+//out vec3 world_normal;
+out vec3 tng_normal;
 out vec3 world_pos;
 out mat3 TBN;
 out vec3 world_light_dir;
@@ -44,7 +45,8 @@ void main(){
 	world_pos = (model * vec4(aPos, 1.0)).xyz;
 	gl_Position = projection * view * model * vec4(aPos, 1.0);//+ gl_InstanceID;
 	
-	world_normal = (model * vec4(aNormal,1.0)).xyz;
+	//world_normal = (model * vec4(aNormal,1.0)).xyz;
+	tng_normal = aNormal;
 	texcoord = aUv;
 
 	//mat4 mv = view * model;

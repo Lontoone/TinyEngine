@@ -8,7 +8,8 @@ uniform mat4 u_LIGHT_VP_MATRIX;
 uniform vec4 u_LIGHT_WORLD_POS0;
 
 in vec3 world_pos;
-in vec3 world_normal;
+//in vec3 world_normal;
+in vec3 tng_normal;
 in mat3 TBN;
 in vec3 light_dir;
 in vec4 world_clip_pos;
@@ -31,6 +32,8 @@ layout(location = 5) out vec4 color_speculr;
 uniform sampler2D DIFFUSE;
 uniform sampler2D NORMAL;
 uniform bool NO_DIFFUSE = false;
+uniform bool NO_NORMAL	= false;
+
 uniform vec3 u_MAT_PARA_ID;
 uniform vec3 u_MAT_PARA_IS;
 uniform vec3 u_MAT_PARA_IA;
@@ -121,6 +124,11 @@ void main(){
 
 	//FragColor = direcLight();
 	//color_tex = FragColor;
+
+	vec3 world_normal = normalize( mat3(model) * tng_normal);
+	if (!NO_NORMAL) {
+		world_normal = normalize(mat3(model) * (texture(NORMAL, texcoord).xyz * 2.0 - vec3(1.0)) );
+	}
 
 	//===================================
 	//			Deffered Shading

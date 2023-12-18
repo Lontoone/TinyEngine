@@ -9,18 +9,7 @@ layout(binding = 5) uniform sampler2D texture5;//color_diffuse;
 layout(binding = 6) uniform sampler2D texture6;//color_speculr;
 
 layout(binding = 9)  uniform sampler2D u_TEX_SHADOW_MAP;
-/*
-uniform sampler2D screenTexture;
 
-uniform sampler2D texture1;//screenTexture;
-uniform sampler2D texture3;//color_ws_pos;
-uniform sampler2D texture2;//color_ws_normal;
-uniform sampler2D texture4;//color_ambient;
-uniform sampler2D texture5;//color_diffuse;
-uniform sampler2D texture6;//color_speculr;
-//uniform sampler2DShadow u_TEX_SHADOW_MAP;
-uniform sampler2D u_TEX_SHADOW_MAP;
-*/
 uniform mat4 u_LIGHT_VP_MATRIX;
 
 //===================================
@@ -54,7 +43,8 @@ void main() {
 		color = vec4(0);
 	}
 	vec4 diffuse = texture(texture5, texcoord);
-	color = diffuse * color;
+
+	//color = diffuse * color;
 	/*
 	vec4 diffuse_color = texture(texture5, texcoord);
 	vec4 world_normal = texture(texture2, texcoord);
