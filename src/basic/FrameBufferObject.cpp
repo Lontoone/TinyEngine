@@ -26,13 +26,13 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 	}
 
 	glDrawBuffers(buffer_cnt, draw_buffers);
-	/*
 	if (this->rbo == NULL) {
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
+	/*
 	*/
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -84,13 +84,13 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 	
 	glDrawBuffer(color_draw);
 	glReadBuffer(color_read);
-	/*
 	if (this->rbo == NULL) {
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
+	/*
 	*/
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

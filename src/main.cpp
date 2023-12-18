@@ -276,11 +276,11 @@ int main(int argc , char** argv) {
 		// [ Set up Shadow FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);
 		// Depth testing needed for Shadow Map
-		glEnable(GL_DEPTH_TEST);		
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 		glViewport(0, 0, 1024, 1024);
 		sun->fbo->activate();
+		glEnable(GL_DEPTH_TEST);		
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		// Render all object
@@ -299,11 +299,11 @@ int main(int argc , char** argv) {
 		
 		// [ Set up G-buffer FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);		
-		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(4.0f,4.0f);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
 		gbuffer_fbo->activate();
+		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Draw all items
@@ -319,6 +319,7 @@ int main(int argc , char** argv) {
 		//================================================================
 		//  Blit to main screen
 		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
+		
 		frameBuffer_deffer_shader.activate();
 		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));
