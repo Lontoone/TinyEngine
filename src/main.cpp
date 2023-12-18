@@ -307,11 +307,12 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 
+		//================================================================
 		//  Blit to main screen
 		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
 		frameBuffer_deffer_shader.activate();
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
-
+		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		// Bind the Shadow Map
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);

@@ -14,8 +14,10 @@ in mat3 TBN;
 in vec3 light_dir;
 in vec4 world_clip_pos;
 in vec4 light_clip_pos;
+/*
 vec3 tng_light_dir;
 vec3 tng_view_dir; 
+*/
 in vec3 world_light_dir;
 in vec3 world_view_dir;
 in vec3 world_half_dir;
@@ -64,6 +66,7 @@ vec4 direcLight()
 	// ========================
 	//      Light space
 	// ========================	
+	/*
 	tng_light_dir = normalize(
 		vec3(
 			dot(world_light_dir, TBN[0]),
@@ -77,7 +80,7 @@ vec4 direcLight()
 			dot(world_view_dir, TBN[1]),
 			dot(world_view_dir, TBN[2])
 		));
-
+	
 	// ambient lighting
 	float ambient = 0.20f;
 	// =====================================
@@ -111,23 +114,22 @@ vec4 direcLight()
 	
 	float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); ;	
 	return vec4((shadow_factor) , 0, 0, 1.0);	
+	*/
 	/*
 	return  diffuse_color * (diffuse * (1.0f - shadow)) * id +
 			ambient * ia +
 			specular * is * (1.0f - shadow);
 			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
 	*/
+	return vec4(1);
 }
 
 
 void main(){
 
-	//FragColor = direcLight();
-	//color_tex = FragColor;
-
-	vec3 world_normal = normalize( mat3(model) * tng_normal);
+	vec3 world_normal = normalize(TBN * tng_normal);
 	if (!NO_NORMAL) {
-		world_normal = normalize(mat3(model) * (texture(NORMAL, texcoord).xyz * 2.0 - vec3(1.0)) );
+		world_normal = normalize(TBN * (texture(NORMAL, texcoord).xyz * 2.0 - vec3(1.0)) );
 	}
 
 	//===================================
@@ -139,7 +141,12 @@ void main(){
 	color_ws_normal = vec4(world_normal, 1.0);
 	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ambient	= vec4(0.5);
-	color_diffuse	= texture(DIFFUSE, texcoord);
+	if (!NO_DIFFUSE) {
+		color_diffuse = texture(DIFFUSE, texcoord);
+	}
+	else {
+		color_diffuse = vec4(1);  // default diffuse color
+	}
 	color_speculr	= vec4(1); // TODO:....read from texture or setting
 	/*
 	

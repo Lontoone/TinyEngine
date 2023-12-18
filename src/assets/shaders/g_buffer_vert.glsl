@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aUv;
 layout (location = 2) in vec3 aNormal;
-layout(location = 3) in vec3 aTangent;
+layout (location = 3) in vec3 aTangent;
 
 uniform mat4 transform ; 
 uniform mat4 model ; 
@@ -48,6 +48,9 @@ void main(){
 	//world_normal = (model * vec4(aNormal,1.0)).xyz;
 	tng_normal = aNormal;
 	texcoord = aUv;
+
+
+
 
 	//mat4 mv = view * model;
 	vec3 N = mat3(model) * aNormal;

@@ -11,7 +11,7 @@ layout(binding = 6) uniform sampler2D texture6;//color_speculr;
 layout(binding = 9)  uniform sampler2D u_TEX_SHADOW_MAP;
 
 uniform mat4 u_LIGHT_VP_MATRIX;
-
+uniform vec4 u_LIGHT_WORLD_POS0;
 //===================================
 //			Deffered Shading
 //===================================
@@ -27,6 +27,13 @@ in vec2 texcoord;
 out vec4 color;
 
 void main() {
+	//============================================
+	//                 Read Texture
+	//============================================
+	vec4 diffuse_color = texture(texture5, texcoord);
+	vec4 world_normal = texture(texture2, texcoord);
+	//============================================
+
 	//vec4 world_pos = texture(texture1, texcoord);
 	vec2 scr_pix = vec2(texcoord.x * 1344 , texcoord.y * 756 );
 	vec4 world_pos = texelFetch(texture3,ivec2(scr_pix.xy) ,0); // model * aPos
@@ -42,12 +49,14 @@ void main() {
 		//color = shaow_color;
 		color = vec4(0);
 	}
-	vec4 diffuse = texture(texture5, texcoord);
 
-	//color = diffuse * color;
+	vec3 world_light_dir = normalize(u_LIGHT_WORLD_POS0.xyz - world_pos.xyz);
+	vec4 diffuse = texture(texture5, texcoord);
+	float d_intensity = max(dot(world_normal.xyz, world_light_dir), 0.0f);
+	//color = vec4(d_intensity,0,0, 1.0);
+	color = diffuse * d_intensity * color;
 	/*
-	vec4 diffuse_color = texture(texture5, texcoord);
-	vec4 world_normal = texture(texture2, texcoord);
+
 	//vec4 world_pos = texture(screenTexture, texcoord);
 	//world_pos.w = 1;
 
