@@ -42,12 +42,17 @@ public:
 
 	FramebufferObject* fbo; 
 	Shader shadow_shader;
+	float m_far=10;
+
+	// point light
+	mat4 m_point_light_view_matrixs [6];
+	mat4 m_point_light_vp_matrixs[6];
 
 private:
 	void bind_shadow_map();
 	void init_buffer();
 	void init_shader();
-	mat4 get_directional_light_mvp();
+	
 	unsigned int shadow_fbo_cascaded[SHOWOW_CASCADE_LEVEL];
 
 };

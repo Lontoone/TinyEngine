@@ -137,19 +137,6 @@ GameObject::~GameObject()
 
 void GameObject::execute(EXECUTE_TIMING timimg )
 {	
-		/*
-	switch (timimg)
-	{	
-	case EXECUTE_TIMING::BEFORE_FRAME:		
-		this->DO_Before_Frame();
-		break;
-	case EXECUTE_TIMING::AFTER_FRAME:
-		this->Do_End_Frame();
-		break;
-	default:
-		break;
-	}
-		*/
 	
 	for (int i = 0; i < this->m_comps.size(); i++) {		
 
@@ -199,7 +186,7 @@ void GameObject::set_name(size_t  _idx)
 
 void GameObject::add_component(Component* _new_comp)
 {
-	this->m_comps.push_back(_new_comp);
+	this->m_comps.push_back(_new_comp);	
 	_new_comp->attatch_to(this);	
 }
 

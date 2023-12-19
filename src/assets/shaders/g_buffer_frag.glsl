@@ -52,7 +52,7 @@ vec4 specularLight = vec4(1,1,1,1);
 
 vec4 ia = vec4(u_MAT_PARA_IA ,1);
 vec4 id = vec4(u_MAT_PARA_ID, 1);
-vec4 is = vec4(u_MAT_PARA_IS, 1);
+vec4 is = vec4(u_MAT_PARA_IS, u_MAT_PARA_SN);
 
 float near = 1;
 float far = 100.0f;
@@ -135,19 +135,22 @@ void main(){
 	//===================================
 	//			Deffered Shading
 	//===================================
+	if (!NO_DIFFUSE) {
+		color_diffuse = texture(DIFFUSE, texcoord);
+	}
+	else {
+		color_diffuse = id;  // default diffuse color
+	}
+	if (color_diffuse.a < 0.05) {
+		discard;
+	}
 	//color_tex = FragColor;
 	color_ws_pos = vec4(world_pos.xyz, 1.0);
 	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ws_normal = vec4(world_normal, 1.0);
 	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
-	color_ambient	= vec4(0.5);
-	if (!NO_DIFFUSE) {
-		color_diffuse = texture(DIFFUSE, texcoord);
-	}
-	else {
-		color_diffuse = vec4(1);  // default diffuse color
-	}
-	color_speculr	= vec4(u_MAT_PARA_IS,1.0) * u_MAT_PARA_SN; // TODO:....read from texture or setting
+	color_ambient	= ia;
+	color_speculr	= is; // TODO:....read from texture or setting
 	/*
 	
 	// For Debuf

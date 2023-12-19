@@ -17,16 +17,19 @@ struct MechainState
 	GLuint programId;
 	GLuint vertShaderId;
 	GLuint fragShaderId;
+	GLuint geoShaderId;
 
 };
 
 void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file);
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file , const string geo_file);
 void SetProgramFromSource(MechainState& mechainState, const char* vs, const char* fs , bool create_one = true);
 
 class Shader {
 public:
 	Shader();	
 	Shader(const string vert_path, const string frag_path);	
+	Shader(const string vert_path, const string frag_path , const string geo_path);  // vert , frag , geo
 	Shader(const string vert_path);
 	~Shader();
 

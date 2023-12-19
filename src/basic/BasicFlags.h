@@ -50,6 +50,9 @@ const static char* u_TEX_SHADOW_MAP2 = "u_TEX_SHADOW_MAP2";
 const static char* u_TEX_SHADOW_MAP3 = "u_TEX_SHADOW_MAP3";
 
 const static char* u_LIGHT_WORLD_POS0 = "u_LIGHT_WORLD_POS0";
+const static char* u_LIGHT_WORLD_POS1 = "u_LIGHT_WORLD_POS1";
+
+const static char* u_POINTLIGHT1_FAR = "u_POINTLIGHT1_FAR";
 
 /*
 static const char* CODE_TO_STR( const char* str) {

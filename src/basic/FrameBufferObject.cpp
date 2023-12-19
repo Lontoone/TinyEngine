@@ -26,13 +26,14 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum* draw_buffers,
 	}
 
 	glDrawBuffers(buffer_cnt, draw_buffers);
-
 	if (this->rbo == NULL) {
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
+	/*
+	*/
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
@@ -83,13 +84,14 @@ FramebufferObject::FramebufferObject(Shader* shader, const GLenum draw_target, c
 	
 	glDrawBuffer(color_draw);
 	glReadBuffer(color_read);
-
 	if (this->rbo == NULL) {
 		glGenRenderbuffers(1, &this->rbo);
 		glBindRenderbuffer(GL_RENDERBUFFER, this->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->rbo);
 	}
+	/*
+	*/
 
 	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
@@ -148,6 +150,7 @@ void FramebufferObject::create_shadow_buffer(Shader* shader, unsigned int& width
 		cout << "frame buffer error " << fbo_status << endl;
 	}
 
+	/*
 	// Prepare framebuffer rectangle VBO and VAO	
 	if (this->rectVAO == NULL) {
 		glGenVertexArrays(1, &this->rectVAO);
@@ -161,9 +164,47 @@ void FramebufferObject::create_shadow_buffer(Shader* shader, unsigned int& width
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	}
-
+	*/
 	//const char* shadow_map = u_TEX_SHADOW_MAP;
 	//glUniform1i(glGetUniformLocation(this->shader->m_state.programId, shadow_map), 0); //u_TEX_SHADOW_MAP
+}
+
+void FramebufferObject::create_pointLight_shadow_buffer(Shader* shader, unsigned int& width, unsigned int& height)
+{
+	this->shader = shader;
+	this->width = &width;
+	this->height = &height;
+	glGenFramebuffers(1, &this->fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+
+
+	glGenTextures(1, &framebuffer_texture[0]);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->framebuffer_texture[0]);
+	for (unsigned int i = 0; i < 6; ++i) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+	
+
+	glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->framebuffer_texture[0], 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->framebuffer_texture[0], 0);
+
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	auto fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "frame buffer error " << fbo_status << endl;
+	}
 }
 
 

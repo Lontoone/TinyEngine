@@ -59,28 +59,30 @@ void Material::render()
 {
 
 	//============================
-	// [ToDo] : 改成loop through all texture enum name...
+	// 改成loop through all texture enum name...
 	//============================
 	int cnt = 0;
 	for (int i = Bind_Type::DIFFUSE; i != Bind_Type::NONE; ++i) {
-		// Bind Texture
+		// Bind Texture		
 		Bind_Type tex_type = static_cast<Bind_Type>(i);
-		char* uniform_name = new char[ strlen(s_bind_types[tex_type])+4];			
+		char* uniform_name = new char[strlen(s_bind_types[tex_type]) + 4];
 		strcpy(uniform_name, "NO_");
 		strcat(uniform_name, s_bind_types[tex_type]);
 
 		unsigned int tex = 99;
 		glActiveTexture(GL_TEXTURE0 + cnt);
-		if (this->m_textures.count(tex_type)) {
+		// Check if texture exists , setting the uniform "NO_..."   (NO_DIFFUSE , NO_NORMAL....etc)
+		if (this->m_textures.count(tex_type) && this->m_use_texture) {
 			tex = this->m_textures[tex_type]->m_texture_id;
 			glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, uniform_name), false);
-		}	
-		else {				
+		}
+		else {
 			glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, uniform_name), true);
 		}
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, s_bind_types[tex_type]), cnt);
 
+		
 		// Bind Material para
 		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_IA),1, value_ptr( this->m_mat_para_ia));
 		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_IS), 1, value_ptr(this->m_mat_para_is));

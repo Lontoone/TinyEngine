@@ -23,6 +23,7 @@ public:
 	//Material(Texture& _diff , Texture& _normal);
 	~Material();
 	
+	bool m_use_texture = true;
 	string m_shader_name;
 	string m_material_name;
 	map<Bind_Type, Texture*> m_textures;

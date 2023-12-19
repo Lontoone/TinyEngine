@@ -278,6 +278,9 @@
     <None Include="src\assets\shaders\g_buffer_vert.glsl" />
     <None Include="src\assets\shaders\g_buffer_frag.glsl" />
     <None Include="src\assets\shaders\deffered_rd_frag.glsl" />
+    <None Include="src\assets\shaders\pointLight_vert.glsl" />
+    <None Include="src\assets\shaders\pointLight_geo.glsl" />
+    <None Include="src\assets\shaders\pointLight_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

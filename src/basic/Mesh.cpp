@@ -56,7 +56,8 @@ void Mesh::Render()
         const unsigned int MaterialIndex = this->m_Entries[i].MaterialIndex;
         
         
-        GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform        
+        //GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform
+        GameObject* gm = this->get_gameobject();        
         this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);        
 		this->materials[MaterialIndex]->render();
 
@@ -170,6 +171,20 @@ void Mesh::init_ui_content()
 
     auto title_text = [&]() {Text("========= [ Mesh Render] ============");return true;};
     this->add_draw_item(title_text);
+
+    // [Use Texture ][For Final Demo]    
+    auto use_normal_checkbox = [&]() {
+        ImGui::Checkbox("Use Texture", &this->m_useTexture);
+        for (int i = 0; i < this->materials.size(); i++) {
+            this->materials[i]->m_use_texture = this->m_useTexture;
+        }
+        return &this->m_useTexture;
+    };
+    this->add_draw_item(use_normal_checkbox);
+
+    // [Paramerters]
+
+
     // ToDo:  Display Mesh data on panel
     /*
     for (auto _mat : this->materials) {
@@ -341,6 +356,7 @@ bool Mesh::InitMaterials(const aiScene* pScene)
                 mat->m_mat_para_sn = ai_float;
             };
 
+            ret = material->Get(AI_MATKEY_NAME, mat->m_material_name);
 
             // Fininsh Loading this material
 			this->materials.push_back(mat);

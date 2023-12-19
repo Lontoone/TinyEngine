@@ -244,6 +244,9 @@
     <None Include="src\assets\shaders\hw3_view_culling.glsl" />
     <None Include="src\assets\shaders\Indir_default_frag.glsl" />
     <None Include="src\assets\shaders\Indir_default_vert.glsl" />
+    <None Include="src\assets\shaders\pointLight_frag.glsl" />
+    <None Include="src\assets\shaders\pointLight_geo.glsl" />
+    <None Include="src\assets\shaders\pointLight_vert.glsl" />
     <None Include="src\assets\shaders\shadow_map_frag.glsl" />
     <None Include="src\assets\shaders\shadow_map_vert.glsl" />
     <None Include="src\assets\shaders\unlit_vert.glsl" />

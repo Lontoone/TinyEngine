@@ -128,25 +128,35 @@ int main(int argc , char** argv) {
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
-	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
-	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
+	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
+	Mesh* tri_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
+	Mesh* pl_ball_mesh = new Mesh(src_path + "\\assets\\models\\cube\\ball.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	//Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
 	//Mesh* mesh_b3 =new Mesh(src_path + "\\assets\\models\\bush\\bush05_lod2.obj" );
 	//Mesh* mesh = new Mesh(src_path + "\\assets\\models\\cube\\cube.obj", s_default_shader);
 
-	GameObject obj = GameObject("Slime");
+	/*
+	*/
+	GameObject obj = GameObject("House");
 	obj.add_component(dog_mesh);
 	obj.m_transform->m_scale = vec3(1);
 	Hierarchy::instance().add_object(&obj);	
 	Hierarchy::instance().add_renderer(dog_mesh);
 	
+	GameObject tri_obj = GameObject("Tri");
+	tri_obj.add_component(tri_mesh);
+	tri_obj.m_transform->set_transform_parent(obj.m_transform);
+	tri_obj.m_transform->m_scale = vec3(0.001);
+	tri_obj.m_transform->m_position= vec3(2.05, 0.628725, -1.9);
+	Hierarchy::instance().add_object(&tri_obj);
+	Hierarchy::instance().add_renderer(tri_mesh);
 
-	scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
-	scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
-	game_camera_obj.m_transform->m_position = glm::vec3(3.42,0.7,-3);
-	game_camera_obj.m_transform->m_rotation = glm::vec3(0, -600, 0);
+	//scene_camera_obj.m_transform->m_position = vec3(0, 150, 150);
+	//scene_camera_obj.m_transform->m_rotation = vec3(-30, 0, 0);
+	game_camera_obj.m_transform->m_position = glm::vec3(4.0, 1.0,-1.5);
+	game_camera_obj.m_transform->m_rotation = glm::vec3(0, 0, 0);
 	game_camera_obj.m_transform->m_scale = vec3(1, 1,1);
 	
 	//GameObject camera_obj = GameObject((TransformObject*)game_camera->m_parent);
@@ -159,14 +169,30 @@ int main(int argc , char** argv) {
 	Hierarchy::instance().add_object(&game_camera_obj);
 	Hierarchy::instance().add_object(&scene_camera_obj);
 	
+	GameObject pointLight_obj = GameObject("Point Ball Light");
+	pointLight_obj.add_component(pl_ball_mesh);
+	Hierarchy::instance().add_object(&pointLight_obj);
+	//Hierarchy::instance().add_renderer(pl_ball_mesh);
 
+	//===========================================
+	//                Define Light
+	// * Add mesh obj before this.
+	//===========================================
 	Light* sun = new Light();
 	GameObject sun_obj = GameObject("Sun");
-	sun_obj.m_transform->m_position = vec3(1, 1, -3);
+	sun_obj.m_transform->m_position = vec3(-2.845, 2.028, -1.293);
 	sun_obj.add_component((Component*)sun);
 	Hierarchy::instance().add_object(&sun_obj);
 	Hierarchy::instance().add_light(sun);
 
+	// Point Light
+	
+	Light* pointLight = new Light(LIGHT_Type::POINT_LIGHT);	
+	//pointLight_ball_obj.m_transform->set_transform_parent(pointLight_obj.m_transform);
+	pointLight_obj.m_transform->m_position = vec3(1.87659, 0.4625, 0.103928);
+	//pointLight_obj.m_transform->m_position = vec3(1.786,0.0,0.104);
+	pointLight_obj.add_component((Component*)pointLight);	
+	Hierarchy::instance().add_light(pointLight);
 #pragma endregion
 
 	
@@ -208,10 +234,16 @@ int main(int argc , char** argv) {
 	Shader frameBuffer_deffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\deffered_rd_frag.glsl"));
 	//Shader gBuffer_shader = Shader(src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
 	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
+	
 	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
 	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
 	Shader gizmose_shader = Shader(src_path + string("\\assets\\shaders\\vertexShader_ogl_450.glsl"), src_path + string("\\assets\\shaders\\fragmentShader_ogl_450.glsl"));
 
+	Shader point_light_shader = Shader(
+		src_path + string("\\assets\\shaders\\pointLight_vert.glsl"), 
+		src_path + string("\\assets\\shaders\\pointLight_frag.glsl"),
+		src_path + string("\\assets\\shaders\\pointLight_geo.glsl")
+	);
 
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
@@ -258,43 +290,68 @@ int main(int argc , char** argv) {
 		Begin("Sun positon");
 		SliderFloat3("sun position", &sun_obj.m_transform->m_position[0], -10, 10);
 		End();
+		Begin("Point Light positon");
+		SliderFloat3("Point Light position", &pointLight_obj.m_transform->m_position[0], -10, 10);
+		End();
 
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);				
 
 		//hw3_move_slim(obj);
 		//id_mesh.hw3_update_dog_position(obj.m_transform->m_position);
 
-		// [ Set up FBO]
-		glClearColor(0.2, 0.2, 0.2, 1.0f);
-		// Depth testing needed for Shadow Map
-		glEnable(GL_DEPTH_TEST);		
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
-		glViewport(0, 0, 1024, 1024);
+		// [ Set up Shadow FBO]
 		sun->fbo->activate();
+		glClearColor(0.2, 0.2, 0.2, 1.0f);
+		glViewport(0, 0, 1024, 1024);
+		glEnable(GL_DEPTH_TEST);		
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		// Render all object
+		// [SUN] Render all object
 		shadow_shader.activate();
 		mat4 sun_vp = sun->get_light_vp_matrix();
-		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));
+		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));		
 		for (auto renderer : Hierarchy::instance().m_meshes) {
 			renderer->get_gameobject()->m_transform->Do();
 			glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
 			renderer->Render_without_material(shadow_shader);
 		}
-		//LightingManager::render_to_shadowmap();   // [ BUG : writing to wrong mvp? ]
+
+		// [Point Light] Render all object		
+		pointLight->fbo->activate();
+		glClearColor(0.2, 0.2, 0.2, 1.0f);
+		glViewport(0, 0, 1024, 1024);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(4.0f, 4.0f);
+		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		point_light_shader.activate();
+		pointLight->get_light_view_matrix();  //update view
+		pointLight->get_light_vp_matrix(); //update vp
+		glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_VP_MATRIX), 6, GL_FALSE, value_ptr(pointLight->m_point_light_vp_matrixs[0]));
+		glUniform4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
+		glUniform1f(glGetUniformLocation(point_light_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
+		for (auto renderer : Hierarchy::instance().m_meshes) {
+			renderer->get_gameobject()->m_transform->Do();
+			glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
+			renderer->Render_without_material(point_light_shader);
+		}
 		
+		
+		//glDisable(GL_CULL_FACE);
+		//LightingManager::render_to_shadowmap();   // [ BUG : writing to wrong mvp? ]
 		//sun->fbo->blit(sun->fbo->framebuffer_texture[0], main_fbo->fbo, frameBuffer_shader);		
 		//---------------------------
 		
-		// [ Set up FBO]
+		// [ Set up G-buffer FBO]
 		glClearColor(0.2, 0.2, 0.2, 1.0f);		
-		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(4.0f,4.0f);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);		
 		gbuffer_fbo->activate();
+		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Draw all items
@@ -310,14 +367,26 @@ int main(int argc , char** argv) {
 		//================================================================
 		//  Blit to main screen
 		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
+		
 		frameBuffer_deffer_shader.activate();
+		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
+		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));
+		//glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_VIEW_MATRIX), 1, value_ptr(game_camera->getViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
-		// Bind the Shadow Map
+		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
+		glUniform1f(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
+		// Bind the Shadow Map-- Sun
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
+
+		// Bind the Shadow Map--Point light 1
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, pointLight->fbo->framebuffer_texture[0]);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP0), 10);
 		
+		// Bind G-Buffer
 		for (int i = 1; i <= 6; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);			
 			glBindTexture(GL_TEXTURE_2D, gbuffer_fbo->framebuffer_texture[i - 1]);
@@ -328,42 +397,36 @@ int main(int argc , char** argv) {
 			GLint texture2Location = glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, b);
 			glUniform1i(texture2Location, i);
 		}
-		/*
-		// Bind World position
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[1]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture1"), 1);
-		// Bind World position
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, main_fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "texture2"), 2);
-		
-		main_fbo->blit(main_fbo->framebuffer_texture[0], deffered_fbo->fbo, main_fbo->framebuffer_texture, 6 , frameBuffer_deffer_shader) ;
-		deffered_fbo->blit(deffered_fbo->framebuffer_texture[0] , 0 );
-		*/
-		/*
-		*/
-		/*
-		
-		*/
+
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);		
 		glBindVertexArray(deffered_fbo->rectVAO);
 		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
 			
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+
+
+		//==============================================================================
+		//					DEBUG
+		//==============================================================================
 		
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		//ui_manager.create_sceneNgame_window(scene_fbo->framebuffer_texture[0] , game_fbo->framebuffer_texture[0]);
 		frame_buffer_debugger.Draw_Frames_on_Panel();
-		frame_buffer_debugger.attach_texture(sun->fbo->framebuffer_texture[0]);
+		frame_buffer_debugger.attach_texture(sun->fbo->framebuffer_texture[0]);		
+		/*
+		*/
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[0]);
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[1]);
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[2]);
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[3]);
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[4]);
 		frame_buffer_debugger.attach_texture(gbuffer_fbo->framebuffer_texture[5]);
+
+		// Add point light		
+		frame_buffer_debugger.attach_texture(pointLight->fbo->framebuffer_texture[0]);
 		frame_buffer_debugger.End_Panel();
 		ui_manager.create_hierarchy_window(Hierarchy::instance().m_game_objects);
 		ui_manager.create_menubar();
@@ -550,10 +613,10 @@ void processInput(GLFWwindow* window, double dt) {
 	/*  TODO: 統一camera和object設計	*/
 	/**/
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {		
-		game_camera_obj.m_transform->m_position -= vec3( vec4(game_camera_obj.m_transform->m_forward * vec3(dt), 1.0));		
+		game_camera_obj.m_transform->m_position -= vec3( vec4(game_camera_obj.m_transform->m_forward * vec3(dt*0.1), 1.0));		
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		game_camera_obj.m_transform->m_position += vec3(vec4(game_camera_obj.m_transform->m_forward * vec3(dt), 1.0));		
+		game_camera_obj.m_transform->m_position += vec3(vec4(game_camera_obj.m_transform->m_forward * vec3(dt * 0.1), 1.0));
 	}	
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		game_camera_obj.m_transform->m_rotation-= vec3(0, dt, 0);
@@ -631,10 +694,10 @@ void processInput(GLFWwindow* window, double dt) {
 	/////////////////////////// [ Move Camera Up and Down ] ////////////////////////////
 	
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {		
-		game_camera_obj.m_transform->m_position += vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt ), 1.0));
+		game_camera_obj.m_transform->m_position += vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt * 0.1), 1.0));
 	}
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {		
-		game_camera_obj.m_transform->m_position -= vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt), 1.0));
+		game_camera_obj.m_transform->m_position -= vec3(vec4((game_camera_obj.m_transform->m_up) * vec3(dt * 0.1), 1.0));
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS ) {

@@ -123,6 +123,20 @@ void SetProgram(MechainState& mechainState , const string vs_file) {
 		exit(123);
 	}
 }
+
+GLuint CompileShader(GLuint shader_pid , const string file , GLuint shaderType) {
+	GLuint id;
+	GLint success = 1;
+	id = glCreateShader(shaderType);
+
+	char* txt = NULL;
+	txt = textFileRead(file.c_str());
+	glShaderSource(id, 1, (const GLchar**)&txt, NULL);
+	success *= compile_shader(shader_pid , id);
+	free(txt);
+
+	return id;
+}
 void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file)
 {
 	char* vs = NULL;
@@ -163,7 +177,12 @@ void SetProgram(MechainState& mechainState, const string vs_file, const string f
 	mechainState.fragShaderId = f;
 	mechainState.vertShaderId = v;
 	mechainState.programId = p;
+}
 
+void SetProgram(MechainState& mechainState, const string vs_file, const string fs_file, const string geo_file)
+{
+	SetProgram(mechainState , vs_file , fs_file);
+	mechainState.geoShaderId = CompileShader(mechainState.programId , geo_file , GL_GEOMETRY_SHADER);
 
 }
 
@@ -183,6 +202,11 @@ Shader::Shader(const string vert_path, const string frag_path)
 	this->init_variables();
 }
 
+Shader::Shader(const string vert_path, const string frag_path, const string geo_path)
+{
+	this->m_state = MechainState();
+	SetProgram(this->m_state , vert_path , frag_path , geo_path);
+}
 
 Shader::Shader(const string vert_path)
 {

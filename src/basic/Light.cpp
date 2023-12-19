@@ -3,6 +3,7 @@
 Light::Light()
 {	
 	this->light_type = LIGHT_Type::DIRECTIONAL;
+	this->m_far = 10;
 	this->init_shader();
 	this->init_buffer();
 }
@@ -10,6 +11,7 @@ Light::Light()
 Light::Light(LIGHT_Type type)
 {
 	this->light_type = type;
+	this->m_far = 10;	
 	this->init_shader();
 	this->init_buffer();
 
@@ -48,21 +50,23 @@ void Light::bind_shadow_map()
 
 mat4 Light::get_projection_matrix()
 {
-	if (this->light_type == LIGHT_Type::DIRECTIONAL) {		
-		//return this->get_directional_light_mvp();
+	if (this->light_type == LIGHT_Type::DIRECTIONAL) {
 		Camera* main_camera = Hierarchy::instance().get_main_camera();
 		float near_plane = main_camera->m_near;
 		float far_plane = main_camera->m_far;
-		//float width = main_camera->m_width *0.1;
-		//float height = main_camera->m_heigth *0.1;
-		float width = 20;
-		float height = 20;
+
+		float width = 5;
+		float height = 5;
 		//return glm::ortho(0.0f, float(this->SHOWOW_RESOLUTION), float(this->SHOWOW_RESOLUTION), 0.0f, main_camera->m_near, main_camera->m_far);
 		//return mat4(1);
 
-		//return glm::ortho(-35.0f,35.0f ,-35.0f , 35.0f,0.0f,100.0f);
-		return glm::ortho(-width, width, -height, height, 0.01f, 50.0f);
-		//return glm::ortho(0.0f, main_camera->m_width, main_camera->m_heigth, 0.0f, main_camera->m_near, main_camera->m_far * 10);
+		return glm::ortho(-width, width, -height, height, 0.1f, this->m_far);
+	}
+	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {
+		float aspect = (float)this->SHOWOW_RESOLUTION / (float)this->SHOWOW_RESOLUTION;
+		float near = 0.22f;
+		float far = this->m_far;
+		return glm::perspective(glm::radians(90.0f), aspect, near, far);
 	}
 	//TODO:
 
@@ -73,33 +77,54 @@ mat4 Light::get_light_view_matrix()
 	if (this->light_type == LIGHT_Type::DIRECTIONAL) {
 		// Directional light no translation
 		vec3 light_pos = this->get_gameobject()->m_transform->m_position ;
-		//return transpose( this->get_gameobject()->m_transform->m_rot_matrix) * this->get_gameobject()->m_transform->m_translate_matrix *-1.0f;  // inverse rot mat 		
-		//return transpose(this->get_gameobject()->m_transform->m_rot_matrix) ;  // inverse rot mat 		
-
-		//return glm::lookAt(25.0f *normalize(this->get_gameobject()->m_transform->m_position)  , vec3(0) , WORLD_UP);
+		
 		return glm::lookAt(
-			light_pos ,
+			light_pos,
 			//light_pos + this->get_gameobject()->m_transform->m_forward * 5.0f,
-			vec3(0),
+			//vec3(0),
+			vec3(0.542, -0.141, -0.422) ,
 			WORLD_UP);
 		/*
 		*/
 	}
 	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {
-		// Point light no rotation
-		return this->get_gameobject()->m_transform->m_translate_matrix* mat4(-1);// inverse translation 
-	
+		
+		vec3 lightPos = this->get_gameobject()->m_transform->m_position;
+		float rate = 0.22f;
+		this->m_point_light_view_matrixs[0] =(glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0) *rate, glm::vec3(0.0, -1.0, 0.0)));
+		this->m_point_light_view_matrixs[1] =(glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0)*rate, glm::vec3(0.0, -1.0, 0.0)));
+		this->m_point_light_view_matrixs[2] =(glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0) *rate, glm::vec3(0.0, 0.0, 1.0)));
+		this->m_point_light_view_matrixs[3] =(glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0)*rate, glm::vec3(0.0, 0.0, -1.0)));
+		this->m_point_light_view_matrixs[4] =(glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0) *rate, glm::vec3(0.0, -1.0, 0.0)));
+		this->m_point_light_view_matrixs[5] = glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0)*rate, glm::vec3(0.0, -1.0, 0.0));
+
+		return this->m_point_light_view_matrixs[0];
+		/*
+		*/
 	}
 }
 mat4 Light::get_light_vp_matrix()
 {
-	return this->get_projection_matrix() * this->get_light_view_matrix();
+	if (this->light_type == LIGHT_Type::DIRECTIONAL) {
+		return this->get_projection_matrix() * this->get_light_view_matrix();
+	}
+	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {		
+		mat4 proj = this->get_projection_matrix();
+		for (int i = 0; i < 6;i++) {
+			this->m_point_light_vp_matrixs[i] = proj * this->m_point_light_view_matrixs[i];
+		}
+		return this->m_point_light_vp_matrixs[0];
+	}
 }
 /*
 */
 
 void Light::init_buffer()
 {		
+	if (this->fbo != nullptr) {
+		glDeleteFramebuffers(1 , &this->fbo->fbo);		
+	}
+
 
 	if (this->light_type==LIGHT_Type::DIRECTIONAL) {
 		this->fbo = new FramebufferObject();
@@ -108,7 +133,11 @@ void Light::init_buffer()
 				SHOWOW_RESOLUTION , SHOWOW_RESOLUTION);
 	}
 	else if (this->light_type == LIGHT_Type::POINT_LIGHT) {
-		
+		this->fbo = new FramebufferObject();
+		this->fbo->create_pointLight_shadow_buffer(
+			&this->shadow_shader,
+			SHOWOW_RESOLUTION, SHOWOW_RESOLUTION);
+
 	}
 
 
@@ -137,15 +166,3 @@ void Light::init_shader()
 	this->shadow_shader.add_variables(uniform_name);
 }
 
-mat4 Light::get_directional_light_mvp()
-{
-	//ToDo: Broken???
-	// return otho proj matrix
-	Camera* main_camera = Hierarchy::instance().get_main_camera();
-	float near_plane = main_camera->m_near;
-	float far_plane = main_camera->m_far;
-	return glm::ortho(0.0f , main_camera->m_width , main_camera->m_heigth ,0.0f , main_camera->m_near , main_camera->m_far*10 );
-	//return mat4(1);
-}
-/*
-*/
