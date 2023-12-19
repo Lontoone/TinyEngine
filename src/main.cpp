@@ -191,7 +191,7 @@ int main(int argc , char** argv) {
 	//pointLight_ball_obj.m_transform->set_transform_parent(pointLight_obj.m_transform);
 	pointLight_obj.m_transform->m_position = vec3(1.87659, 0.4625, 0.103928);
 	//pointLight_obj.m_transform->m_position = vec3(1.786,0.0,0.104);
-	pointLight_obj.add_component((Component*)pointLight);	
+	pointLight_obj.add_component(pointLight);	
 	Hierarchy::instance().add_light(pointLight);
 #pragma endregion
 
@@ -317,28 +317,27 @@ int main(int argc , char** argv) {
 		}
 
 		// [Point Light] Render all object		
-		pointLight->fbo->activate();
-		glClearColor(0.2, 0.2, 0.2, 1.0f);
-		glViewport(0, 0, 1024, 1024);
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(4.0f, 4.0f);
-		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		if (pointLight->m_activate) {
+			pointLight->fbo->activate();
+			glClearColor(0.2, 0.2, 0.2, 1.0f);
+			glViewport(0, 0, 1024, 1024);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(4.0f, 4.0f);
+			glEnable(GL_DEPTH_TEST);
+			glClear(GL_DEPTH_BUFFER_BIT);
 
-		point_light_shader.activate();
-		pointLight->get_light_view_matrix();  //update view
-		pointLight->get_light_vp_matrix(); //update vp
-		glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_VP_MATRIX), 6, GL_FALSE, value_ptr(pointLight->m_point_light_vp_matrixs[0]));
-		glUniform4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
-		glUniform1f(glGetUniformLocation(point_light_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
-		for (auto renderer : Hierarchy::instance().m_meshes) {
-			renderer->get_gameobject()->m_transform->Do();
-			glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
-			renderer->Render_without_material(point_light_shader);
+			point_light_shader.activate();
+			pointLight->get_light_view_matrix();  //update view
+			pointLight->get_light_vp_matrix(); //update vp
+			glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_VP_MATRIX), 6, GL_FALSE, value_ptr(pointLight->m_point_light_vp_matrixs[0]));
+			glUniform4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
+			glUniform1f(glGetUniformLocation(point_light_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
+			for (auto renderer : Hierarchy::instance().m_meshes) {
+				renderer->get_gameobject()->m_transform->Do();
+				glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
+				renderer->Render_without_material(point_light_shader);
+			}
 		}
-		
 		
 		//glDisable(GL_CULL_FACE);
 		//LightingManager::render_to_shadowmap();   // [ BUG : writing to wrong mvp? ]
@@ -374,17 +373,24 @@ int main(int argc , char** argv) {
 		//glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_VIEW_MATRIX), 1, value_ptr(game_camera->getViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
-		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
-		glUniform1f(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
+		// If using point light
+		if (pointLight->m_activate) {
+			glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
+			glUniform1f(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
+			// Bind the Shadow Map--Point light 1
+			glActiveTexture(GL_TEXTURE10);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLight->fbo->framebuffer_texture[0]);
+			glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP0), 10);
+		}
+		else {
+			glActiveTexture(GL_TEXTURE10);			
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		}
 		// Bind the Shadow Map-- Sun
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
 
-		// Bind the Shadow Map--Point light 1
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, pointLight->fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP0), 10);
 		
 		// Bind G-Buffer
 		for (int i = 1; i <= 6; i++) {

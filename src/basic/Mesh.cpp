@@ -168,7 +168,7 @@ Component* Mesh::copy()
 void Mesh::init_ui_content()
 {
     //this->create_panel(this->m_name);
-
+    cout << "Mesh ui";
     auto title_text = [&]() {Text("========= [ Mesh Render] ============");return true;};
     this->add_draw_item(title_text);
 

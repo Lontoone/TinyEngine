@@ -6,6 +6,7 @@ Light::Light()
 	this->m_far = 10;
 	this->init_shader();
 	this->init_buffer();
+	init_ui_content();
 }
 
 Light::Light(LIGHT_Type type)
@@ -14,7 +15,7 @@ Light::Light(LIGHT_Type type)
 	this->m_far = 10;	
 	this->init_shader();
 	this->init_buffer();
-
+	init_ui_content();
 }
 
 Light::~Light()
@@ -25,10 +26,9 @@ Light::~Light()
 void Light::Do()
 {
 	//Bind shadow fbo
-	this->shadow_pass();
-
-	//
-	this->light_pass();
+	//this->shadow_pass();
+	//this->light_pass();
+	
 }
 // Not Using
 void Light::bind_shadow_map()
@@ -144,6 +144,20 @@ void Light::init_buffer()
 	// ToDo: cascade shadow
 	//for (int i = 0; i < this->SHOWOW_CASCADE_LEVEL; i++) {	}
 
+}
+
+void Light::init_ui_content()
+{
+	cout << "Light ui";
+	auto title_text = [&]() {Text("========= [ Light ] ============"); return true; };
+	this->add_draw_item(title_text);
+
+	// [Active Component ]
+	auto activate_checkbox = [&]() {
+		ImGui::Checkbox("Activate", &this->m_activate);	
+		return &this->m_activate;};
+	this->add_draw_item(activate_checkbox);
+	
 }
 
 void Light::shadow_pass()

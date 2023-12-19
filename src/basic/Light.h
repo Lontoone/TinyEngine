@@ -23,7 +23,7 @@ using namespace glm;
 using namespace std;
 
 
-class Light:public UiableComponent
+class Light : public UiableComponent
 {
 public:
 	Light();
@@ -47,6 +47,9 @@ public:
 	// point light
 	mat4 m_point_light_view_matrixs [6];
 	mat4 m_point_light_vp_matrixs[6];
+
+
+	void init_ui_content() override;
 
 private:
 	void bind_shadow_map();
