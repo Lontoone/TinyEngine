@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 */
+#include <ltc_matrix.hpp>
 #include <UiableComponent.h>
 #include <env_path.h>
 /*
@@ -48,6 +49,7 @@ public:
 	mat4 m_point_light_view_matrixs [6];
 	mat4 m_point_light_vp_matrixs[6];
 
+	// area light
 
 	void init_ui_content() override;
 

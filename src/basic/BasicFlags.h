@@ -24,7 +24,8 @@ const enum class LIGHT_Type
 {
 	DIRECTIONAL,
 	POINT_LIGHT,
-	SPOT_LIGHT
+	SPOT_LIGHT,
+	AREA_LIGHT,
 };
 
 
@@ -53,6 +54,8 @@ const static char* u_LIGHT_WORLD_POS0 = "u_LIGHT_WORLD_POS0";
 const static char* u_LIGHT_WORLD_POS1 = "u_LIGHT_WORLD_POS1";
 
 const static char* u_POINTLIGHT1_FAR = "u_POINTLIGHT1_FAR";
+const static char* u_TEX_LTC_MAP0 = "u_TEX_LTC_MAP0";
+const static char* u_TEX_LTC_MAP1 = "u_TEX_LTC_MAP1";
 
 /*
 static const char* CODE_TO_STR( const char* str) {

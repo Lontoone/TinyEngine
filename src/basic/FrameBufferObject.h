@@ -17,6 +17,7 @@ public:
 	FramebufferObject(Shader* shader, const GLenum draw_target, const GLenum texture_target, const GLenum color_draw, const GLenum color_read, unsigned int& width, unsigned int& height);
 	void create_shadow_buffer(Shader* shader , unsigned int& width, unsigned int& height);  // For Single shadow buffer
 	void create_pointLight_shadow_buffer(Shader* shader, unsigned int& width, unsigned int& height);
+	void create_areaLight_buffer(const float* ltc1 , const float* ltc2);
 
 	Shader* shader;
 	unsigned int framebuffer_texture[10];

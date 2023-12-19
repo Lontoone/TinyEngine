@@ -4,7 +4,7 @@ Light::Light()
 {	
 	this->light_type = LIGHT_Type::DIRECTIONAL;
 	this->m_far = 10;
-	this->init_shader();
+	//this->init_shader();
 	this->init_buffer();
 	init_ui_content();
 }
@@ -13,7 +13,7 @@ Light::Light(LIGHT_Type type)
 {
 	this->light_type = type;
 	this->m_far = 10;	
-	this->init_shader();
+	//this->init_shader();
 	this->init_buffer();
 	init_ui_content();
 }
@@ -139,7 +139,10 @@ void Light::init_buffer()
 			SHOWOW_RESOLUTION, SHOWOW_RESOLUTION);
 
 	}
-
+	else if (this->light_type == LIGHT_Type::AREA_LIGHT) {
+		this->fbo = new FramebufferObject();
+		this->fbo->create_areaLight_buffer(LTC1 , LTC2);
+	}
 
 	// ToDo: cascade shadow
 	//for (int i = 0; i < this->SHOWOW_CASCADE_LEVEL; i++) {	}

@@ -236,6 +236,9 @@
     <ClInclude Include="src\utlis\UniformBinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\utlis\ltc_matrix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\assets\shaders\vert.glsl" />

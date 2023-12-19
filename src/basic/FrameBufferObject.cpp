@@ -208,6 +208,40 @@ void FramebufferObject::create_pointLight_shadow_buffer(Shader* shader, unsigned
 }
 
 
+/*
+*	This is only for LTC texture, shadow not implemented
+*/
+void FramebufferObject::create_areaLight_buffer(const float* ltc1 , const float* ltc2)
+{
+	unsigned int _size = 64;
+	this->width =  &_size;
+	this->height = &_size;
+
+	glGenTextures(2, &framebuffer_texture[0]);
+
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[0]);
+
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, ltc1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[1]);
+
+	glBindTexture(GL_TEXTURE_2D, this->framebuffer_texture[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_FLOAT, ltc2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 
 void FramebufferObject::activate()
 {

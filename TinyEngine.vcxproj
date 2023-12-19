@@ -211,6 +211,7 @@
     <ClInclude Include="src\ui\UiItem.h" />
     <ClInclude Include="src\ui\UiManager.h" />
     <ClInclude Include="src\ui\UiPanel.h" />
+    <ClInclude Include="src\utlis\ltc_matrix.hpp" />
     <ClInclude Include="src\utlis\SpatialSample.h" />
     <ClInclude Include="src\utlis\UniformBinder.h" />
   </ItemGroup>

@@ -172,7 +172,10 @@ int main(int argc , char** argv) {
 	GameObject pointLight_obj = GameObject("Point Ball Light");
 	pointLight_obj.add_component(pl_ball_mesh);
 	Hierarchy::instance().add_object(&pointLight_obj);
-	//Hierarchy::instance().add_renderer(pl_ball_mesh);
+	
+	GameObject areaLight_obj = GameObject("AreaLight");
+	Hierarchy::instance().add_object(&areaLight_obj);
+
 
 	//===========================================
 	//                Define Light
@@ -193,6 +196,12 @@ int main(int argc , char** argv) {
 	//pointLight_obj.m_transform->m_position = vec3(1.786,0.0,0.104);
 	pointLight_obj.add_component(pointLight);	
 	Hierarchy::instance().add_light(pointLight);
+
+	// Area Light
+	Light* area_light = new Light(LIGHT_Type::AREA_LIGHT);
+	areaLight_obj.add_component(area_light);
+
+
 #pragma endregion
 
 	
@@ -364,13 +373,11 @@ int main(int argc , char** argv) {
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
 
 		//================================================================
-		//  Blit to main screen
-		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);		
-		
+		//  Blit to Render Deffered Buffer
+		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);				
 		frameBuffer_deffer_shader.activate();
 		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
-		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));
-		//glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_VIEW_MATRIX), 1, value_ptr(game_camera->getViewMatrix()));
+		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));		
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		// If using point light
@@ -391,6 +398,14 @@ int main(int argc , char** argv) {
 		glBindTexture(GL_TEXTURE_2D, sun->fbo->framebuffer_texture[0]);
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
 
+		// Bind the Arae Light LTC
+		glActiveTexture(GL_TEXTURE11);
+		glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[0]);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP0), 11);
+
+		glActiveTexture(GL_TEXTURE12);
+		glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[1]);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP1), 12);
 		
 		// Bind G-Buffer
 		for (int i = 1; i <= 6; i++) {
