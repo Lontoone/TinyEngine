@@ -147,7 +147,7 @@ void main(){
 	else {
 		color_diffuse = vec4(1);  // default diffuse color
 	}
-	color_speculr	= vec4(1); // TODO:....read from texture or setting
+	color_speculr	= vec4(u_MAT_PARA_IS,1.0) * u_MAT_PARA_SN; // TODO:....read from texture or setting
 	/*
 	
 	// For Debuf
