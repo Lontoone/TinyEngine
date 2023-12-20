@@ -387,17 +387,12 @@ int main(int argc , char** argv) {
 		*/
 
 		//================================================================
-		//  Blit to Render Deffered Buffer
-		//main_fbo->blit(main_fbo->framebuffer_texture[0] , deffered_fbo->fbo);				
+		//  Blit to Render Deffered Buffer		
 		frameBuffer_deffer_shader.activate();
 		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));		
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
-		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_AREA_LIGHT_Model_MAT"), 1, GL_FALSE, value_ptr(areaLight_obj.m_transform->m_model_matrix));
-		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[0]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[0].m_pos)));
-		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[1]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[1].m_pos)));
-		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[2]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[2].m_pos)));
-		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[3]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[3].m_pos)));
+
 
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		// If using point light
@@ -419,13 +414,27 @@ int main(int argc , char** argv) {
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_SHADOW_MAP), 9);
 
 		// Bind the Arae Light LTC
-		glActiveTexture(GL_TEXTURE11);
-		glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[0]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP0), 11);
+		if (area_light->m_activate) {
+			glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_AREA_LIGHT_Model_MAT"), 1, GL_FALSE, value_ptr(areaLight_obj.m_transform->m_model_matrix));
+			glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[0]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[0].m_pos)));
+			glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[1]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[1].m_pos)));
+			glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[2]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[2].m_pos)));
+			glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[3]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[3].m_pos)));
+			glActiveTexture(GL_TEXTURE11);
+			glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[0]);
+			glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP0), 11);
 
-		glActiveTexture(GL_TEXTURE12);
-		glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[1]);
-		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP1), 12);
+			glActiveTexture(GL_TEXTURE12);
+			glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[1]);
+			glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP1), 12);
+		}
+		else {
+			glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_AREA_LIGHT_Model_MAT"), 1, GL_FALSE, value_ptr(mat4(0)));
+			glActiveTexture(GL_TEXTURE11);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE12);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 		// Arae Light MVP
 		
 		// Bind G-Buffer

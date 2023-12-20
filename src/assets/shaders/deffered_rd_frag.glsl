@@ -147,6 +147,16 @@ vec3 ToLinear(vec3 v) { return PowVec3(v, gamma); }
 vec3 ToSRGB(vec3 v) { return PowVec3(v, 1.0 / gamma); }
 
 
+// Volumetric Light
+/*
+float G_SCATTERING = 0.5;
+float ComputeScattering(float lightDotView)
+{
+	float result = 1.0f - G_SCATTERING * G_SCATTERING;
+	result /= (4.0f * PI * pow(1.0f + G_SCATTERING * G_SCATTERING - (2.0f * G_SCATTERING) * lightDotView, 1.5f));
+	return result;
+}
+*/
 
 uniform bool u_USE_SHADOW;   //Not using....
 
@@ -154,6 +164,8 @@ void main() {
 	pl1_para.constant = 1.0;
 	pl1_para.linear = 0.7;
 	pl1_para.quadratic = 0.01;
+
+	float vl_sum = 0;  //volumn light counter
 
 	//============================================
 	//                 Read Texture
@@ -177,6 +189,7 @@ void main() {
 	float shadow_term = 0;
 	if (light_ndc_pos.z < shadow_color.r  || !u_USE_SHADOW) {
 		shadow_term = 1;
+		vl_sum += 0.25;
 	}
 	else {		
 		shadow_term = 0;
@@ -278,12 +291,20 @@ void main() {
 	view_pos = normalize(view_pos);
 	float specular_term = pow(max(dot(R, V), 0.0f), specular_color.a);
 
+	//==============================================
+	//			Volumetric Light
+	//==============================================
+
+
+
+
 	//color = (ambient_color * ia + vec4(1) * d_intensity + specular_color * specular_term) * diffuse * shadow_term; 
 	color = ambient_color * ia * diffuse +
 		diffuse * d_intensity * shadow_term * id +
 		specular_color * specular_term * shadow_term * is * diffuse +
 		point_light1 +
-		area_light		
+		area_light;
+		+ vl_sum
 		;
 	
 }
