@@ -35,6 +35,7 @@ uniform sampler2D DIFFUSE;
 uniform sampler2D NORMAL;
 uniform bool NO_DIFFUSE = false;
 uniform bool NO_NORMAL	= false;
+//uniform bool u_write_gbuffer;
 
 uniform vec3 u_MAT_PARA_ID;
 uniform vec3 u_MAT_PARA_IS;
@@ -144,16 +145,15 @@ void main(){
 	if (color_diffuse.a < 0.05) {
 		discard;
 	}
+
+
 	//color_tex = FragColor;
 	color_ws_pos = vec4(world_pos.xyz, 1.0);
 	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ws_normal = vec4(world_normal, 1.0);
 	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
-	color_ambient	= ia;
-	color_speculr	= is; // TODO:....read from texture or setting
-	/*
-	
-	// For Debuf
-	*/
+	color_ambient = ia;
+	color_speculr = is; 
 	FragColor = color_ws_pos;
+
 }

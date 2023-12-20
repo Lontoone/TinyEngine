@@ -55,7 +55,7 @@ void Material::set_uniform_matrix(map<const char*, mat4> uniform_pairs)
 	}
 }
 
-void Material::render()
+void Material::render(bool write_gbuffer)
 {
 
 	//============================
@@ -89,7 +89,7 @@ void Material::render()
 		glUniform3fv(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_ID), 1, value_ptr(this->m_mat_para_id));
 		glUniform1f(glGetUniformLocation(this->m_shader->m_state.programId, u_MAT_PARA_SN), this->m_mat_para_sn);
 
-
+		glUniform1i(glGetUniformLocation(this->m_shader->m_state.programId, u_USE_SHADOW), write_gbuffer);
 
 		cnt++;
 	}

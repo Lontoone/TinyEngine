@@ -59,7 +59,7 @@ void Mesh::Render()
         //GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform
         GameObject* gm = this->get_gameobject();        
         this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);        
-		this->materials[MaterialIndex]->render();
+		this->materials[MaterialIndex]->render(this->m_useGbuffer);
 
         glDrawElements(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0);
         //glDrawElementsInstanced(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0,100);       
@@ -96,7 +96,7 @@ void Mesh::Render_without_material(Shader& shader)
         glEnableVertexAttribArray(3);
         const unsigned int MaterialIndex = this->m_Entries[i].MaterialIndex;
 
-
+        glUniform1i(glGetUniformLocation(shader.m_state.programId, "u_write_gbuffer"), this->m_useGbuffer);
         //GameObject* gm = this->m_gameobject->cast_component<GameObject>(); // Get this gameobj's transform        
         //this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);
         //this->materials[MaterialIndex]->render();
@@ -108,8 +108,6 @@ void Mesh::Render_without_material(Shader& shader)
 
 void Mesh::Render(map<const char*, mat4> uniform_pairs , Shader& shader)
 {
-    // Set up 
-    //LightingManager::request_shadowmap_uniform(this->m_default_shader);
 
     // Render self
     for (unsigned int i = 0; i < this->m_Entries.size(); i++) {
@@ -137,7 +135,7 @@ void Mesh::Render(map<const char*, mat4> uniform_pairs , Shader& shader)
         shader.activate();
         this->materials[MaterialIndex]->set_model_matrix(gm->m_transform->m_model_matrix);
         this->materials[MaterialIndex]->set_uniform_matrix(uniform_pairs);
-        this->materials[MaterialIndex]->render();
+        this->materials[MaterialIndex]->render(this->m_useGbuffer);
 
         glDrawElements(GL_TRIANGLES, this->m_Entries[i].NumIndices, GL_UNSIGNED_INT, 0);
      
@@ -146,8 +144,20 @@ void Mesh::Render(map<const char*, mat4> uniform_pairs , Shader& shader)
 
 void Mesh::Do()
 {
-	//cout << "Mesh Comp Do" << endl;
-	this->Render();
+    if (this->m_activate) {
+        /*
+        if (!this->m_useGbuffer) {
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+
+        }
+        else {
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+        }
+        */
+        this->Render();
+    }
 }
 
 Component* Mesh::copy()

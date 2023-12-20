@@ -127,10 +127,12 @@ int main(int argc , char** argv) {
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cy_sponza\\sponza.obj" , s_default_shader);
 	//obj.m_transform->m_scale = vec3(0.05);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cube\\SimpleTest.obj" , s_default_shader);
+	//Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\cube\\PlaneFloor.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\sponza\\sponza.obj" , s_default_shader);
 	Mesh* dog_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\new_house.obj", s_default_shader);
 	Mesh* tri_mesh = new Mesh(src_path + "\\assets\\models\\indoor\\t_new.obj", s_default_shader);
 	Mesh* pl_ball_mesh = new Mesh(src_path + "\\assets\\models\\cube\\ball.obj", s_default_shader);
+	Mesh* al_plane_mesh = new Mesh(src_path + "\\assets\\models\\cube\\Plane.obj", s_default_shader);
 	//Mesh* dog_mesh =new Mesh(src_path + "\\assets\\models\\cute_dog\\cute_dg.obj" , s_default_shader);
 	//Mesh* mesh_b1 = new Mesh(src_path + "\\assets\\models\\bush\\grassB.obj");
 	//Mesh* mesh_b2 = new Mesh(src_path + "\\assets\\models\\bush\\bush01_lod2.obj");
@@ -171,9 +173,14 @@ int main(int argc , char** argv) {
 	
 	GameObject pointLight_obj = GameObject("Point Ball Light");
 	pointLight_obj.add_component(pl_ball_mesh);
+	pl_ball_mesh->m_useGbuffer = false;
 	Hierarchy::instance().add_object(&pointLight_obj);
 	
 	GameObject areaLight_obj = GameObject("AreaLight");
+	areaLight_obj.add_component(al_plane_mesh);
+	al_plane_mesh->m_useGbuffer = false;
+	areaLight_obj.m_transform->m_position = vec3(1.0,0,-0.5);
+	areaLight_obj.m_transform->m_rotation = vec3(0,20,0);
 	Hierarchy::instance().add_object(&areaLight_obj);
 
 
@@ -295,14 +302,15 @@ int main(int argc , char** argv) {
 
 		//============================
 		//		BEFORE FRAME SETTING
-		//=============================
-		Begin("Sun positon");
+		//=============================		
+		Begin("Light");
 		SliderFloat3("sun position", &sun_obj.m_transform->m_position[0], -10, 10);
-		End();
-		Begin("Point Light positon");
 		SliderFloat3("Point Light position", &pointLight_obj.m_transform->m_position[0], -10, 10);
+		SliderFloat3("Area Light Rot", &areaLight_obj.m_transform->m_rotation[0], 0, 90);
 		End();
+		
 
+		//al_plane_mesh->m_activate = false;
 		Hierarchy::instance().execute(EXECUTE_TIMING::BEFORE_FRAME);				
 
 		//hw3_move_slim(obj);
@@ -318,11 +326,11 @@ int main(int argc , char** argv) {
 		// [SUN] Render all object
 		shadow_shader.activate();
 		mat4 sun_vp = sun->get_light_vp_matrix();
-		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "u_LIGHT_VP_MATRIX"), 1, GL_FALSE, value_ptr(sun_vp));		
-		for (auto renderer : Hierarchy::instance().m_meshes) {
+		glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(sun_vp));		
+		for (auto renderer : Hierarchy::instance().m_meshes) {			
 			renderer->get_gameobject()->m_transform->Do();
 			glUniformMatrix4fv(glGetUniformLocation(shadow_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
-			renderer->Render_without_material(shadow_shader);
+			renderer->Render_without_material(shadow_shader);			
 		}
 
 		// [Point Light] Render all object		
@@ -342,9 +350,11 @@ int main(int argc , char** argv) {
 			glUniform4fv(glGetUniformLocation(point_light_shader.m_state.programId, u_LIGHT_WORLD_POS1), 1, value_ptr(pointLight_obj.m_transform->m_position));
 			glUniform1f(glGetUniformLocation(point_light_shader.m_state.programId, u_POINTLIGHT1_FAR), pointLight->m_far);
 			for (auto renderer : Hierarchy::instance().m_meshes) {
+				
 				renderer->get_gameobject()->m_transform->Do();
 				glUniformMatrix4fv(glGetUniformLocation(point_light_shader.m_state.programId, "model"), 1, GL_FALSE, value_ptr(renderer->get_gameobject()->m_transform->m_model_matrix));
 				renderer->Render_without_material(point_light_shader);
+				
 			}
 		}
 		
@@ -371,6 +381,10 @@ int main(int argc , char** argv) {
 		glUniform4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		glUniformMatrix4fv(glGetUniformLocation(s_default_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		Hierarchy::instance().execute(EXECUTE_TIMING::MAIN_LOGIC);
+		/*
+		al_plane_mesh->m_activate = true;
+		al_plane_mesh->Render_without_material(s_default_shader);
+		*/
 
 		//================================================================
 		//  Blit to Render Deffered Buffer
@@ -379,6 +393,12 @@ int main(int argc , char** argv) {
 		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));		
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
+		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_AREA_LIGHT_Model_MAT"), 1, GL_FALSE, value_ptr(areaLight_obj.m_transform->m_model_matrix));
+		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[0]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[0].m_pos)));
+		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[1]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[1].m_pos)));
+		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[2]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[2].m_pos)));
+		glUniform3fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "al_points[3]"), 1, value_ptr(vec3(al_plane_mesh->m_Entries[0].m_vertexs[3].m_pos)));
+
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
 		// If using point light
 		if (pointLight->m_activate) {
@@ -406,6 +426,7 @@ int main(int argc , char** argv) {
 		glActiveTexture(GL_TEXTURE12);
 		glBindTexture(GL_TEXTURE_2D, area_light->fbo->framebuffer_texture[1]);
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_TEX_LTC_MAP1), 12);
+		// Arae Light MVP
 		
 		// Bind G-Buffer
 		for (int i = 1; i <= 6; i++) {

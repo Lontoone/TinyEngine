@@ -34,7 +34,8 @@ public:
 	void set_model_matrix(mat4 _mode_matrix);
 	void set_uniform_matrix(map< const char* , mat4 > uniform_pairs);
 	
-	virtual void render();
+	//virtual void render();
+	virtual void render(bool write_gbuffer);
 
 	vec3 m_mat_para_ia;
 	vec3 m_mat_para_id;  

@@ -19,12 +19,16 @@ uniform mat4 view;
 //			Light Prop
 //===================================
 uniform mat4 u_LIGHT_VP_MATRIX;
+uniform mat4 u_AREA_LIGHT_Model_MAT;
 uniform vec4 u_LIGHT_WORLD_POS0;
 uniform vec4 u_LIGHT_WORLD_POS1;
 uniform float u_POINTLIGHT1_FAR;
+
+uniform vec3 al_points[4];
+
 const float LUT_SIZE = 64.0; // ltc_texture size
 const float LUT_SCALE = (LUT_SIZE - 1.0) / LUT_SIZE;
-const float LUT_BIAS = 0.5 / LUT_SIZE;
+const float LUT_BIAS = 0.5 / LUT_SIZE ;
 
 //out vec4 fragColor;
 in vec2 texcoord;
@@ -92,7 +96,7 @@ vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSid
 	// check if the shading point is behind the light
 	vec3 dir = points[0] - P; // LTC space
 	vec3 lightNormal = cross(points[1] - points[0], points[3] - points[0]);
-	bool behind = (dot(dir, lightNormal) < 0.0);
+	bool behind = (dot(dir, lightNormal) < 0);
 
 	// cos weighted space
 	L[0] = normalize(L[0]);
@@ -111,6 +115,8 @@ vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSid
 	float len = length(vsum);
 
 	float z = vsum.z / len;
+	/*
+	*/
 	if (behind)
 		z = -z;
 
@@ -142,6 +148,7 @@ vec3 ToSRGB(vec3 v) { return PowVec3(v, 1.0 / gamma); }
 
 
 
+uniform bool u_USE_SHADOW;   //Not using....
 
 void main() {
 	pl1_para.constant = 1.0;
@@ -168,7 +175,7 @@ void main() {
 
 	vec4 shadow_color = texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy);
 	float shadow_term = 0;
-	if (light_ndc_pos.z < shadow_color.r) {
+	if (light_ndc_pos.z < shadow_color.r  || !u_USE_SHADOW) {
 		shadow_term = 1;
 	}
 	else {		
@@ -196,13 +203,13 @@ void main() {
 	//			Area Light
 	//==============================================
 	vec3 ar_N = normalize(world_normal.xyz);
-	vec3 ar_V = normalize( mat3(view )* world_pos.xyz - world_pos.xyz);   //normalize(viewPosition - worldPosition);
+	vec3 ar_V = normalize(u_CAM_POS.xyz - world_pos.xyz);   //normalize(viewPosition - worldPosition);
 	vec3 ar_P = world_pos.xyz;
 	float dotNV = clamp(dot(ar_N, ar_V), 0.0f, 1.0f);
 
 	// use roughness and sqrt(1-cos_theta) to sample M_texture
 	//vec2 ar_uv = vec2(material.albedoRoughness.w, sqrt(1.0f - dotNV));
-	vec2 ar_uv = vec2( 1 , sqrt(1.0f - dotNV));  
+	vec2 ar_uv = vec2(specular_color.a, sqrt(1-dotNV));
 	ar_uv = ar_uv * LUT_SCALE + LUT_BIAS;
 
 	// get 4 parameters for inverse_M
@@ -218,17 +225,17 @@ void main() {
 
 	// translate light source for testing
 	vec3 translatedPoints[4];
-	vec3 offset = vec3(1,0,-2);
+	vec3 offset = vec3(0,0,0);
+	translatedPoints[0] = (u_AREA_LIGHT_Model_MAT * vec4( al_points[0],1.0)).xyz;
+	translatedPoints[1] = (u_AREA_LIGHT_Model_MAT * vec4( al_points[1],1.0)).xyz;
+	translatedPoints[2] = (u_AREA_LIGHT_Model_MAT * vec4( al_points[2],1.0)).xyz;
+	translatedPoints[3] = (u_AREA_LIGHT_Model_MAT * vec4( al_points[3],1.0)).xyz;
 	/*
-	translatedPoints[0] = areaLight.points[0] + areaLightTranslate;
-	translatedPoints[1] = areaLight.points[1] + areaLightTranslate;
-	translatedPoints[2] = areaLight.points[2] + areaLightTranslate;
-	translatedPoints[3] = areaLight.points[3] + areaLightTranslate;
+	translatedPoints[0] = (u_AREA_LIGHT_Model_MAT * vec4(-1, 1, -1, 1)).xyz + offset;
+	translatedPoints[1] = (u_AREA_LIGHT_Model_MAT * vec4(-1, 1, 1, 1)).xyz + offset;
+	translatedPoints[2] = (u_AREA_LIGHT_Model_MAT * vec4(-1, 0, 1, 1)).xyz + offset;
+	translatedPoints[3] = (u_AREA_LIGHT_Model_MAT *vec4(-1, 0, -1,1)).xyz+offset ;
 	*/
-	translatedPoints[0] = vec3(-1,0,0) + offset;
-	translatedPoints[1] = vec3(1, 0, 0) + offset;
-	translatedPoints[2] = vec3(1, 1, 0) + offset;
-	translatedPoints[3] = vec3(-1, 1, 0)+ offset;
 
 	// Evaluate LTC shading
 	vec3 ar_diffuse = LTC_Evaluate(ar_N, ar_V, ar_P, mat3(1), translatedPoints, false);
@@ -240,10 +247,13 @@ void main() {
 	specular *= is * t2.x + (1.0f - is) * t2.y;
 
 	//result = areaLight.color * areaLight.intensity * (specular + mDiffuse * diffuse);
-	vec3 result = vec3(1) * (specular + id * ar_diffuse);
+	//vec3 result = vec3(0.8, 0.6, 0.0) * (specular + id * ar_diffuse);
+	vec3 result = vec3(0.8, 0.6, 0.0) * (ar_diffuse);
 
-	color = vec4(ToSRGB(result), 1.0f);
-	return;
+	vec4 area_light = vec4(ToSRGB(result), 1.0f);
+	//color = vec4(ar_diffuse, 1.0);
+	//color = area_light;
+	//return;
 
 
 	//==============================================
@@ -272,8 +282,8 @@ void main() {
 	color = ambient_color * ia * diffuse +
 		diffuse * d_intensity * shadow_term * id +
 		specular_color * specular_term * shadow_term * is * diffuse +
-		point_light1 ;
-		
+		point_light1 +
+		area_light		
 		;
 	
 }

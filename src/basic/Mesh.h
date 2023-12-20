@@ -52,6 +52,7 @@ public:
 	string m_srcPath = "";
 	string m_srcDirecotory ="";
     bool m_useTexture = true;        
+    bool m_useGbuffer = true;
 
     //vector<Vertex> m_vertices;
     //vector<unsigned int> m_baseVertex;
