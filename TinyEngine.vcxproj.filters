@@ -284,6 +284,8 @@
     <None Include="src\assets\shaders\pointLight_vert.glsl" />
     <None Include="src\assets\shaders\pointLight_geo.glsl" />
     <None Include="src\assets\shaders\pointLight_frag.glsl" />
+    <None Include="src\assets\shaders\1npr_frag.glsl" />
+    <None Include="src\assets\shaders\1fxaa_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

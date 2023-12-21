@@ -219,6 +219,8 @@
     <None Include="src\assets\poissonPoints_1010s.ss2" />
     <None Include="src\assets\poissonPoints_155304s.ss2" />
     <None Include="src\assets\poissonPoints_2797s.ss2" />
+    <None Include="src\assets\shaders\1fxaa_frag.glsl" />
+    <None Include="src\assets\shaders\1npr_frag.glsl" />
     <None Include="src\assets\shaders\cs_grass.glsl" />
     <None Include="src\assets\shaders\default_frag.glsl" />
     <None Include="src\assets\shaders\default_vert.glsl" />

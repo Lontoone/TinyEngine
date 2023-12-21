@@ -14,6 +14,7 @@ layout(binding = 11)  uniform sampler2D   u_TEX_LTC_MAP0;  // area light ltc1
 layout(binding = 12)  uniform sampler2D   u_TEX_LTC_MAP1;  // area light ltc2
 
 uniform vec3 u_CAM_POS;
+uniform mat4 u_PROJ_MATRIX;
 uniform mat4 view;
 //===================================
 //			Light Prop
@@ -187,14 +188,14 @@ void main() {
 
 	vec4 shadow_color = texture(u_TEX_SHADOW_MAP, light_ndc_pos.xy);
 	float shadow_term = 0;
-	if (light_ndc_pos.z < shadow_color.r  || !u_USE_SHADOW) {
+	if (light_ndc_pos.z < shadow_color.r ) {
 		shadow_term = 1;
-		vl_sum += 0.25;
 	}
 	else {		
 		shadow_term = 0;
 	}
-	
+	//color = vec4(shadow_term,0,0,1);
+	//return;
 	//==============================================
 	//			Point Light 1
 	//==============================================
@@ -294,8 +295,77 @@ void main() {
 	//==============================================
 	//			Volumetric Light
 	//==============================================
+	vec4 vl_start_pos = vec4(u_CAM_POS,1);
+	//vec3 vl_start_pos = u_LIGHT_WORLD_POS0;	
+	vec4 vl_main_light_pos = u_PROJ_MATRIX * view * (u_LIGHT_WORLD_POS0);
+	vec3 vl_move_dir = normalize(vl_main_light_pos.xyz - vec3(texcoord , 1.0));
+	vl_move_dir =  vl_move_dir;
+	//color = vec4(vl_move_dir , 1.0);
+	//return;
+	
+	int max_steps = 100;
+	float traveled_distance = 0;
+	float step_size = 0.005f;
+	float total_intensity=0;
+	float decay = 0.95;
+	float total_distance = length(u_LIGHT_WORLD_POS0);
 
+	for (int i = 0; i < max_steps; i++) {
+		//vl_sum += 0.25;
+		vl_start_pos.xyz += vl_move_dir * step_size;
+		traveled_distance += step_size;
+		
+		vec4 vl_light_pos = u_LIGHT_VP_MATRIX * vl_start_pos;
 
+		vec3 vl_proj_uv = (vl_light_pos.xyz / vl_light_pos.w).xyz;		
+		vec4 shadow_color = texture(u_TEX_SHADOW_MAP, vl_proj_uv.xy);
+
+		float vl_intensity = 0;
+		if (vl_proj_uv.z < shadow_color.r) {
+			float vl_intensity = 1 ;		
+			total_intensity += vl_intensity * pow(decay , i );
+		}	
+	
+	}
+	//color = vec4(total_intensity , 0 , 0 , 1.0) ;
+	color = total_intensity /100 * diffuse;
+	
+	return;
+	/*
+	*/
+	/*
+	int NUM_SAMPLES = 100;
+	float Density = 0.926;
+	float Weight = 0.0587;
+	float Decay = 0.56;
+	float Exposure = 0.2;
+
+	vec2 moving_uv = texcoord;
+	// Calculate vector from pixel to light source in screen space.    
+	vec2 deltaTexCoord = (texcoord - (u_PROJ_MATRIX * mat4(view) * (u_LIGHT_WORLD_POS0)).xy);
+	// Divide by number of samples and scale by control factor.   
+	deltaTexCoord *= 1.0f / NUM_SAMPLES * Density;
+	// Store initial sample.    
+	vec4 vl_bg_color = texture(texture5, moving_uv);
+	// Set up illumination decay factor.    
+	float illuminationDecay = 1.0f;
+	// Evaluate summation from Equation 3 NUM_SAMPLES iterations.    
+	for (int i = 0; i < NUM_SAMPLES; i++) {
+		// Step sample location along ray.     
+		moving_uv -= deltaTexCoord;
+		// Retrieve sample at new location.    
+		vec4 vl_diffuse= texture(texture5, moving_uv); // diffuse color
+		// Apply sample attenuation scale/decay factors.     
+		vl_diffuse *= illuminationDecay * Weight;
+		// Accumulate combined color.     
+		vl_bg_color += vl_diffuse;
+		// Update exponential decay factor.     
+		illuminationDecay *= Decay;
+	}
+	// Output final color with a further scale control factor.    
+	color = vl_bg_color* Exposure + diffuse ;
+	return;
+	*/
 
 
 	//color = (ambient_color * ia + vec4(1) * d_intensity + specular_color * specular_term) * diffuse * shadow_term; 

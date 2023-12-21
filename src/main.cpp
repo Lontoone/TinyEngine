@@ -260,7 +260,8 @@ int main(int argc , char** argv) {
 		src_path + string("\\assets\\shaders\\pointLight_frag.glsl"),
 		src_path + string("\\assets\\shaders\\pointLight_geo.glsl")
 	);
-
+	Shader frame_npr_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\1npr_frag.glsl"));
+	Shader frame_fxaa_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\1fxaa_frag.glsl"));
 	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
 	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
 	static const GLenum draw_buffers[]={
@@ -276,7 +277,8 @@ int main(int argc , char** argv) {
 		//GL_DEPTH_ATTACHMENT,
 	};
 	FramebufferObject* gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
-	FramebufferObject* deffered_fbo = new FramebufferObject(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	//FramebufferObject* deffered_fbo = new FramebufferObject(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	FramebufferObject* pp_npr_fbo = new FramebufferObject(&frame_fxaa_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
 #pragma endregion
 
@@ -391,6 +393,7 @@ int main(int argc , char** argv) {
 		frameBuffer_deffer_shader.activate();
 		game_camera->bind_uniform(frameBuffer_deffer_shader.m_state.programId);
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));		
+		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_PROJ_MATRIX), 1, GL_FALSE, value_ptr(game_camera->getProjectionMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 
 
@@ -449,12 +452,16 @@ int main(int argc , char** argv) {
 			glUniform1i(texture2Location, i);
 		}
 
-
+		/*
+		*/
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);		
-		glBindVertexArray(deffered_fbo->rectVAO);
-		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
-			
+		//glBindFramebuffer(GL_FRAMEBUFFER, pp_npr_fbo->fbo);
+		glBindVertexArray(pp_npr_fbo->rectVAO);
+		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded			
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		//gbuffer_fbo->blit(gbuffer_fbo->framebuffer_texture[0], 0);
+		//pp_npr_fbo->blit(pp_npr_fbo->framebuffer_texture[0],0 , gbuffer_fbo->framebuffer_texture[1]);
 
 
 
