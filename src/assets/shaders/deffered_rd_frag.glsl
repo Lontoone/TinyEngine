@@ -16,6 +16,7 @@ layout(binding = 12)  uniform sampler2D   u_TEX_LTC_MAP1;  // area light ltc2
 uniform vec3 u_CAM_POS;
 uniform mat4 u_PROJ_MATRIX;
 uniform mat4 view;
+uniform mat4 inv_view;
 //===================================
 //			Light Prop
 //===================================
@@ -24,6 +25,7 @@ uniform mat4 u_AREA_LIGHT_Model_MAT;
 uniform vec4 u_LIGHT_WORLD_POS0;
 uniform vec4 u_LIGHT_WORLD_POS1;
 uniform float u_POINTLIGHT1_FAR;
+uniform bool u_USE_VOLUMN_LIGHT;
 
 uniform vec3 al_points[4];
 
@@ -38,7 +40,6 @@ out vec4 color;
 float ia = 0.1; //ToDo: ambient term
 float id = 0.7;
 float is = 0.7;
-
 
 struct Light {
 
@@ -295,42 +296,52 @@ void main() {
 	//==============================================
 	//			Volumetric Light
 	//==============================================
-	vec4 vl_start_pos = vec4(u_CAM_POS,1);
-	//vec3 vl_start_pos = u_LIGHT_WORLD_POS0;	
-	vec4 vl_main_light_pos = u_PROJ_MATRIX * view * (u_LIGHT_WORLD_POS0);
-	vec3 vl_move_dir = normalize(vl_main_light_pos.xyz - vec3(texcoord , 1.0));
-	vl_move_dir =  vl_move_dir;
-	//color = vec4(vl_move_dir , 1.0);
-	//return;
-	
-	int max_steps = 100;
-	float traveled_distance = 0;
-	float step_size = 0.005f;
-	float total_intensity=0;
-	float decay = 0.95;
-	float total_distance = length(u_LIGHT_WORLD_POS0);
+	float total_intensity = 0;
+	if (u_USE_VOLUMN_LIGHT) {
+		vec4 vl_start_pos = vec4(0, 0, 1, 1); // in view space	
+		vec3 vl_move_dir = normalize(vec3(texcoord, 1.0) * 2 - 1);
+		vl_move_dir = mat3(view) * vl_move_dir;
 
-	for (int i = 0; i < max_steps; i++) {
-		//vl_sum += 0.25;
-		vl_start_pos.xyz += vl_move_dir * step_size;
-		traveled_distance += step_size;
-		
-		vec4 vl_light_pos = u_LIGHT_VP_MATRIX * vl_start_pos;
 
-		vec3 vl_proj_uv = (vl_light_pos.xyz / vl_light_pos.w).xyz;		
-		vec4 shadow_color = texture(u_TEX_SHADOW_MAP, vl_proj_uv.xy);
+		int max_steps = 100;
+		float traveled_distance = 0;
+		float step_size = 0.05f;
 
-		float vl_intensity = 0;
-		if (vl_proj_uv.z < shadow_color.r) {
-			float vl_intensity = 1 ;		
-			total_intensity += vl_intensity * pow(decay , i );
-		}	
-	
+		for (int i = 0; i < max_steps; i++) {
+			//vl_sum += 0.25;
+			vl_start_pos.xyz += vl_move_dir * step_size;
+			traveled_distance += step_size;
+
+			vec4 mvoing_world_pos = inv_view * vl_start_pos;
+			vec4 vl_light_pos = u_LIGHT_VP_MATRIX * mvoing_world_pos;
+
+			vec3 vl_proj_uv = (vl_light_pos.xyz / vl_light_pos.w).xyz;
+			vec4 shadow_color = texture(u_TEX_SHADOW_MAP, vl_proj_uv.xy);
+			color = vec4(vl_proj_uv.xy, 0, 1);
+			//return;
+
+
+			if (vl_proj_uv.z < shadow_color.r && length(mvoing_world_pos.xyz - u_CAM_POS.xyz) < length(world_pos.xyz - u_CAM_POS.xyz)) {
+				//total_intensity += ((i/ max_steps) * decay);
+				//total_intensity += ( 0.5 + (pow(i/100 ,2)));
+				total_intensity += 0.01 + 1 / i / max_steps;
+			}
+			else {
+				//break;
+			}
+
+		}
 	}
-	//color = vec4(total_intensity , 0 , 0 , 1.0) ;
-	color = total_intensity /100 * diffuse;
+	else {
+		total_intensity = 0;
+	}
+
+
+	//color = total_intensity * diffuse;
+	//color = vec4(total_intensity , 0 , 0 , 1.0) * diffuse + shadow_term;
+	//color = total_intensity ;
 	
-	return;
+	//return;
 	/*
 	*/
 	/*
@@ -373,8 +384,10 @@ void main() {
 		diffuse * d_intensity * shadow_term * id +
 		specular_color * specular_term * shadow_term * is * diffuse +
 		point_light1 +
-		area_light;
-		+ vl_sum
+		area_light +
+		total_intensity * diffuse 
 		;
-	
+
+
+
 }

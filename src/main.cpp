@@ -91,6 +91,7 @@ vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 #include <string>
 #include <iostream>
 
+
 using namespace std;
 #include <direct.h>
 std::string get_current_dir() {
@@ -106,7 +107,8 @@ int main(int argc , char** argv) {
 	GLFWwindow* window =  init();  // TODO: init 
 	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
-	float time_scale = 1;
+	float time_scale = 1;   // not using
+	bool use_volumn_light = 0;
 	
 	Hierarchy::instance().set_main_camera(game_camera);
 	cout << get_current_dir() << endl;
@@ -247,6 +249,7 @@ int main(int argc , char** argv) {
 
 	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
 	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	Shader frameBuffer_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
 	Shader frameBuffer_deffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\deffered_rd_frag.glsl"));
 	//Shader gBuffer_shader = Shader(src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
 	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
@@ -277,6 +280,7 @@ int main(int argc , char** argv) {
 		//GL_DEPTH_ATTACHMENT,
 	};
 	FramebufferObject* gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
+	FramebufferObject* bloom_fbo = new FramebufferObject(&frameBuffer_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	//FramebufferObject* deffered_fbo = new FramebufferObject(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	FramebufferObject* pp_npr_fbo = new FramebufferObject(&frame_fxaa_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
@@ -309,6 +313,7 @@ int main(int argc , char** argv) {
 		SliderFloat3("sun position", &sun_obj.m_transform->m_position[0], -10, 10);
 		SliderFloat3("Point Light position", &pointLight_obj.m_transform->m_position[0], -10, 10);
 		SliderFloat3("Area Light Rot", &areaLight_obj.m_transform->m_rotation[0], 0, 90);
+		Checkbox("Use Volumetric Light", &use_volumn_light);
 		End();
 		
 
@@ -395,6 +400,8 @@ int main(int argc , char** argv) {
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_CAM_POS), 1, value_ptr(game_camera_obj.m_transform->m_position));		
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_PROJ_MATRIX), 1, GL_FALSE, value_ptr(game_camera->getProjectionMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_USE_VOLUMN_LIGHT"),  use_volumn_light);
+		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "inv_view"), 1,GL_FALSE , value_ptr ( inverse( game_camera->getViewMatrix() ) ));
 
 
 		glUniform4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_WORLD_POS0), 1, value_ptr(sun_obj.m_transform->m_position));
@@ -454,11 +461,12 @@ int main(int argc , char** argv) {
 
 		/*
 		*/
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);		
-		//glBindFramebuffer(GL_FRAMEBUFFER, pp_npr_fbo->fbo);
-		glBindVertexArray(pp_npr_fbo->rectVAO);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);		
+		glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo->fbo);
+		glBindVertexArray(bloom_fbo->rectVAO);
 		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded			
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		bloom_fbo->blit(bloom_fbo->framebuffer_texture[0] , 0);
 
 		//gbuffer_fbo->blit(gbuffer_fbo->framebuffer_texture[0], 0);
 		//pp_npr_fbo->blit(pp_npr_fbo->framebuffer_texture[0],0 , gbuffer_fbo->framebuffer_texture[1]);
