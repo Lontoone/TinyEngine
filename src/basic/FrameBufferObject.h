@@ -49,6 +49,7 @@ public:
 	void blit(unsigned int src_texture_id, unsigned int dst_fbo_id, unsigned int additional_textures[], int count , Shader& shaer);
 	void set_frame_uniform();
 	void update_debugger(unsigned int& texture_idx);
+	void delete_fbo();
 	
 	
 	//TODO: Make them shared.

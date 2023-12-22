@@ -39,6 +39,7 @@ public :
 	void bind_uniform(unsigned int shader_pid) override;
 	void viewFrustumClipPlaneCornersInViewSpace(const float depth, float* corners);
 	mat4 get_model_matrix() { return this->get_gameobject()->m_transform->m_model_matrix; };
+	void resize(unsigned int width , unsigned int height);
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::mat4 getInverseProjectionMatrix();

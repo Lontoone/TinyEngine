@@ -341,6 +341,16 @@ void FramebufferObject::update_debugger(unsigned int& texture_idx)
 	}
 }
 
+void FramebufferObject::delete_fbo()
+{
+	glDeleteFramebuffers(1, &this->fbo);
+	glDeleteTextures(this->m_texture_count , this->framebuffer_texture);
+	if (this->rbo > 0) {
+		glDeleteRenderbuffers(1,&this->rbo);
+	}
+
+}
+
 void FramebufferObject::blit(unsigned int src_texture_id, FramebufferObject& fbo, unsigned int additional_texture)
 {
 

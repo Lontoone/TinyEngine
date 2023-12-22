@@ -92,6 +92,16 @@ vec3 sun_postion = normalize(vec3(0, 1, 1)); // temp debug
 #include <iostream>
 
 
+static const GLenum draw_buffers[] = {
+	GL_COLOR_ATTACHMENT0,
+	GL_COLOR_ATTACHMENT1,
+	GL_COLOR_ATTACHMENT2,
+	GL_COLOR_ATTACHMENT3,
+	GL_COLOR_ATTACHMENT4,
+	GL_COLOR_ATTACHMENT5,
+	GL_COLOR_ATTACHMENT6,
+	//GL_DEPTH_ATTACHMENT,
+};
 using namespace std;
 #include <direct.h>
 std::string get_current_dir() {
@@ -102,13 +112,32 @@ std::string get_current_dir() {
 }
 
 using namespace std;
+
+Shader frameBuffer_shader;
+Shader frameBuffer_bloom_shader;
+Shader frameBuffer_blur_shader;
+Shader frameBuffer_npr_shader;
+Shader frameBuffer_deffer_shader;
+
+FramebufferObject* final_fbo;
+FramebufferObject* gbuffer_fbo;
+FramebufferObject* bloom_fbo;
+FramebufferObject* blur_fbo;
+FramebufferObject* pp_npr_fbo;
+
 int main(int argc , char** argv) {
 	std::cout << "hello"<<endl;	
 	GLFWwindow* window =  init();  // TODO: init 
 	glfwSwapInterval(0);   // Disable v-sync   hey~hey
 	double _previous_time = 0;
 	float time_scale = 1;   // not using
+
+	//==========================================
+	//				 Toggle
+	//==========================================
 	bool use_volumn_light = 0;
+	bool use_bloom = 0;
+	bool use_npr = 0;
 	
 	Hierarchy::instance().set_main_camera(game_camera);
 	cout << get_current_dir() << endl;
@@ -116,10 +145,30 @@ int main(int argc , char** argv) {
 
 	Shader s_default_shader(
 		src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
-	/*
-		src_path + string("\\assets\\shaders\\default_vert.glsl"),
-		src_path + string("\\assets\\shaders\\default_frag.glsl"));
-	*/
+
+	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
+	frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
+	frameBuffer_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
+	frameBuffer_blur_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_blur_frag.glsl"));
+	frameBuffer_npr_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_npr_frag.glsl"));
+	frameBuffer_deffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\deffered_rd_frag.glsl"));
+	//Shader gBuffer_shader = Shader(src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
+	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
+		
+	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
+	Shader gizmose_shader = Shader(src_path + string("\\assets\\shaders\\vertexShader_ogl_450.glsl"), src_path + string("\\assets\\shaders\\fragmentShader_ogl_450.glsl"));
+
+	Shader point_light_shader = Shader(
+		src_path + string("\\assets\\shaders\\pointLight_vert.glsl"),
+		src_path + string("\\assets\\shaders\\pointLight_frag.glsl"),
+		src_path + string("\\assets\\shaders\\pointLight_geo.glsl")
+	);
+
+	final_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT);
+	bloom_fbo = new FramebufferObject(&frameBuffer_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	blur_fbo = new FramebufferObject(&frameBuffer_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	pp_npr_fbo = new FramebufferObject(&frameBuffer_npr_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
 	grid = new DefaultEditorGrid(
 		src_path + string("\\assets\\shaders\\unlit_vert.glsl") , 
@@ -247,42 +296,6 @@ int main(int argc , char** argv) {
 	FrameBufferDebugger frame_buffer_debugger;
 	ShaderEditor shaderEditor;
 
-	//Shader cs_grass_shader = Shader(src_path + string("\\assets\\shaders\\cs_grass.glsl"),"");
-	Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl") , src_path + string("\\assets\\shaders\\frame_frag.glsl"));
-	Shader frameBuffer_bloom_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_bloom_frag.glsl"));
-	Shader frameBuffer_deffer_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\deffered_rd_frag.glsl"));
-	//Shader gBuffer_shader = Shader(src_path + string("\\assets\\shaders\\g_buffer_vert.glsl"), src_path + string("\\assets\\shaders\\g_buffer_frag.glsl"));
-	Shader shadow_shader = Shader(src_path + string("\\assets\\shaders\\shadow_map_vert.glsl"), src_path + string("\\assets\\shaders\\shadow_map_frag.glsl"));
-	
-	Shader frameBuffer_scene_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_frag.glsl"));
-	Shader frame_grid_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\frame_grid_frag.glsl"));
-	Shader gizmose_shader = Shader(src_path + string("\\assets\\shaders\\vertexShader_ogl_450.glsl"), src_path + string("\\assets\\shaders\\fragmentShader_ogl_450.glsl"));
-
-	Shader point_light_shader = Shader(
-		src_path + string("\\assets\\shaders\\pointLight_vert.glsl"), 
-		src_path + string("\\assets\\shaders\\pointLight_frag.glsl"),
-		src_path + string("\\assets\\shaders\\pointLight_geo.glsl")
-	);
-	Shader frame_npr_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\1npr_frag.glsl"));
-	Shader frame_fxaa_shader = Shader(src_path + string("\\assets\\shaders\\frame_vert.glsl"), src_path + string("\\assets\\shaders\\1fxaa_frag.glsl"));
-	//Shader frameBuffer_shader = Shader(src_path + string("\\assets\\shaders"), "frame");
-	//Shader frame_blur_shader = Shader(src_path + string("\\assets\\shaders"), "frame_blur");
-	static const GLenum draw_buffers[]={
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4,
-		GL_COLOR_ATTACHMENT5,
-		GL_COLOR_ATTACHMENT6,
-		/*
-		*/
-		//GL_DEPTH_ATTACHMENT,
-	};
-	FramebufferObject* gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT );
-	FramebufferObject* bloom_fbo = new FramebufferObject(&frameBuffer_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	//FramebufferObject* deffered_fbo = new FramebufferObject(&frameBuffer_deffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
-	FramebufferObject* pp_npr_fbo = new FramebufferObject(&frame_fxaa_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 	
 #pragma endregion
 
@@ -314,6 +327,8 @@ int main(int argc , char** argv) {
 		SliderFloat3("Point Light position", &pointLight_obj.m_transform->m_position[0], -10, 10);
 		SliderFloat3("Area Light Rot", &areaLight_obj.m_transform->m_rotation[0], 0, 90);
 		Checkbox("Use Volumetric Light", &use_volumn_light);
+		Checkbox("Use Bloom", &use_bloom);
+		Checkbox("Use NPR", &use_npr);
 		End();
 		
 
@@ -401,6 +416,8 @@ int main(int argc , char** argv) {
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_PROJ_MATRIX), 1, GL_FALSE, value_ptr(game_camera->getProjectionMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, u_LIGHT_VP_MATRIX), 1, GL_FALSE, value_ptr(biased_sun_vp));
 		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "u_USE_VOLUMN_LIGHT"),  use_volumn_light);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "SCR_WIDTH"), SCR_WIDTH);
+		glUniform1i(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "SCR_HEIGHT"), SCR_HEIGHT);
 		glUniformMatrix4fv(glGetUniformLocation(frameBuffer_deffer_shader.m_state.programId, "inv_view"), 1,GL_FALSE , value_ptr ( inverse( game_camera->getViewMatrix() ) ));
 
 
@@ -462,11 +479,24 @@ int main(int argc , char** argv) {
 		/*
 		*/
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);		
-		glBindFramebuffer(GL_FRAMEBUFFER, bloom_fbo->fbo);
-		glBindVertexArray(bloom_fbo->rectVAO);
+		glBindFramebuffer(GL_FRAMEBUFFER, final_fbo->fbo);
+		glBindVertexArray(final_fbo->rectVAO);
 		glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded			
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		bloom_fbo->blit(bloom_fbo->framebuffer_texture[0] , 0);
+
+		if (use_bloom) {
+			final_fbo->blit(final_fbo->framebuffer_texture[0], bloom_fbo->fbo);
+			bloom_fbo->blit(bloom_fbo->framebuffer_texture[0], final_fbo->fbo);
+			//bloom_fbo->blit(bloom_fbo->framebuffer_texture[0], final_fbo->fbo);
+		}
+		if (use_npr) {
+			glUniform1i(glGetUniformLocation(pp_npr_fbo->shader->m_state.programId, "SCR_WIDTH"), SCR_WIDTH);
+			glUniform1i(glGetUniformLocation(pp_npr_fbo->shader->m_state.programId, "SCR_HEIGHT"), SCR_HEIGHT);
+			final_fbo->blit(final_fbo->framebuffer_texture[0], pp_npr_fbo->fbo);
+			pp_npr_fbo->blit(pp_npr_fbo->framebuffer_texture[0], final_fbo->fbo);
+		}
+
+		final_fbo->blit(final_fbo->framebuffer_texture[0], 0);
 
 		//gbuffer_fbo->blit(gbuffer_fbo->framebuffer_texture[0], 0);
 		//pp_npr_fbo->blit(pp_npr_fbo->framebuffer_texture[0],0 , gbuffer_fbo->framebuffer_texture[1]);
@@ -624,42 +654,23 @@ void render_grid( mat4& vp ) {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	cout << "resizing is banned" << endl;
+	SCR_WIDTH = width;
+	SCR_HEIGHT = height;
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-	//TODO:
-	// Framebuffer textture­n­«·screate
 	
-	//glViewport(0, 0, width, height);
-	//SCR_WIDTH = width;
-	//SCR_HEIGHT = height;
-	/*
-	// Ensure we don't divide by zero
-		if (height == 0) {
-			height = 1;
-		}
+	game_camera->resize(width ,height);
+	final_fbo->delete_fbo();
+	gbuffer_fbo->delete_fbo();
+	bloom_fbo->delete_fbo();
+	blur_fbo->delete_fbo();
+	pp_npr_fbo->delete_fbo();
+	
+	final_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	gbuffer_fbo = new FramebufferObject(&frameBuffer_shader, &draw_buffers[0], 6, SCR_WIDTH, SCR_HEIGHT);
+	bloom_fbo = new FramebufferObject(&frameBuffer_bloom_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	blur_fbo = new FramebufferObject(&frameBuffer_blur_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
+	pp_npr_fbo = new FramebufferObject(&frameBuffer_npr_shader, &draw_buffers[0], 1, SCR_WIDTH, SCR_HEIGHT);
 
-		GLfloat aspectRatio = (GLfloat)width / (GLfloat)height;
-
-		// Set the viewport to cover the new window
-		glViewport(0, 0, width, height);
-
-		// Set the projection matrix
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		// Adjust the aspect ratio
-		if (width >= height) {
-			// width is larger, so widen the viewing volume
-			glOrtho(-1.0 * aspectRatio, 1.0 * aspectRatio, -1.0, 1.0, 1.0, -1.0);
-		}
-		else {
-			// height is larger, so increase the viewing volume
-			glOrtho(-1.0, 1.0, -1.0 / aspectRatio, 1.0 / aspectRatio, 1.0, -1.0);
-		}
-
-		// Switch back to the model view matrix
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-	*/
 }
 
 

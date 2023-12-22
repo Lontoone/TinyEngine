@@ -27,6 +27,9 @@ uniform vec4 u_LIGHT_WORLD_POS1;
 uniform float u_POINTLIGHT1_FAR;
 uniform bool u_USE_VOLUMN_LIGHT;
 
+uniform int SCR_WIDTH ;
+uniform int SCR_HEIGHT;
+
 uniform vec3 al_points[4];
 
 const float LUT_SIZE = 64.0; // ltc_texture size
@@ -181,7 +184,7 @@ void main() {
 	//==============================================
 	//			Main Light Shadow
 	//==============================================
-	vec2 scr_pix = vec2(texcoord.x * 1344 , texcoord.y * 756 );
+	vec2 scr_pix = vec2(texcoord.x * SCR_WIDTH, texcoord.y * SCR_HEIGHT);
 	vec4 world_pos = texelFetch(texture3,ivec2(scr_pix.xy) ,0); // model * aPos
 
 	vec4 light_clip_pos = u_LIGHT_VP_MATRIX * world_pos;

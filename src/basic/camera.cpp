@@ -88,7 +88,14 @@ void Camera::viewFrustumClipPlaneCornersInViewSpace(const float depth, float* co
 	}
 }
 
-glm::mat4 Camera::getViewMatrix() {	
+void Camera::resize(unsigned int width, unsigned int height)
+{
+	this->m_width = width;
+	this->m_heigth = height;
+	this->m_aspect_ratio = width / height;
+}
+
+glm::mat4 Camera::getViewMatrix() {
 
 	this->Do();
 	//return lookAt(this->m_position, this->m_position +this->m_forward * this->zoom , this->m_up);

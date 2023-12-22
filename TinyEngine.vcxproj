@@ -234,6 +234,7 @@
     <None Include="src\assets\shaders\frame_frag.glsl" />
     <None Include="src\assets\shaders\frame_grid_frag.glsl" />
     <None Include="src\assets\shaders\frame_mag_frag.glsl" />
+    <None Include="src\assets\shaders\frame_npr_frag.glsl" />
     <None Include="src\assets\shaders\frame_pixelization_frag.glsl" />
     <None Include="src\assets\shaders\frame_quantization_frag.glsl" />
     <None Include="src\assets\shaders\frame_sin_wave_frag.glsl" />
