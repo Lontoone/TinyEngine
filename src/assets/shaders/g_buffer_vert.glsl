@@ -25,6 +25,7 @@ out vec2 texcoord;
 out vec3 tng_normal;
 out vec3 world_pos;
 out mat3 TBN;
+out mat3 inv_TBN;
 out vec3 world_light_dir;
 out vec3 world_view_dir;
 out vec3 world_half_dir;
@@ -56,7 +57,7 @@ void main(){
 	vec3 B = cross(N, T);
 
 	TBN = mat3(T, B, N);   // Convert normal from tangent space to world
-
+	inv_TBN = inverse(TBN);
 
 	// ========================
 	//      World Light Info

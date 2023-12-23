@@ -11,6 +11,7 @@ in vec3 world_pos;
 //in vec3 world_normal;
 in vec3 tng_normal;
 in mat3 TBN;
+in mat3 inv_TBN;
 in vec3 light_dir;
 in vec4 world_clip_pos;
 in vec4 light_clip_pos;
@@ -61,76 +62,15 @@ float linear_depth(float d) {
 	d = (2 * near * far) / (far + near - (d * 2.0 - 1.0) * (far - near));
 	return d / far;
 }
-vec4 direcLight()
-{
 
-	// ========================
-	//      Light space
-	// ========================	
-	/*
-	tng_light_dir = normalize(
-		vec3(
-			dot(world_light_dir, TBN[0]),
-			dot(world_light_dir, TBN[1]),
-			dot(world_light_dir, TBN[2])
-		));
-
-	tng_view_dir = normalize(
-		vec3(
-			dot(world_view_dir, TBN[0]),
-			dot(world_view_dir, TBN[1]),
-			dot(world_view_dir, TBN[2])
-		));
-	
-	// ambient lighting
-	float ambient = 0.20f;
-	// =====================================
-	//			Diffuse lighting
-	// =====================================
-	//vec3 normal = normalize(world_normal);
-	vec3 normal = texture(NORMAL, texcoord).xyz *2.0 - vec3(1.0);
-	
-	// Diffuse light
-	float diffuse = max(dot(normal, tng_light_dir), 0.0f) ; 
-	vec4 diffuse_color = texture(DIFFUSE, texcoord);
-	if (NO_DIFFUSE) {
-		diffuse_color = vec4(1);
-	}
-	
-	
-	// =====================================
-	//			Specular lighting
-	// =====================================		
-	vec3 R = reflect(-tng_light_dir , normal);
-	float specular = pow(max(dot(R, tng_view_dir), 0.0f), u_MAT_PARA_SN);
-	
-	
-	// Shadow value
-	float shadow = 0.0f;
-	
-	vec3 light_ndc_pos = light_clip_pos.xyz / light_clip_pos.w; //Direction don't need to /w
-
-	// Directional Light
-	//vec3 light_ndc_pos = light_clip_pos.xyz; //Direction don't need to /w
-	
-	float shadow_factor = textureProj(u_TEX_SHADOW_MAP, light_clip_pos); ;	
-	return vec4((shadow_factor) , 0, 0, 1.0);	
-	*/
-	/*
-	return  diffuse_color * (diffuse * (1.0f - shadow)) * id +
-			ambient * ia +
-			specular * is * (1.0f - shadow);
-			//+ texture(specular0, texCoord).r * specular * (1.0f - shadow)) * lightColor;
-	*/
-	return vec4(1);
-}
 
 
 void main(){
 
-	vec3 world_normal = normalize(TBN * tng_normal);
+	vec3 world_normal = normalize( TBN * tng_normal);
 	if (!NO_NORMAL) {
-		world_normal = normalize(TBN * (texture(NORMAL, texcoord).xyz * 2.0 - vec3(1.0)) );
+		world_normal = normalize((texture(NORMAL, texcoord).xyz * 2.0 - vec3(1.0)) );
+		world_normal = normalize(inv_TBN * world_normal);
 	}
 
 	//===================================
@@ -149,8 +89,8 @@ void main(){
 
 	//color_tex = FragColor;
 	color_ws_pos = vec4(world_pos.xyz, 1.0);
-	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ws_normal = vec4(world_normal, 1.0);
+	//color_ws_pos = normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	//color_ws_pos	= normalize( vec4(world_pos.xyz, 1.0))*0.5+0.5;
 	color_ambient = ia;
 	color_speculr = is; 

@@ -179,6 +179,7 @@ void main() {
 	vec4 world_normal = texture(texture2, texcoord);
 	vec4 ambient_color = texture(texture4, texcoord);
 	vec4 specular_color = texture(texture6, texcoord);  // rgb = color tint , a = shininess
+	world_normal.xyz = normalize(world_normal.xyz);
 	//============================================
 
 	//==============================================
@@ -280,6 +281,9 @@ void main() {
 	vec3 world_light_dir = normalize(u_LIGHT_WORLD_POS0.xyz - world_pos.xyz);
 	vec4 diffuse = texture(texture5, texcoord);
 	float d_intensity = max(dot(world_normal.xyz, world_light_dir), 0.0f);
+	//color = vec4(d_intensity , 0,0,1);
+	//color = vec4(world_normal.xyz,  1);
+	//return;
 
 	//==============================================
 	//			Specular
@@ -295,6 +299,7 @@ void main() {
 	vec3 R = reflect(-L , view_normal);
 	view_pos = normalize(view_pos);
 	float specular_term = pow(max(dot(R, V), 0.0f), specular_color.a);
+	
 
 	//==============================================
 	//			Volumetric Light
@@ -338,48 +343,6 @@ void main() {
 	else {
 		total_intensity = 0;
 	}
-
-
-	//color = total_intensity * diffuse;
-	//color = vec4(total_intensity , 0 , 0 , 1.0) * diffuse + shadow_term;
-	//color = total_intensity ;
-	
-	//return;
-	/*
-	*/
-	/*
-	int NUM_SAMPLES = 100;
-	float Density = 0.926;
-	float Weight = 0.0587;
-	float Decay = 0.56;
-	float Exposure = 0.2;
-
-	vec2 moving_uv = texcoord;
-	// Calculate vector from pixel to light source in screen space.    
-	vec2 deltaTexCoord = (texcoord - (u_PROJ_MATRIX * mat4(view) * (u_LIGHT_WORLD_POS0)).xy);
-	// Divide by number of samples and scale by control factor.   
-	deltaTexCoord *= 1.0f / NUM_SAMPLES * Density;
-	// Store initial sample.    
-	vec4 vl_bg_color = texture(texture5, moving_uv);
-	// Set up illumination decay factor.    
-	float illuminationDecay = 1.0f;
-	// Evaluate summation from Equation 3 NUM_SAMPLES iterations.    
-	for (int i = 0; i < NUM_SAMPLES; i++) {
-		// Step sample location along ray.     
-		moving_uv -= deltaTexCoord;
-		// Retrieve sample at new location.    
-		vec4 vl_diffuse= texture(texture5, moving_uv); // diffuse color
-		// Apply sample attenuation scale/decay factors.     
-		vl_diffuse *= illuminationDecay * Weight;
-		// Accumulate combined color.     
-		vl_bg_color += vl_diffuse;
-		// Update exponential decay factor.     
-		illuminationDecay *= Decay;
-	}
-	// Output final color with a further scale control factor.    
-	color = vl_bg_color* Exposure + diffuse ;
-	return;
-	*/
 
 
 	//color = (ambient_color * ia + vec4(1) * d_intensity + specular_color * specular_term) * diffuse * shadow_term; 
