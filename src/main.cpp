@@ -584,6 +584,7 @@ void render_game_view( Camera* camera , Shader* shader) {
 }
 
 GLFWwindow* init() {
+	glewExperimental = GL_TRUE;
 	glfwInit();
 
 	/*

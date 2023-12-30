@@ -305,7 +305,33 @@ void main() {
 	//			Volumetric Light
 	//==============================================
 	float total_intensity = 0;
+	int vl_max_steps  = 50 ;
 	if (u_USE_VOLUMN_LIGHT) {
+		vec3 vl_end_pos = world_pos.xyz ;
+		vec3 vl_start_pos = u_CAM_POS.xyz;
+		vec3 vl_sun_dir = normalize(u_LIGHT_WORLD_POS0.xyz - u_CAM_POS.xyz) ;
+
+		vec3 vl_ray_dir = vl_end_pos - vl_start_pos ;
+		float vl_ray_length = length(vl_ray_dir);
+		vl_ray_dir = vl_ray_dir/vl_ray_length;
+
+		float vl_step_length = vl_ray_length / vl_max_steps;
+		vec3 vl_step = vl_ray_dir * vl_step_length;
+
+		vec3 vl_current_pos = vl_start_pos;
+		for( int i = 0 ; i < vl_max_steps ; i++){
+			vl_current_pos += vl_step;
+
+			vec4 vl_light_pos = u_LIGHT_VP_MATRIX * vec4(vl_current_pos , 1.0);
+
+			vec3 vl_proj_uv = (vl_light_pos.xyz / vl_light_pos.w).xyz;
+			vec4 shadow_color = texture(u_TEX_SHADOW_MAP, vl_proj_uv.xy);
+			if (vl_proj_uv.z < shadow_color.r ) {
+				total_intensity += dot(vl_ray_dir , vl_sun_dir);
+			}
+		}
+		total_intensity /= vl_max_steps; 
+		/*
 		vec4 vl_start_pos = vec4(0, 0, 1, 1); // in view space	
 		vec3 vl_move_dir = normalize(vec3(texcoord, 1.0) * 2 - 1);
 		vl_move_dir = mat3(view) * vl_move_dir;
@@ -329,7 +355,8 @@ void main() {
 			//return;
 
 
-			if (vl_proj_uv.z < shadow_color.r && length(mvoing_world_pos.xyz - u_CAM_POS.xyz) < length(world_pos.xyz - u_CAM_POS.xyz)) {
+			//if (vl_proj_uv.z < shadow_color.r && length(mvoing_world_pos.xyz - u_CAM_POS.xyz) < length(world_pos.xyz - u_CAM_POS.xyz)) {
+			if (vl_proj_uv.z < shadow_color.r ) {
 				//total_intensity += ((i/ max_steps) * decay);
 				//total_intensity += ( 0.5 + (pow(i/100 ,2)));
 				total_intensity += 0.01 + 1 / i / max_steps;
@@ -339,6 +366,7 @@ void main() {
 			}
 
 		}
+		*/
 	}
 	else {
 		total_intensity = 0;
